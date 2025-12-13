@@ -40,6 +40,7 @@
                 <td>
                     <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-secondary">View</a>
                     <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-secondary">Edit</a>
+                    {{ include('product/_delete_form.html.twig') }}
                 </td>
             </tr>
         {% else %}

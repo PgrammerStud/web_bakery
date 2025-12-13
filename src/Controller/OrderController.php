@@ -14,18 +14,27 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/order')]
 final class OrderController extends AbstractController
 {
-    #[Route(name: 'app_order_index', methods: ['GET'])]
+    #[Route('/', name: 'app_order_index', methods: ['GET'])]
     public function index(OrderRepository $orderRepository): Response
     {
+        $user = $this->getUser();
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            $orders = $orderRepository->findAll();
+        } else {
+            $orders = $orderRepository->findBy(['createdBy' => $user]);
+        }
+
         return $this->render('order/index.html.twig', [
-            'orders' => $orderRepository->findAll(),
+            'orders' => $orders,
         ]);
     }
 
+    #[IsGranted('ROLE_STAFF')]
     #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager): Response
-{
-    $order = new Order();
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $order = new Order();
+        $order->setCreatedBy($this->getUser());
 
     $form = $this->createForm(OrderType::class, $order);
     $form->handleRequest($request);
@@ -65,6 +74,11 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
     #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
     public function show(Order $order): Response
     {
+        $user = $this->getUser();
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            throw $this->createAccessDeniedException('You can only view your own orders.');
+        }
+
         return $this->render('order/show.html.twig', [
             'order' => $order,
         ]);
@@ -73,6 +87,11 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
     #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            throw $this->createAccessDeniedException('You can only edit your own orders.');
+        }
+
         $form = $this->createForm(OrderType::class, $order);
         $form->handleRequest($request);
 
@@ -91,6 +110,11 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
     #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            throw $this->createAccessDeniedException('You can only delete your own orders.');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($order);
             $entityManager->flush();
