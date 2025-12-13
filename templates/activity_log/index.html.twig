@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Activity Log{% endblock %}
+
+{% block body %}
+<div class="activity-log-container">
+    <h1>Activity Log</h1>
+
+    <div class="filter-form">
+        <form method="get" action="{{ path('app_activity_log') }}">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="user">User:</label>
+                    <select name="user" id="user">
+                        <option value="">All Users</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if filters.user is defined and filters.user == user.id %}selected{% endif %}>{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="action">Action:</label>
+                    <select name="action" id="action">
+                        <option value="">All Actions</option>
+                        {% for actionOption in actions %}
+                            <option value="{{ actionOption }}" {% if filters.action is defined and filters.action == actionOption %}selected{% endif %}>{{ actionOption }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="date_from">Date From:</label>
+                    <input type="date" name="date_from" id="date_from" value="{{ filters.date_from ?? '' }}">
+                </div>
+
+                <div class="filter-group">
+                    <label for="date_to">Date To:</label>
+                    <input type="date" name="date_to" id="date_to" value="{{ filters.date_to ?? '' }}">
+                </div>
+
+                <div class="filter-group">
+                    <button type="submit">Filter</button>
+                    <a href="{{ path('app_activity_log') }}" class="btn-clear">Clear Filters</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <table class="activity-log-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Action</th>
+                <th>Target Data</th>
+                <th>Date & Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in activity_logs %}
+                <tr>
+                    <td>{{ log.user.username }}</td>
+                    <td>{{ log.user.roles|join(', ') }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.targetData }}</td>
+                    <td>{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">No logs found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
