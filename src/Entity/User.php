@@ -47,10 +47,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ActivityLog::class, mappedBy: 'user')]
     private Collection $activityLogs;
 
+    /**
+     * @var Collection<int, Product>
+     */
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'createdBy')]
+    private Collection $products;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
         $this->activityLogs = new ArrayCollection();
+        $this->products = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -170,6 +177,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getActivityLogs(): Collection
     {
         return $this->activityLogs;
+    }
+
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
     }
 
     public function addActivityLog(ActivityLog $activityLog): static
