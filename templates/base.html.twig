@@ -5,6 +5,7 @@
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
         {% endblock %}
 
         {% block javascripts %}
@@ -12,6 +13,37 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <header class="header">
+            <img src="{{ asset('image/monochrome.png') }}" alt="Catalbas Bakery" class="logo">
+            <nav class="header-nav">
+                <a href="/profile">Profile</a>
+                <a href="/logout">Logout</a>
+            </nav>
+        </header>
+
+        <aside class="sidebar">
+            <ul>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li><a href="/dashboard">Dashboard</a></li>
+                    <li><a href="/order">Order</a></li>
+                    <li><a href="/category">Category</a></li>
+                    <li><a href="/stock">Stock</a></li>
+                    <li><a href="/product">Product</a></li>
+                    <li><a href="/user">Staff Management</a></li>
+                    <li><a href="/">Activity Log</a></li>
+                    
+                {% elseif is_granted('ROLE_STAFF') %}
+                    <li><a href="/order">Order</a></li>
+                    <li><a href="/category">Category</a></li>
+                    <li><a href="/stock">Stock</a></li>
+                    <li><a href="/product">Product</a></li>
+                {% endif %}
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            {% block body %}{% endblock %}
+        </main>
+
     </body>
 </html>

@@ -1,0 +1,19 @@
+{{ form_start(form) }}
+
+{{ form_row(form.orderNumber) }}
+{{ form_row(form.customerName) }}
+{{ form_row(form.customerContact) }}
+{{ form_row(form.status) }}
+{{ form_row(form.totalAmount) }}
+{{ form_row(form.paymentMethod) }}
+{{ form_row(form.notes) }}
+{{ form_row(form.createdBy) }}
+
+<h3>Order Items</h3>
+<div id="order-items">
+    {{ form_widget(form.orderItems) }}
+</div>
+
+<button type="submit" class="btn btn-primary">Submit Order</button>
+
+{{ form_end(form) }}
