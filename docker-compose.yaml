@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: webbakery_root_password
+      MYSQL_DATABASE: web_bakery_db
+      MYSQL_USER: web_bakery_user
+      MYSQL_PASSWORD: web_bakery_password
+    ports:
+      - "3312:3306"  
+    volumes:
+      - mysql_data_webbakery:/var/lib/mysql
+    networks:
+      - webbakery_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PASSWORD: web_bakery_password
+    ports:
+      - "8085:80"    
+    depends_on:
+      - mysql
+    networks:
+      - webbakery_network
+volumes:
+  mysql_data_webbakery:
+
+networks:
+  webbakery_network:
