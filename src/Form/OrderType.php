@@ -3,12 +3,10 @@
 namespace App\Form;
 
 use App\Entity\Order;
-use App\Entity\User;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class OrderType extends AbstractType
 {
@@ -18,19 +16,16 @@ class OrderType extends AbstractType
             ->add('orderNumber')
             ->add('customerName')
             ->add('customerContact')
-            ->add('status')
-            ->add('totalAmount')
             ->add('paymentMethod')
             ->add('notes')
-           ->add('orderItems', CollectionType::class, [
-    'entry_type' => OrderItemType::class,
-    'allow_add' => true,
-    'allow_delete' => true,
-    'by_reference' => false,
-])
-            ->add('createdBy', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'id',
+            ->add('status', ChoiceType::class, [
+                'choices' => [
+                    'Pending' => 'pending',
+                    'Processing' => 'processing',
+                    'Completed' => 'completed',
+                    'Cancelled' => 'cancelled',
+                ],
+                'data' => 'pending', // default value
             ])
         ;
     }
