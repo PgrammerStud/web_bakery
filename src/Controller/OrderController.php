@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Order;
+use App\Entity\OrderItems;
+use App\Form\OrderItemsType;
 use App\Form\OrderType;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,42 +35,28 @@ final class OrderController extends AbstractController
     {
         $order = new Order();
         $order->setCreatedBy($this->getUser());
-
-    $form = $this->createForm(OrderType::class, $order);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-
-        $total = 0;
-
-        foreach ($order->getOrderItems() as $item) {
-
-            $product = $item->getProduct();
-            $price = $product->getPrice();   // auto from Product
-            $subtotal = $price * $item->getQuantity();
-
-            $item->setPrice($price);
-            $item->setSubtotal($subtotal);
-            $item->setOrder($order); // VERY IMPORTANT
-
-            $total += $subtotal;
+        $order->setTotalAmount(0.0);
+        if (!$order->getStatus()) {
+            $order->setStatus('pending');
         }
 
-        $order->setTotalAmount($total);
+        $form = $this->createForm(OrderType::class, $order);
+        $form->handleRequest($request);
 
-        $entityManager->persist($order);
-        $entityManager->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($order);
+            $entityManager->flush();
 
-        $activityLogger->log($this->getUser(), 'CREATE', "Order: #{$order->getId()}");
+            $activityLogger->log($this->getUser(), 'CREATE', "Order: #{$order->getId()}");
 
-        $this->addFlash('success', 'Order created successfully!');
-        return $this->redirectToRoute('app_order_index');
+            $this->addFlash('success', 'Order created successfully! Now add items.');
+            return $this->redirectToRoute('app_order_add_items', ['id' => $order->getId()]);
+        }
+
+        return $this->render('order/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
-
-    return $this->render('order/new.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
 
 
     #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
@@ -111,7 +99,50 @@ final class OrderController extends AbstractController
             'form' => $form,
         ]);
     }
+    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF')")]
+    #[Route('/{id}/items', name: 'app_order_add_items', methods: ['GET', 'POST'])]
+    public function addItems(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
+    {
+        $user = $this->getUser();
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            throw $this->createAccessDeniedException('You can only add items to your own orders.');
+        }
 
+        $orderItem = new OrderItems();
+        $orderItem->setOrderEntity($order);
+
+        $form = $this->createForm(OrderItemsType::class, $orderItem);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $product = $orderItem->getProduct();
+            $price = $product->getPrice();
+            $quantity = $orderItem->getQuantity();
+            $subtotal = $price * $quantity;
+
+            $orderItem->setPrice($price);
+            $orderItem->setSubtotal($subtotal);
+
+            $entityManager->persist($orderItem);
+
+            // Update order total
+            $total = $order->getTotalAmount() + $subtotal;
+            $order->setTotalAmount($total);
+
+            $entityManager->flush();
+
+            $activityLogger->log($this->getUser(), 'CREATE', "Order Item: {$product->getName()} for Order #{$order->getId()}");
+
+            $this->addFlash('success', 'Item added successfully! Add another or view the order.');
+            // Stay on the same page
+            return $this->redirectToRoute('app_order_add_items', ['id' => $order->getId()]);
+        }
+
+        return $this->render('order/add_items.html.twig', [
+            'order' => $order,
+            'form' => $form->createView(),
+        ]);
+    }
     #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
