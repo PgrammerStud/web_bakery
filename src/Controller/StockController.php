@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\ActivityLoggerService;
 
 #[Route('/stock')]
 final class StockController extends AbstractController
@@ -23,7 +24,7 @@ final class StockController extends AbstractController
     }
 
     #[Route('/new', name: 'app_stock_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $stock = new Stock();
         $form = $this->createForm(StockType::class, $stock);
@@ -32,6 +33,8 @@ final class StockController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($stock);
             $entityManager->flush();
+
+            $activityLogger->log($this->getUser(), 'CREATE', "Stock: {$stock->getProduct()->getName()} (ID: {$stock->getId()})");
 
             return $this->redirectToRoute('app_stock_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -51,13 +54,15 @@ final class StockController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_stock_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Stock $stock, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Stock $stock, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $form = $this->createForm(StockType::class, $stock);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+
+            $activityLogger->log($this->getUser(), 'UPDATE', "Stock: {$stock->getProduct()->getName()} (ID: {$stock->getId()})");
 
             return $this->redirectToRoute('app_stock_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -69,11 +74,12 @@ final class StockController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_stock_delete', methods: ['POST'])]
-    public function delete(Request $request, Stock $stock, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Stock $stock, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         if ($this->isCsrfTokenValid('delete'.$stock->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($stock);
             $entityManager->flush();
+            $activityLogger->log($this->getUser(), 'DELETE', "Stock: {$stock->getProduct()->getName()} (ID: {$stock->getId()})");
         }
 
         return $this->redirectToRoute('app_stock_index', [], Response::HTTP_SEE_OTHER);

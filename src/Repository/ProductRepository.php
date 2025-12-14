@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -31,13 +32,18 @@ class ProductRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Product
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findVisibleToUser(User $user): array
+    {
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return $this->findAll();
+        }
+
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.createdBy', 'u')
+            ->where('p.createdBy = :user OR u.roles LIKE :adminRole')
+            ->setParameter('user', $user)
+            ->setParameter('adminRole', '%ROLE_ADMIN%')
+            ->getQuery()
+            ->getResult();
+    }
 }
