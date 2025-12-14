@@ -17,7 +17,9 @@ class ActivityLoggerService
         $log = new ActivityLog();
         $log->setUser($user);
         $log->setUsername($user->getUsername());
-        $log->setRole(implode(', ', $user->getRoles()));
+        $roles = $user->getRoles();
+        $role = in_array('ROLE_ADMIN', $roles, true) ? 'ROLE_ADMIN' : 'ROLE_STAFF';
+        $log->setRole($role);
         $log->setAction($action);
         $log->setTargetData($targetData);
         $log->setCreatedAt(new \DateTimeImmutable());

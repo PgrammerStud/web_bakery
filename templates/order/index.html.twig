@@ -49,8 +49,10 @@
 
 <td>
     <a href="{{ path('app_order_show', {'id': order.id}) }}">show</a>
-    <a href="{{ path('app_order_edit', {'id': order.id}) }}">edit</a>
-    {{ include('order/_delete_form.html.twig') }}
+    {% if is_granted('ROLE_ADMIN') or order.createdBy == app.user %}
+        <a href="{{ path('app_order_edit', {'id': order.id}) }}">edit</a>
+        {{ include('order/_delete_form.html.twig') }}
+    {% endif %}
 </td>
             </tr>
         {% else %}

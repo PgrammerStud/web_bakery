@@ -25,18 +25,18 @@
             <ul>
                 {% if is_granted('ROLE_ADMIN') %}
                     <li><a href="{{ path('app_dashboard') }}">Dashboard</a></li>
-                    <li><a href="/order">Order</a></li>
-                    <li><a href="/category">Category</a></li>
-                    <li><a href="/stock">Stock</a></li>
-                    <li><a href="/product">Product</a></li>
-                    <li><a href="/user">Staff Management</a></li>
+                    <li><a href="{{ path('app_order_index') }}">Order</a></li>
+                    <li><a href="{{ path('app_category_index') }}">Category</a></li>
+                    <li><a href="{{ path('app_stock_index') }}">Stock</a></li>
+                    <li><a href="{{ path('app_product_index') }}">Product</a></li>
+                    <li><a href="{{ path('app_user_index') }}">Staff Management</a></li>
                     <li><a href="{{ path('app_activity_log') }}">Activity Log</a></li>
                     
                 {% elseif is_granted('ROLE_STAFF') %}
-                    <li><a href="/order">Order</a></li>
-                    <li><a href="/category">Category</a></li>
-                    <li><a href="/stock">Stock</a></li>
-                    <li><a href="/product">Product</a></li>
+                    <li><a href="{{ path('app_order_index') }}">Order</a></li>
+                    <li><a href="{{ path('app_category_index') }}">Category</a></li>
+                    <li><a href="{{ path('app_stock_index') }}">Stock</a></li>
+                    <li><a href="{{ path('app_product_index') }}">Product</a></li>
                 {% endif %}
             </ul>
         </aside>

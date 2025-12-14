@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -31,13 +32,18 @@ class OrderRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Order
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findVisibleToUser(User $user): array
+    {
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return $this->findAll();
+        }
+
+        return $this->createQueryBuilder('o')
+            ->leftJoin('o.createdBy', 'u')
+            ->where('o.createdBy = :user OR u.roles LIKE :adminRole')
+            ->setParameter('user', $user)
+            ->setParameter('adminRole', '%ROLE_ADMIN%')
+            ->getQuery()
+            ->getResult();
+    }
 }

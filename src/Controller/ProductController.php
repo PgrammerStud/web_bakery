@@ -9,29 +9,27 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\Attribute\Security;
+use App\Service\ActivityLoggerService;
 
 #[Route('/product')]
 final class ProductController extends AbstractController
 {
-    #[Route(name: 'app_product_index', methods: ['GET'])]
+    #[Route('/', name: 'app_product_index', methods: ['GET'])]
     public function index(ProductRepository $productRepository): Response
     {
-        $user = $this->getUser();
-        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
-            $products = $productRepository->findAll();
-        } else {
-            $products = $productRepository->findBy(['createdBy' => $user]);
-        }
+        $products = $productRepository->findAll();
 
         return $this->render('product/index.html.twig', [
             'products' => $products,
         ]);
     }
 
-    #[IsGranted('ROLE_STAFF')]
+    #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF')")]
     #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $product = new Product();
         $product->setCreatedBy($this->getUser());
@@ -44,6 +42,8 @@ final class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($product);
             $entityManager->flush();
+
+            $activityLogger->log($this->getUser(), 'CREATE', "Product: {$product->getName()} (ID: {$product->getId()})");
 
             return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -68,7 +68,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Product $product, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Product $product, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $user = $this->getUser();
         if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
@@ -82,6 +82,11 @@ final class ProductController extends AbstractController
             $product->setUpdatedAt(new \DateTimeImmutable());
             $entityManager->flush();
 
+            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || $product->getCreatedBy() === $user;
+            if ($shouldLog) {
+                $activityLogger->log($user, 'UPDATE', "Product: {$product->getName()} (ID: {$product->getId()})");
+            }
+
             return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -92,7 +97,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_product_delete', methods: ['POST'])]
-    public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Product $product, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $user = $this->getUser();
         if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
@@ -102,6 +107,10 @@ final class ProductController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($product);
             $entityManager->flush();
+            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || $product->getCreatedBy() === $user;
+            if ($shouldLog) {
+                $activityLogger->log($user, 'DELETE', "Product: {$product->getName()} (ID: {$product->getId()})");
+            }
         }
 
         return $this->redirectToRoute('app_product_index', [], Response::HTTP_SEE_OTHER);
