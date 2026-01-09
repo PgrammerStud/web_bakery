@@ -58,8 +58,9 @@ final class ProductController extends AbstractController
     public function show(Product $product): Response
     {
         $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
-            throw $this->createAccessDeniedException('You can only view your own products.');
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
+            $this->addFlash('error', 'You can only view your own products.');
+            return $this->redirectToRoute('app_product_index');
         }
 
         return $this->render('product/show.html.twig', [
@@ -71,8 +72,9 @@ final class ProductController extends AbstractController
     public function edit(Request $request, Product $product, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
-            throw $this->createAccessDeniedException('You can only edit your own products.');
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
+            $this->addFlash('error', 'You can only edit your own products.');
+            return $this->redirectToRoute('app_product_index');
         }
 
         $form = $this->createForm(ProductType::class, $product);
@@ -82,7 +84,7 @@ final class ProductController extends AbstractController
             $product->setUpdatedAt(new \DateTimeImmutable());
             $entityManager->flush();
 
-            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || $product->getCreatedBy() === $user;
+            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true) || $product->getCreatedBy() === $user;
             if ($shouldLog) {
                 $activityLogger->log($user, 'UPDATE', "Product: {$product->getName()} (ID: {$product->getId()})");
             }
@@ -100,14 +102,15 @@ final class ProductController extends AbstractController
     public function delete(Request $request, Product $product, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
-            throw $this->createAccessDeniedException('You can only delete your own products.');
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $product->getCreatedBy() !== $user) {
+            $this->addFlash('error', 'You can only delete your own products.');
+            return $this->redirectToRoute('app_product_index');
         }
 
         if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($product);
             $entityManager->flush();
-            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || $product->getCreatedBy() === $user;
+            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true) || $product->getCreatedBy() === $user;
             if ($shouldLog) {
                 $activityLogger->log($user, 'DELETE', "Product: {$product->getName()} (ID: {$product->getId()})");
             }

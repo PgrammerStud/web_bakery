@@ -38,12 +38,12 @@ class OrderItems
 
     public function getOrderEntity(): ?Order
     {
-        return $this->order_entity;
+        return $this->orderEntity;
     }
 
-    public function setOrderEntity(?Order $order_entity): static
+    public function setOrderEntity(?Order $orderEntity): static
     {
-        $this->order_entity = $order_entity;
+        $this->orderEntity = $orderEntity;
 
         return $this;
     }
@@ -92,18 +92,6 @@ class OrderItems
     public function setSubtotal(string $subtotal): static
     {
         $this->subtotal = $subtotal;
-
-        return $this;
-    }
-
-    public function getOrderProperty(): ?Order
-    {
-        return $this->order_property;
-    }
-
-    public function setOrderProperty(?Order $order_property): static
-    {
-        $this->order_property = $order_property;
 
         return $this;
     }

@@ -2,10 +2,21 @@
 
 {% block title %}Stock index{% endblock %}
 
-{% block body %}
-    <h1>Stock index</h1>
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+{% endblock %}
 
-    <table class="table">
+{% block javascripts %}
+{{ parent() }}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block body %}
+    <h1>Stock Management</h1>
+
+    <table id="stocks-table" class="table">
         <thead>
             <tr>
                 <th>Id</th>
@@ -22,9 +33,12 @@
                 <td>{{ stock.quantity }}</td>
                 <td>{{ stock.createdAt ? stock.createdAt|date('Y-m-d H:i:s') : '' }}</td>
                 <td>{{ stock.updatedAt ? stock.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_stock_show', {'id': stock.id}) }}">show</a>
-                    <a href="{{ path('app_stock_edit', {'id': stock.id}) }}">edit</a>
+                <td class="actions">
+                    <a href="{{ path('app_stock_show', {'id': stock.id}) }}" class="btn btn-show">show</a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_stock_edit', {'id': stock.id}) }}" class="btn btn-edit">edit</a>
+                        {{ include('stock/_delete_form.html.twig') }}
+                    {% endif %}
                 </td>
             </tr>
         {% else %}
@@ -35,5 +49,11 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_stock_new') }}">Create new</a>
+    <a href="{{ path('app_stock_new') }}" class="btn btn-create-new">Create new</a>
+
+<script>
+$(document).ready(function() {
+    $('#stocks-table').DataTable();
+});
+</script>
 {% endblock %}

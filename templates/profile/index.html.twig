@@ -4,16 +4,19 @@
 
 {% block body %}
 <div class="profile-container">
-    <h1>My Profile</h1>
+
     <div class="profile-info">
+    <h1> {{ user.username }}'s Profile</h1>
         <p><strong>Username:</strong> {{ user.username }}</p>
         <p><strong>Roles:</strong>
             {% for role in user.roles %}
                 {% if role == 'ROLE_ADMIN' %}Admin{% elseif role == 'ROLE_STAFF' %}Staff{% endif %}
                 {% if not loop.last %} {% endif %}
             {% endfor %}
+
         </p>
+        <a href="{{ path('app_change_password') }}" class="btn btn-primary">Change Password</a>
     </div>
-    <a href="{{ path('app_change_password') }}" class="btn btn-primary">Change Password</a>
+    {# <a href="{{ path('app_change_password') }}" class="btn btn-primary">Change Password</a> #}
 </div>
 {% endblock %}

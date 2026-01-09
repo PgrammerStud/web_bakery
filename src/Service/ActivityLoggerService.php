@@ -18,7 +18,7 @@ class ActivityLoggerService
         $log->setUser($user);
         $log->setUsername($user->getUsername());
         $roles = $user->getRoles();
-        $role = in_array('ROLE_ADMIN', $roles, true) ? 'ROLE_ADMIN' : 'ROLE_STAFF';
+        $role = in_array('ROLE_ADMIN', $roles, true) ? 'Admin' : 'Staff';
         $log->setRole($role);
         $log->setAction($action);
         $log->setTargetData($targetData);

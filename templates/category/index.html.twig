@@ -2,15 +2,26 @@
 
 {% block title %}Category index{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
 {% block body %}
 <div class="category-page">
     <div class="category-header">
-        <h1>Category Index</h1>
+        <h1>Category Management</h1>
         <a href="{{ path('app_category_new') }}" class="btn-create-new">Create New</a>
     </div>
 
     <div class="category-table-wrapper">
-        <table class="category-table">
+        <table id="categories-table" class="category-table">
             <thead>
                 <tr>
                     <th>Id</th>
@@ -25,8 +36,11 @@
                     <td>{{ category.name }}</td>
                     <td>
                         <div class="actions">
-                            <a href="{{ path('app_category_show', {'id': category.id}) }}">Show</a>
-                            <a href="{{ path('app_category_edit', {'id': category.id}) }}">Edit</a>
+                            <a href="{{ path('app_category_show', {'id': category.id}) }}" class="btn btn-show">Show</a>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-edit">Edit</a>
+                                {{ include('category/_delete_form.html.twig') }}
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -39,4 +53,10 @@
         </table>
     </div>
 </div>
+
+<script>
+$(document).ready(function() {
+    $('#categories-table').DataTable();
+});
+</script>
 {% endblock %}

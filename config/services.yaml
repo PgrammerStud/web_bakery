@@ -24,5 +24,10 @@ services:
         tags:
             - { name: doctrine.event_subscriber }
 
+    # User Checker for status validation
+    App\Security\UserChecker:
+        tags:
+            - { name: security.user_checker }
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

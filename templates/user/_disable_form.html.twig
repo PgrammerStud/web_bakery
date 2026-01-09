@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_user_disable', {'id': user.id}) }}" onsubmit="return confirm('Are you sure you want to disable this user account?')" style="display: inline-block;">
+    <input type="hidden" name="_token" value="{{ csrf_token('disable' ~ user.id) }}">
+    <button class="btn btn-warning">Disable</button>
+</form>

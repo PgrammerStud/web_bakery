@@ -21,22 +21,40 @@
             </nav>
         </header>
 
+        {% for flash_message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ flash_message }}
+            </div>
+        {% endfor %}
+        {% set error_flashes = app.flashes('error') %}
+        {% for flash_message in error_flashes %}
+            <div class="alert alert-error">
+                {{ flash_message }}
+            </div>
+        {% endfor %}
+
+        {% for flash_message in error_flashes %}
+        <script>
+            alert('{{ flash_message }}');
+        </script>
+        {% endfor %}
+
         <aside class="sidebar">
             <ul>
                 {% if is_granted('ROLE_ADMIN') %}
                     <li><a href="{{ path('app_dashboard') }}">Dashboard</a></li>
-                    <li><a href="{{ path('app_order_index') }}">Order</a></li>
-                    <li><a href="{{ path('app_category_index') }}">Category</a></li>
-                    <li><a href="{{ path('app_stock_index') }}">Stock</a></li>
-                    <li><a href="{{ path('app_product_index') }}">Product</a></li>
+                    <li><a href="{{ path('app_order_index') }}">Order Management</a></li>
+                    <li><a href="{{ path('app_category_index') }}">Category Management</a></li>
+                    <li><a href="{{ path('app_stock_index') }}">Stock Management</a></li>
+                    <li><a href="{{ path('app_product_index') }}">Product Management</a></li>
                     <li><a href="{{ path('app_user_index') }}">Staff Management</a></li>
                     <li><a href="{{ path('app_activity_log') }}">Activity Log</a></li>
                     
                 {% elseif is_granted('ROLE_STAFF') %}
-                    <li><a href="{{ path('app_order_index') }}">Order</a></li>
-                    <li><a href="{{ path('app_category_index') }}">Category</a></li>
-                    <li><a href="{{ path('app_stock_index') }}">Stock</a></li>
-                    <li><a href="{{ path('app_product_index') }}">Product</a></li>
+                    <li><a href="{{ path('app_order_index') }}">Order Management</a></li>
+                    <li><a href="{{ path('app_category_index') }}">Category Management</a></li>
+                    <li><a href="{{ path('app_stock_index') }}">Stock Management</a></li>
+                    <li><a href="{{ path('app_product_index') }}">Product Management</a></li>
                 {% endif %}
             </ul>
         </aside>
