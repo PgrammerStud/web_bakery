@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ActivityLogRepository;
+use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,17 +18,20 @@ final class DashboardController extends AbstractController
     public function index(
         UserRepository $userRepository,
         ProductRepository $productRepository,
-        ActivityLogRepository $activityLogRepository
+        ActivityLogRepository $activityLogRepository,
+        OrderRepository $orderRepository
     ): Response {
         $totalUsers = $userRepository->count([]);
         $totalStaff = $userRepository->countStaff();
         $totalRecords = $productRepository->count([]);
+        $totalOrders = $orderRepository->count([]);
         $recentActivities = $activityLogRepository->findBy([], ['createdAt' => 'DESC'], 10);
 
         return $this->render('dashboard/index.html.twig', [
             'totalUsers' => $totalUsers,
             'totalStaff' => $totalStaff,
             'totalRecords' => $totalRecords,
+            'totalOrders' => $totalOrders,
             'recentActivities' => $recentActivities,
         ]);
     }

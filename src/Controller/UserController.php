@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\UserStatus;
 use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,16 +13,21 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\ActivityLoggerService;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 #[Route('/user')]
 final class UserController extends AbstractController
 {
     #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+    public function index(Request $request, UserRepository $userRepository): Response
     {
+        $status = $request->query->get('status');
+        $users = $status ? $userRepository->findBy(['status' => UserStatus::from($status)]) : $userRepository->findAll();
+
         return $this->render('user/index.html.twig', [
-            'users' => $userRepository->findAll(),
+            'users' => $users,
+            'currentStatus' => $status,
         ]);
     }
 
@@ -29,6 +35,7 @@ final class UserController extends AbstractController
 public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ActivityLoggerService $activityLogger): Response
 {
     $user = new User();
+    $user->setStatus(UserStatus::ACTIVE); // New users start as active
     $form = $this->createForm(UserType::class, $user);
     $form->handleRequest($request);
 
@@ -74,6 +81,11 @@ public function new(Request $request, EntityManagerInterface $entityManager, Use
                 $user->setPassword($hashedPassword);
             }
 
+            // Ensure admin users' status cannot be changed
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                $user->setStatus(UserStatus::ACTIVE);
+            }
+
             $entityManager->flush();
 
             $activityLogger->log($this->getUser(), 'UPDATE', "User: {$user->getUsername()} (ID: {$user->getId()})");
@@ -96,6 +108,63 @@ public function new(Request $request, EntityManagerInterface $entityManager, Use
             $entityManager->flush();
             $activityLogger->log($this->getUser(), 'DELETE', "User: {$user->getUsername()} (ID: {$user->getId()})");
             $this->addFlash('success', 'User deleted successfully.');
+        }
+
+        return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/disable', name: 'app_user_disable', methods: ['POST'])]
+    public function disable(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
+    {
+        // Prevent disabling admin accounts
+        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            $this->addFlash('error', 'Cannot disable admin accounts.');
+            return $this->redirectToRoute('app_user_index');
+        }
+
+        if ($this->isCsrfTokenValid('disable'.$user->getId(), $request->getPayload()->getString('_token'))) {
+            $user->setStatus(UserStatus::DISABLED);
+            $entityManager->flush();
+            $activityLogger->log($this->getUser(), 'DISABLE', "User: {$user->getUsername()} (ID: {$user->getId()})");
+            $this->addFlash('success', 'User account disabled successfully.');
+        }
+
+        return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/enable', name: 'app_user_enable', methods: ['POST'])]
+    public function enable(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
+    {
+        // Prevent changing status for admin users
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            $this->addFlash('error', 'Cannot change status for admin accounts.');
+            return $this->redirectToRoute('app_user_index');
+        }
+
+        if ($this->isCsrfTokenValid('enable'.$user->getId(), $request->getPayload()->getString('_token'))) {
+            $user->setStatus(UserStatus::ACTIVE);
+            $entityManager->flush();
+            $activityLogger->log($this->getUser(), 'ENABLE', "User: {$user->getUsername()} (ID: {$user->getId()})");
+            $this->addFlash('success', 'User account enabled successfully.');
+        }
+
+        return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/archive', name: 'app_user_archive', methods: ['POST'])]
+    public function archive(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
+    {
+        // Prevent archiving admin accounts
+        if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            $this->addFlash('error', 'Cannot archive admin accounts.');
+            return $this->redirectToRoute('app_user_index');
+        }
+
+        if ($this->isCsrfTokenValid('archive'.$user->getId(), $request->getPayload()->getString('_token'))) {
+            $user->setStatus(UserStatus::ARCHIVED);
+            $entityManager->flush();
+            $activityLogger->log($this->getUser(), 'ARCHIVE', "User: {$user->getUsername()} (ID: {$user->getId()})");
+            $this->addFlash('success', 'User account archived successfully.');
         }
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);

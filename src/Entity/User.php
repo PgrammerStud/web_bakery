@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\UserStatus;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -29,6 +30,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private array $roles = [];
 
+    #[ORM\Column(type: 'string', enumType: UserStatus::class)]
+    private UserStatus $status = UserStatus::ACTIVE;
+
     /**
      * @var string The hashed password
      */
@@ -38,7 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Order>
      */
-    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'created_by')]
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'createdBy')]
     private Collection $orders;
 
     /**
@@ -107,6 +111,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $roles;
 
         return $this;
+    }
+
+    public function getStatus(): UserStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(UserStatus $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === UserStatus::ACTIVE;
     }
 
     /**

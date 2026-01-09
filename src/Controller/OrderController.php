@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Order;
 use App\Entity\OrderItems;
+use App\Entity\Stock;
 use App\Form\OrderItemsType;
 use App\Form\OrderType;
 use App\Repository\OrderRepository;
@@ -63,8 +64,9 @@ final class OrderController extends AbstractController
     public function show(Order $order): Response
     {
         $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
-            throw $this->createAccessDeniedException('You can only view your own orders.');
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            $this->addFlash('error', 'You can only view your own orders.');
+            return $this->redirectToRoute('app_order_index');
         }
 
         return $this->render('order/show.html.twig', [
@@ -76,8 +78,9 @@ final class OrderController extends AbstractController
     public function edit(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
-            throw $this->createAccessDeniedException('You can only edit your own orders.');
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            $this->addFlash('error', 'You can only edit your own orders.');
+            return $this->redirectToRoute('app_order_index');
         }
 
         $form = $this->createForm(OrderType::class, $order);
@@ -86,7 +89,7 @@ final class OrderController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || $order->getCreatedBy() === $user;
+            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true) || $order->getCreatedBy() === $user;
             if ($shouldLog) {
                 $activityLogger->log($user, 'UPDATE', "Order: #{$order->getId()}");
             }
@@ -104,8 +107,9 @@ final class OrderController extends AbstractController
     public function addItems(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
-            throw $this->createAccessDeniedException('You can only add items to your own orders.');
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            $this->addFlash('error', 'You can only add items to your own orders.');
+            return $this->redirectToRoute('app_order_index');
         }
 
         $orderItem = new OrderItems();
@@ -147,14 +151,15 @@ final class OrderController extends AbstractController
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
         $user = $this->getUser();
-        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
-            throw $this->createAccessDeniedException('You can only delete your own orders.');
+        if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
+            $this->addFlash('error', 'You can only delete your own orders.');
+            return $this->redirectToRoute('app_order_index');
         }
 
         if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($order);
             $entityManager->flush();
-            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || $order->getCreatedBy() === $user;
+            $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true) || $order->getCreatedBy() === $user;
             if ($shouldLog) {
                 $activityLogger->log($user, 'DELETE', "Order: #{$order->getId()}");
             }
