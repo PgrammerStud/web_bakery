@@ -8,7 +8,7 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
+    
         app_user_provider:
             entity:
                 class: App\Entity\User
@@ -16,12 +16,13 @@ security:
 
     firewalls:
         dev:
-            # Ensure dev tools and static assets are always allowed
+
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\UserChecker
             custom_authenticator: App\Security\LoginAuthenticator
             logout:
                 path: app_logout
@@ -43,10 +44,21 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # Note: Only the *first* matching rule is applied
+
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/dashboard, roles: ROLE_ADMIN }
+        # Admin-only routes
+        - { path: ^/dashboard, roles: ROLE_ADMIN }
+        - { path: ^/user, roles: ROLE_ADMIN }
+        
+        # Staff and Admin routes (product, category, stock, order management)
+        - { path: ^/product, roles: [ROLE_ADMIN, ROLE_STAFF] }
+        - { path: ^/category, roles: [ROLE_ADMIN, ROLE_STAFF] }
+        - { path: ^/stock, roles: [ROLE_ADMIN, ROLE_STAFF] }
+        - { path: ^/order, roles: [ROLE_ADMIN, ROLE_STAFF] }
+        
+        # Allow login/logout for everyone
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/logout, roles: PUBLIC_ACCESS }
 
 when@test:
     security:

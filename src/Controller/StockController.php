@@ -48,6 +48,11 @@ final class StockController extends AbstractController
     #[Route('/{id}', name: 'app_stock_show', methods: ['GET'])]
     public function show(Stock $stock): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STAFF')) {
+            $this->addFlash('error', 'Only administrators and staff can view stock details.');
+            return $this->redirectToRoute('app_stock_index');
+        }
+
         return $this->render('stock/show.html.twig', [
             'stock' => $stock,
         ]);
@@ -56,6 +61,11 @@ final class StockController extends AbstractController
     #[Route('/{id}/edit', name: 'app_stock_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Stock $stock, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STAFF')) {
+            $this->addFlash('error', 'Only administrators and staff can edit stock.');
+            return $this->redirectToRoute('app_stock_index');
+        }
+
         $form = $this->createForm(StockType::class, $stock);
         $form->handleRequest($request);
 
@@ -76,6 +86,11 @@ final class StockController extends AbstractController
     #[Route('/{id}', name: 'app_stock_delete', methods: ['POST'])]
     public function delete(Request $request, Stock $stock, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STAFF')) {
+            $this->addFlash('error', 'Only administrators and staff can delete stock.');
+            return $this->redirectToRoute('app_stock_index');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$stock->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($stock);
             $entityManager->flush();

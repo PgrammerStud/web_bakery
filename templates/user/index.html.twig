@@ -12,8 +12,27 @@
         </div>
     {% endfor %}
 
+    {% for flash_message in app.flashes('error') %}
+        <div class="alert alert-error">
+            {{ flash_message }}
+        </div>
+    {% endfor %}
+
     <div style="margin-bottom: 2rem;">
-        <a href="{{ path('app_user_new') }}" class="btn btn-primary">Create New Staff</a>
+        <a href="{{ path('app_user_new') }}" class="btn btn-create-new">Create New Staff</a>
+    </div>
+
+    <!-- Status Filter -->
+    <div style="margin-bottom: 2rem;">
+        <form method="get" style="display: inline-block;">
+            <label for="status_filter" style="margin-right: 0.5rem;">Filter by Status:</label>
+            <select name="status" id="status_filter" onchange="this.form.submit()">
+                <option value="">All Users</option>
+                <option value="active" {% if currentStatus == 'active' %}selected{% endif %}>Active</option>
+                <option value="disabled" {% if currentStatus == 'disabled' %}selected{% endif %}>Disabled</option>
+                <option value="archived" {% if currentStatus == 'archived' %}selected{% endif %}>Archived</option>
+            </select>
+        </form>
     </div>
 
     <table class="table">
@@ -22,6 +41,7 @@
                 <th>ID</th>
                 <th>Username</th>
                 <th>Role</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -32,19 +52,35 @@
                 <td>{{ user.username }}</td>
                 <td>
                     {% for role in user.roles %}
-                        {% if role == 'ROLE_ADMIN' %}Admin{% elseif role == 'ROLE_STAFF' %}Staff{% endif %}
-                        {% if not loop.last %}, {% endif %}
+                        {% if role == 'ROLE_ADMIN' %}ROLE ADMIN{% elseif role == 'ROLE_STAFF' %}ROLE STAFF{% endif %}
+                        {% if not loop.last %} {% endif %}
                     {% endfor %}
                 </td>
                 <td>
-                    <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-secondary">View</a>
-                    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-secondary">Edit</a>
+                    <span class="status-badge status-{{ user.status.value }}">
+                        {{ user.status.label }}
+                    </span>
+                </td>
+                <td class="actions">
+                    <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-show">View</a>
+                    {% if user.status.value == 'active' %}
+                        <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-edit">Edit</a>
+                        {% if not 'ROLE_ADMIN' in user.roles %}
+                            {{ include('user/_disable_form.html.twig') }}
+                            {{ include('user/_archive_form.html.twig') }}
+                        {% endif %}
+                    {% elseif user.status.value == 'disabled' %}
+                        {{ include('user/_enable_form.html.twig') }}
+                        {% if not 'ROLE_ADMIN' in user.roles %}
+                            {{ include('user/_archive_form.html.twig') }}
+                        {% endif %}
+                    {% endif %}
                     {{ include('user/_delete_form.html.twig') }}
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">No staff accounts found</td>
+                <td colspan="5">No staff accounts found</td>
             </tr>
         {% endfor %}
         </tbody>

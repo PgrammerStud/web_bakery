@@ -2,10 +2,21 @@
 
 {% block title %}Order index{% endblock %}
 
-{% block body %}
-    <h1>Order index</h1>
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+{% endblock %}
 
-    <table class="table">
+{% block javascripts %}
+{{ parent() }}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block body %}
+    <h1>Order Management</h1>
+
+    <table id="orders-table" class="table">
         <thead>
             <tr>
                 <th>Id</th>
@@ -47,21 +58,27 @@
     {% endif %}
 </td>
 
-<td>
-    <a href="{{ path('app_order_show', {'id': order.id}) }}">show</a>
+<td class="actions">
+    <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-show">show</a>
     {% if is_granted('ROLE_ADMIN') or order.createdBy == app.user %}
-        <a href="{{ path('app_order_edit', {'id': order.id}) }}">edit</a>
+        <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-edit">edit</a>
         {{ include('order/_delete_form.html.twig') }}
     {% endif %}
 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="9">no records found</td>
+                <td colspan="10">no records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_order_new') }}">Create new</a>
+    <a href="{{ path('app_order_new') }}" class="btn btn-create-new">Create new</a>
+
+<script>
+$(document).ready(function() {
+    $('#orders-table').DataTable();
+});
+</script>
 {% endblock %}

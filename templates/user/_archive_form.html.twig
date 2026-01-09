@@ -1,0 +1,4 @@
+<form method="post" action="{{ path('app_user_archive', {'id': user.id}) }}" onsubmit="return confirm('Are you sure you want to archive this user account? This will prevent login but preserve historical data.')" style="display: inline-block;">
+    <input type="hidden" name="_token" value="{{ csrf_token('archive' ~ user.id) }}">
+    <button class="btn btn-danger">Archive</button>
+</form>

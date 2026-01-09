@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\UserStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -46,6 +47,31 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    public function countByStatus(UserStatus $status): int
+    {
+        return $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.status = :status')
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function findActiveUsers(): array
+    {
+        return $this->findBy(['status' => UserStatus::ACTIVE]);
+    }
+
+    public function findDisabledUsers(): array
+    {
+        return $this->findBy(['status' => UserStatus::DISABLED]);
+    }
+
+    public function findArchivedUsers(): array
+    {
+        return $this->findBy(['status' => UserStatus::ARCHIVED]);
     }
 
     public function countStaff(): int

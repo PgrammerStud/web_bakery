@@ -48,6 +48,11 @@ final class CategoryController extends AbstractController
     #[Route('/{id}', name: 'app_category_show', methods: ['GET'])]
     public function show(Category $category): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STAFF')) {
+            $this->addFlash('error', 'Only administrators and staff can view category details.');
+            return $this->redirectToRoute('app_category_index');
+        }
+
         return $this->render('category/show.html.twig', [
             'category' => $category,
         ]);
@@ -56,6 +61,11 @@ final class CategoryController extends AbstractController
     #[Route('/{id}/edit', name: 'app_category_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Category $category, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STAFF')) {
+            $this->addFlash('error', 'Only administrators and staff can edit categories.');
+            return $this->redirectToRoute('app_category_index');
+        }
+
         $form = $this->createForm(CategoryType::class, $category);
         $form->handleRequest($request);
 
@@ -76,6 +86,11 @@ final class CategoryController extends AbstractController
     #[Route('/{id}', name: 'app_category_delete', methods: ['POST'])]
     public function delete(Request $request, Category $category, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STAFF')) {
+            $this->addFlash('error', 'Only administrators and staff can delete categories.');
+            return $this->redirectToRoute('app_category_index');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$category->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($category);
             $entityManager->flush();

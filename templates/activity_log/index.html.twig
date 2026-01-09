@@ -61,7 +61,7 @@
             {% for log in activity_logs %}
                 <tr>
                     <td>{{ log.user.username }}</td>
-                    <td>{{ log.user.roles|join(', ') }}</td>
+                    <td>{{ log.role }}</td>
                     <td>{{ log.action }}</td>
                     <td>{{ log.targetData }}</td>
                     <td>{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
