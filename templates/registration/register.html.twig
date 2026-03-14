@@ -1,19 +1,87 @@
-{% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+<link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+
+<style>
+body {
+    display: block !important;
+    grid-template-areas: none !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+}
+</style>
+
+
+{% block title %}{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+<div class="main">
+    <div class="login-page">
+        <form method="post" class="login-card">
+            
+            {% if form_errors(registrationForm) %}
+                <div class="alert alert-danger" style="margin-bottom: 1rem;">
+                    {{ form_errors(registrationForm) }}
+                </div>
+            {% endif %}
 
-    {{ form_errors(registrationForm) }}
+            <h1>Create your account</h1>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.username) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+            <div class="form-group">
+                <label for="inputLastname">Last Name</label>
+                <div class="input-wrapper username-field">
+                    {{ form_widget(registrationForm.lastname, {'attr': {'id': 'inputLastname', 'class': 'form-control', 'placeholder': 'Enter your lastname'}}) }}
+                </div>
+                {{ form_errors(registrationForm.lastname) }}
+            </div>
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+            <div class="form-group">
+                <label for="inputFirstname">First Name</label>
+                <div class="input-wrapper username-field">
+                    {{ form_widget(registrationForm.firstname, {'attr': {'id': 'inputFirstname', 'class': 'form-control', 'placeholder': 'Enter your firstname'}}) }}
+                </div>
+                {{ form_errors(registrationForm.firstname) }}
+            </div>
+
+            <div class="form-group">
+                <label for="inputUsername">Username</label>
+                <div class="input-wrapper username-field">
+                    {{ form_widget(registrationForm.username, {'attr': {'id': 'inputUsername', 'class': 'form-control', 'placeholder': 'Enter your username'}}) }}
+                </div>
+                {{ form_errors(registrationForm.username) }}
+            </div>
+
+            <div class="form-group">
+                <label for="inputEmail">Email</label>
+                <div class="input-wrapper username-field">
+                    {{ form_widget(registrationForm.email, {'attr': {'id': 'inputEmail', 'class': 'form-control', 'placeholder': 'Enter your email'}}) }}
+                </div>
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="form-group">
+                <label for="inputPassword">Password</label>
+                <div class="input-wrapper password-field">
+                    {{ form_widget(registrationForm.plainPassword, {'attr': {'id': 'inputPassword', 'class': 'form-control', 'placeholder': 'Enter your password'}}) }}
+                </div>
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
+
+            <div class="checkbox mb-3">
+                <label>
+                    {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': ''}}) }} I agree to the terms
+                </label>
+                {{ form_errors(registrationForm.agreeTerms) }}
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('register') }}">
+
+            <button class="btn-primary" type="submit">Register</button>
+
+            <p style="text-align: center; margin-top: 1.5rem; color: var(--color-text-muted);">
+                Already have an account?
+                <a href="/login" style="color: var(--color-primary); font-weight: 600; text-decoration: none;">Sign in</a>
+            </p>
+        </form>
+    </div>
+</div>
 {% endblock %}

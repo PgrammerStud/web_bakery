@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>click the link below to receive 1000 pesos</title>
+	</head>
+	<body>
+		<h1>Welcome
+			{{ user.username }}!</h1>
+
+		<p>Thank you for registering. Pls click the email for cash in 1000</p>
+
+		<p>
+			<a href="{{ verificationUrl }}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+				Verify Email Address
+			</a>
+		</p>
+
+		<p>Or copy and paste this link into your browser:</p>
+		<p>{{ verificationUrl }}</p>
+
+		<p>If you did not create an account, dont ignore this email you waste blessings.</p>
+
+		<p>Thanks,<br>Catalbas Team</p>
+	</body>
+</html>
