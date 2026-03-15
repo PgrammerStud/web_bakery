@@ -72,11 +72,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $firstname = null;
 
+    /**
+     * @var Collection<int, Bakeitforward>
+     */
+    #[ORM\OneToMany(targetEntity: Bakeitforward::class, mappedBy: 'user')]
+    private Collection $bakeitforwards;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
         $this->activityLogs = new ArrayCollection();
         $this->products = new ArrayCollection();
+        $this->bakeitforwards = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -301,6 +308,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFirstname(string $firstname): static
     {
         $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bakeitforward>
+     */
+    public function getBakeitforwards(): Collection
+    {
+        return $this->bakeitforwards;
+    }
+
+    public function addBakeitforward(Bakeitforward $bakeitforward): static
+    {
+        if (!$this->bakeitforwards->contains($bakeitforward)) {
+            $this->bakeitforwards->add($bakeitforward);
+            $bakeitforward->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBakeitforward(Bakeitforward $bakeitforward): static
+    {
+        if ($this->bakeitforwards->removeElement($bakeitforward)) {
+            // set the owning side to null (unless already changed)
+            if ($bakeitforward->getUser() === $this) {
+                $bakeitforward->setUser(null);
+            }
+        }
 
         return $this;
     }
