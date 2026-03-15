@@ -7,9 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
+#[ApiResource]
 class Order
 {
     #[ORM\Id]
@@ -47,11 +50,25 @@ class Order
     #[ORM\OneToMany(targetEntity: OrderItems::class, mappedBy: 'orderEntity', cascade: ["persist", "remove"], orphanRemoval: true)]
 private Collection $orderItems;
 
+    /**
+     * @var Collection<int, Bakeitforward>
+     */
+    #[ORM\OneToMany(targetEntity: Bakeitforward::class, mappedBy: 'orders')]
+    private Collection $bakeitforwards;
+
+    /**
+     * @var Collection<int, Delivery>
+     */
+    #[ORM\OneToMany(targetEntity: Delivery::class, mappedBy: 'orders')]
+    private Collection $deliveries;
+
 
 
     public function __construct()
     {
         $this->orderItems = new ArrayCollection();
+        $this->bakeitforwards = new ArrayCollection();
+        $this->deliveries = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -179,6 +196,66 @@ private Collection $orderItems;
             // set the owning side to null (unless already changed)
             if ($orderItem->getOrderEntity() === $this) {
                 $orderItem->setOrderEntity(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bakeitforward>
+     */
+    public function getBakeitforwards(): Collection
+    {
+        return $this->bakeitforwards;
+    }
+
+    public function addBakeitforward(Bakeitforward $bakeitforward): static
+    {
+        if (!$this->bakeitforwards->contains($bakeitforward)) {
+            $this->bakeitforwards->add($bakeitforward);
+            $bakeitforward->setOrders($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBakeitforward(Bakeitforward $bakeitforward): static
+    {
+        if ($this->bakeitforwards->removeElement($bakeitforward)) {
+            // set the owning side to null (unless already changed)
+            if ($bakeitforward->getOrders() === $this) {
+                $bakeitforward->setOrders(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Delivery>
+     */
+    public function getDeliveries(): Collection
+    {
+        return $this->deliveries;
+    }
+
+    public function addDelivery(Delivery $delivery): static
+    {
+        if (!$this->deliveries->contains($delivery)) {
+            $this->deliveries->add($delivery);
+            $delivery->setOrders($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDelivery(Delivery $delivery): static
+    {
+        if ($this->deliveries->removeElement($delivery)) {
+            // set the owning side to null (unless already changed)
+            if ($delivery->getOrders() === $this) {
+                $delivery->setOrders(null);
             }
         }
 

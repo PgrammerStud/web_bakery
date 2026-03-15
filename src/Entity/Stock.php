@@ -4,8 +4,12 @@ namespace App\Entity;
 
 use App\Repository\StockRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+
+
 
 #[ORM\Entity(repositoryClass: StockRepository::class)]
+#[ApiResource]
 class Stock
 {
     #[ORM\Id]
