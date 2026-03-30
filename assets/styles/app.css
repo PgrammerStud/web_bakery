@@ -5,30 +5,70 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300;400;700&family=Pacifico&display=swap');
 
 :root {
-    /* Primary Colors - Warm bakery palette */
-    --primary-brown: #8B4513;
-    --primary-cream: #F5E6D3;
-    --primary-wheat: #D4A574;
+    /* ===== PRIMARY BRAND COLORS ===== */
+    /* Primary: Warm Energetic Orange - Main brand color for CTAs, focus states */
+    --color-primary: #DD8928;
+    --color-primary-dark: #C77620;
+    --color-primary-light: #EFA850;
     
-    /* Secondary Colors */
-    --secondary-dark: #5C3317;
-    --secondary-light: #FFF8E7;
-    --accent-gold: #C9A961;
+    /* Secondary: Deep Sophisticated Brown - Background, text, secondary elements */
+    --color-secondary: #3B2416;
+    --color-secondary-light: #5A4A42;
+    --color-secondary-lighter: #7B6B63;
     
-    /* Neutral Colors */
-    --white: #FFFFFF;
-    --gray-light: #F5F5F5;
-    --gray-medium: #CCCCCC;
-    --gray-dark: #666666;
-    --text-dark: #333333;
+    /* ===== COMPLEMENTARY ACCENT COLORS ===== */
+    /* Teal/Blue complement to orange - For secondary CTAs, accents, interactive states */
+    --color-accent-teal: #4A8FB8;
+    --color-accent-teal-light: #6BA5C8;
+    --color-accent-teal-dark: #2E5A7B;
     
-    /* Shadows */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+    /* Muted accent - For subtle highlights, borders, dividers */
+    --color-accent-muted: #5BA3A3;
     
-    /* Transitions */
+    /* ===== BACKGROUND COLORS ===== */
+    /* Soft cream - Main background, light sections */
+    --color-bg-soft: #FEF8F3;
+    --color-bg-cream: #FFFBF0;
+    --color-bg-light-tan: #E6D5C3;
+    
+    /* Neutral backgrounds */
+    --color-bg-white: #FFFFFF;
+    --color-bg-gray-light: #F5F5F5;
+    --color-bg-gray-medium: #EEEBE5;
+    --color-bg-dark: #3B2416;
+    
+    /* ===== TEXT COLORS ===== */
+    /* High contrast text - For body copy, dark sections */
+    --color-text-dark: #2C1810;
+    --color-text-primary: #3B2416;
+    --color-text-secondary: #5A4A42;
+    --color-text-muted: #8B7B73;
+    --color-text-light: #F5F0E8;
+    --color-text-on-dark: #FFFFFF;
+    
+    /* ===== BORDER & DIVIDER COLORS ===== */
+    --color-border-light: #E0D3C8;
+    --color-border-medium: #D1C3B8;
+    --color-border-dark: #A89580;
+    
+    /* ===== SEMANTIC COLORS ===== */
+    --color-success: #52B788;
+    --color-success-light: #74D896;
+    --color-error: #D03C3C;
+    --color-error-light: #E85F5F;
+    --color-warning: #E89a2f;
+    --color-info: #4A8FB8;
+    
+    /* ===== SHADOWS ===== */
+    --shadow-sm: 0 2px 4px rgba(59, 36, 22, 0.1);
+    --shadow-md: 0 4px 6px rgba(59, 36, 22, 0.12);
+    --shadow-lg: 0 10px 20px rgba(59, 36, 22, 0.15);
+    --shadow-xl: 0 15px 30px rgba(59, 36, 22, 0.2);
+    
+    /* ===== TRANSITIONS ===== */
     --transition: all 0.3s ease;
+    --transition-fast: all 0.15s ease;
+    --transition-slow: all 0.5s ease;
 }
 
 * {
@@ -40,8 +80,8 @@
 body {
     font-family: 'Open Sans Condensed', sans-serif;
     font-weight: 400;
-    background-color: var(--gray-light);
-    color: var(--text-dark);
+    background-color: var(--color-bg-gray-light);
+    color: var(--color-text-dark);
     display: grid;
     grid-template-areas:
         "header header"
@@ -54,8 +94,8 @@ body {
 /* ===== HEADER ===== */
 .header {
     grid-area: header;
-    background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-dark) 100%);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--color-text-on-dark);
     padding: 0 2rem;
     display: flex;
     justify-content: space-between;
@@ -84,7 +124,7 @@ body {
 }
 
 .header-nav a {
-    color: var(--white);
+    color: var(--color-text-on-dark);
     text-decoration: none;
     font-size: 1rem;
     text-transform: uppercase;
@@ -119,7 +159,7 @@ body {
 /* ===== SIDEBAR ===== */
 .sidebar {
     grid-area: sidebar;
-    background-color: var(--white);
+    background-color: var(--color-bg-white);
     padding: 2rem 0;
     box-shadow: var(--shadow-md);
     position: sticky;
@@ -141,7 +181,7 @@ body {
     align-items: center;
     gap: 1rem;
     padding: 1rem 1.5rem;
-    color: var(--text-dark);
+    color: var(--color-text-dark);
     text-decoration: none;
     font-size: 1.05rem;
     text-transform: uppercase;
@@ -159,16 +199,16 @@ body {
 }
 
 .sidebar ul li a:hover {
-    background-color: var(--primary-cream);
-    border-left-color: var(--primary-brown);
+    background-color: var(--color-bg-soft);
+    border-left-color: var(--color-primary);
     padding-left: 1.75rem;
 }
 
 .sidebar ul li a.active {
-    background: linear-gradient(90deg, var(--primary-cream) 0%, var(--secondary-light) 100%);
-    border-left-color: var(--primary-brown);
+    background: linear-gradient(90deg, var(--color-bg-soft) 0%, var(--color-secondary-light) 100%);
+    border-left-color: var(--color-primary);
     font-weight: 700;
-    color: var(--primary-brown);
+    color: var(--color-primary);
 }
 
 /* Sidebar Icons */
@@ -220,7 +260,7 @@ body {
 
 /* Content Cards */
 .content-card {
-    background-color: var(--white);
+    background-color: var(--color-bg-white);
     border-radius: 12px;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -235,7 +275,7 @@ body {
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Pacifico', cursive;
-    color: var(--primary-brown);
+    color: var(--color-primary);
     margin-bottom: 1rem;
     font-weight: 400;
 }
@@ -266,55 +306,56 @@ h3 {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-dark) 100%);
-    color: var(--white);
+    background: var(--color-primary);
+    color: var(--color-text-on-dark);
 }
 
 .btn-primary:hover {
+    background: var(--color-primary-dark);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-    background-color: var(--primary-cream);
-    color: var(--primary-brown);
-    border: 2px solid var(--primary-brown);
+    background-color: var(--color-bg-soft);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
 }
 
 .btn-secondary:hover {
-    background-color: var(--primary-brown);
-    color: var(--white);
+    background-color: var(--color-primary);
+    color: var(--color-text-on-dark);
 }
 
 .btn-success {
-    background-color: #28a745;
-    color: var(--white);
+    background-color: var(--color-success);
+    color: var(--color-text-on-dark);
 }
 
 .btn-success:hover {
-    background-color: #218838;
+    background-color: #1c7d32;
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
 }
 
 .btn-warning {
-    background-color: #ffc107;
-    color: var(--text-dark);
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
 }
 
 .btn-warning:hover {
-    background-color: #e0a800;
+    background-color: #cc7a1f;
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
 }
 
 .btn-danger {
-    background-color: #dc3545;
-    color: var(--white);
+    background-color: var(--color-error);
+    color: var(--color-text-on-dark);
 }
 
 .btn-danger:hover {
-    background-color: #c82333;
+    background-color: #a82a2a;
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
 }
@@ -323,15 +364,15 @@ h3 {
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--white);
+    background-color: var(--color-bg-white);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: var(--shadow-sm);
 }
 
 thead {
-    background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-dark) 100%);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--color-text-on-dark);
 }
 
 th, td {
@@ -341,12 +382,12 @@ th, td {
 }
 
 tbody tr {
-    border-bottom: 1px solid var(--gray-medium);
+    border-bottom: 1px solid var(--color-border-light);
     transition: var(--transition);
 }
 
 tbody tr:hover {
-    background-color: var(--primary-cream);
+    background-color: var(--color-bg-soft);
 }
 
 /* Forms */
@@ -357,7 +398,7 @@ tbody tr:hover {
 label {
     display: block;
     margin-bottom: 0.5rem;
-    color: var(--text-dark);
+    color: var(--color-text-dark);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.9rem;
@@ -372,7 +413,7 @@ select,
 textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid var(--gray-medium);
+    border: 2px solid var(--color-border-medium);
     border-radius: 8px;
     font-family: 'Open Sans Condensed', sans-serif;
     font-size: 1rem;
@@ -383,13 +424,13 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    border-color: var(--primary-brown);
-    box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(221, 137, 40, 0.1);
 }
 
 /* Cards */
 .card {
-    background-color: var(--white);
+    background-color: var(--color-bg-white);
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: var(--shadow-sm);
@@ -398,7 +439,7 @@ textarea:focus {
 
 .card h2 {
     margin-bottom: 1rem;
-    color: var(--primary-brown);
+    color: var(--color-primary);
     font-family: 'Pacifico', cursive;
     font-size: 1.5rem;
 }
@@ -407,7 +448,7 @@ textarea:focus {
 .progress-bar {
     width: 100%;
     height: 20px;
-    background-color: var(--gray-light);
+    background-color: var(--color-bg-gray-light);
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 0.5rem;
@@ -415,7 +456,7 @@ textarea:focus {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary-wheat) 0%, var(--accent-gold) 100%);
+    background: linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
     transition: width 0.3s ease;
 }
 
@@ -430,13 +471,13 @@ textarea:focus {
 }
 
 .badge-success {
-    background-color: #28a745;
-    color: white;
+    background-color: var(--color-success);
+    color: var(--color-text-on-dark);
 }
 
 .badge-warning {
-    background-color: #ffc107;
-    color: black;
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
 }
 
 .status-pending {
@@ -477,7 +518,7 @@ textarea:focus {
 .filter-form select,
 .filter-form input {
     padding: 0.5rem;
-    border: 1px solid var(--gray-medium);
+    border: 1px solid var(--color-border-light);
     border-radius: 4px;
 }
 
@@ -492,12 +533,12 @@ textarea:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--primary-cream) 0%, var(--secondary-light) 100%);
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-secondary-light) 100%);
     padding: 2rem;
 }
 
 .login-form {
-    background-color: var(--white);
+    background-color: var(--color-bg-white);
     border-radius: 16px;
     padding: 3rem;
     box-shadow: var(--shadow-lg);
@@ -514,7 +555,7 @@ textarea:focus {
     transform: translateX(-50%);
     width: 100px;
     height: 100px;
-    background: var(--white);
+    background: var(--color-bg-white);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -529,7 +570,7 @@ textarea:focus {
 
 .login-form h1 {
     font-family: 'Pacifico', cursive;
-    color: var(--primary-brown);
+    color: var(--color-primary);
     text-align: center;
     margin-bottom: 2rem;
     margin-top: 1rem;
@@ -544,7 +585,7 @@ textarea:focus {
 .login-form label {
     display: block;
     margin-bottom: 0.5rem;
-    color: var(--text-dark);
+    color: var(--color-text-dark);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.85rem;
@@ -578,20 +619,20 @@ textarea:focus {
 .login-form input[type="password"] {
     width: 100%;
     padding: 0.875rem 1rem 0.875rem 3rem;
-    border: 2px solid var(--gray-medium);
+    border: 2px solid var(--color-border-medium);
     border-radius: 10px;
     font-family: 'Open Sans Condensed', sans-serif;
     font-size: 1rem;
     transition: var(--transition);
-    background-color: var(--gray-light);
+    background-color: var(--color-bg-gray-light);
 }
 
 .login-form input[type="text"]:focus,
 .login-form input[type="password"]:focus {
     outline: none;
-    border-color: var(--primary-brown);
-    background-color: var(--white);
-    box-shadow: 0 0 0 4px rgba(139, 69, 19, 0.1);
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-white);
+    box-shadow: 0 0 0 4px rgba(221, 137, 40, 0.1);
 }
 
 .login-form .checkbox {
@@ -605,7 +646,7 @@ textarea:focus {
     width: 18px;
     height: 18px;
     cursor: pointer;
-    accent-color: var(--primary-brown);
+    accent-color: var(--color-primary);
 }
 
 .login-form .checkbox label {
@@ -619,8 +660,8 @@ textarea:focus {
 .login-form .btn-submit {
     width: 100%;
     padding: 1rem;
-    background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-dark) 100%);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--color-text-on-dark);
     border: none;
     border-radius: 10px;
     font-family: 'Open Sans Condensed', sans-serif;
@@ -662,9 +703,9 @@ textarea:focus {
 }
 
 .login-form .alert-info {
-    background-color: var(--primary-cream);
-    border: 2px solid var(--primary-wheat);
-    color: var(--secondary-dark);
+    background-color: var(--color-bg-soft);
+    border: 2px solid var(--color-bg-light-tan);
+    color: var(--color-secondary);
 }
 
 .login-form .mb-3 {
@@ -672,7 +713,7 @@ textarea:focus {
 }
 
 .login-form .mb-3 a {
-    color: var(--primary-brown);
+    color: var(--color-primary);
     font-weight: 700;
     text-decoration: none;
     transition: var(--transition);
@@ -688,13 +729,13 @@ textarea:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--primary-cream) 0%, var(--secondary-light) 100%);
+    background: linear-gradient(135deg, var(--color-bg-soft) 0%, var(--color-secondary-light) 100%);
     padding: 2rem;
     font-family: 'Open Sans Condensed', sans-serif;
 }
 
 .login-page .login-card {
-    background-color: var(--white);
+    background-color: var(--color-bg-white);
     border-radius: 20px;
     padding: 3rem 2.5rem;
     box-shadow: var(--shadow-lg);
@@ -711,7 +752,7 @@ textarea:focus {
     transform: translateX(-50%);
     width: 100px;
     height: 100px;
-    background: var(--white);
+    background: var(--color-bg-white);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -726,7 +767,7 @@ textarea:focus {
 
 .login-page h1 {
     font-family: 'Pacifico', cursive;
-    color: var(--primary-brown);
+    color: var(--color-primary);
     text-align: center;
     margin-bottom: 2rem;
     margin-top: 1.5rem;
@@ -742,7 +783,7 @@ textarea:focus {
 .login-page label {
     display: block;
     margin-bottom: 0.6rem;
-    color: var(--text-dark);
+    color: var(--color-text-dark);
     font-weight: 700;
     text-transform: uppercase;
     font-size: 0.85rem;
@@ -776,19 +817,19 @@ textarea:focus {
 .login-page .form-control {
     width: 100%;
     padding: 1rem 1rem 1rem 3.25rem;
-    border: 2px solid var(--gray-medium);
+    border: 2px solid var(--color-border-medium);
     border-radius: 12px;
     font-family: 'Open Sans Condensed', sans-serif;
     font-size: 1.05rem;
     transition: var(--transition);
-    background-color: var(--gray-light);
+    background-color: var(--color-bg-gray-light);
 }
 
 .login-page .form-control:focus {
     outline: none;
-    border-color: var(--primary-brown);
-    background-color: var(--white);
-    box-shadow: 0 0 0 4px rgba(139, 69, 19, 0.1);
+    border-color: var(--color-primary);
+    background-color: var(--color-bg-white);
+    box-shadow: 0 0 0 4px rgba(221, 137, 40, 0.1);
 }
 
 .login-page .checkbox {
@@ -806,22 +847,22 @@ textarea:focus {
     text-transform: none;
     font-size: 1rem;
     cursor: pointer;
-    color: var(--gray-dark);
+    color: var(--color-text-secondary);
 }
 
 .login-page .checkbox input[type="checkbox"] {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    accent-color: var(--primary-brown);
+    accent-color: var(--color-primary);
     border-radius: 4px;
 }
 
 .login-page .btn-primary {
     width: 100%;
     padding: 1.1rem;
-    background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-dark) 100%);
-    color: var(--white);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: var(--color-text-on-dark);
     border: none;
     border-radius: 12px;
     font-family: 'Open Sans Condensed', sans-serif;
