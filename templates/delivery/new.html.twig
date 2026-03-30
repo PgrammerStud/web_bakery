@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Delivery{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Create new Delivery</h1>
+
+    {{ include('delivery/_form.html.twig') }}
+
+    <a href="{{ path('app_delivery_index') }}" class="btn">back to list</a>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bake It Forward{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Bake It Forward</h1>
+
+    <div class="card">
+        <h2>Wallet Progress</h2>
+        {% set balance = wallet.totalBalance ?? 0 %}
+        {% set goal = wallet.goalAmount ?? 0 %}
+        {% set progress = goal > 0 ? (balance / goal) * 100 : 0 %}
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ progress }}%"></div>
+        </div>
+        <p>Current Balance: ${{ balance|number_format(2) }} / Goal: ${{ goal|number_format(2) }}</p>
+    </div>
+
+    <div class="card">
+        <h2>Recent Contributions</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Order #</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contribution in contributions %}
+                <tr>
+                    <td>{{ contribution.user ? contribution.user.email : 'N/A' }}</td>
+                    <td>{{ contribution.orders ? contribution.orders.id : 'N/A' }}</td>
+                    <td>${{ contribution.amount|number_format(2) }}</td>
+                    <td>{{ contribution.createdAt|date('Y-m-d H:i') }}</td>
+                    <td>
+                        {% if contribution.donated %}
+                            <span class="badge badge-success">Donated</span>
+                        {% else %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not contribution.donated %}
+                        <form method="post" action="{{ path('app_bakeitforward_mark_donated', {'id': contribution.id}) }}" style="display:inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('mark_donated_' ~ contribution.id) }}">
+                            <button type="submit" class="btn btn-primary">Mark as Donated</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

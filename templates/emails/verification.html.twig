@@ -1,26 +1,138 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<title>click the link below to receive 1000 pesos</title>
-	</head>
-	<body>
-		<h1>Welcome
-			{{ user.username }}!</h1>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                line-height: 1.6;
+                color: #333;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #fff;
+            }
+            .email-header {
+                background: linear-gradient(135deg, #8b4513 0%, #4a2511 100%);
+                color: white;
+                padding: 30px 20px;
+                text-align: center;
+                border-radius: 8px 8px 0 0;
+            }
+            .email-header h2 {
+                margin: 0;
+                font-size: 28px;
+            }
+            .email-body {
+                padding: 30px 20px;
+                border: 1px solid #e0d5c8;
+                border-radius: 0 0 8px 8px;
+            }
+            .welcome-message {
+                background-color: #f9f6f0;
+                padding: 20px;
+                border-left: 4px solid #d4af37;
+                margin: 20px 0;
+                border-radius: 4px;
+            }
+            .verification-section {
+                text-align: center;
+                margin: 30px 0;
+                padding: 20px 0;
+                border-top: 1px solid #e0d5c8;
+                border-bottom: 1px solid #e0d5c8;
+            }
+            .verify-button {
+                display: inline-block;
+                padding: 15px 40px;
+                background-color: #8b4513;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+                font-size: 16px;
+                margin: 20px 0;
+            }
+            .verify-button:hover {
+                background-color: #6b3410;
+            }
+            .code-section {
+                background-color: #f5f5f5;
+                padding: 15px;
+                border-radius: 4px;
+                margin: 20px 0;
+                word-break: break-all;
+                font-family: monospace;
+                font-size: 12px;
+            }
+            .info-box {
+                background-color: #fffbf0;
+                padding: 15px;
+                border-left: 4px solid #d4af37;
+                margin: 20px 0;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e0d5c8;
+                font-size: 12px;
+                color: #999;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="email-header">
+                <h2>Welcome to Catalbas Bakery!</h2>
+            </div>
+            
+            <div class="email-body">
+                <p>Hello <strong>{{ user.username }}</strong>,</p>
+                
+                <div class="welcome-message">
+                    <p>Thank you for registering with <strong>Catalbas Bakery</strong>! We're excited to have you as part of our community.</p>
+                </div>
 
-		<p>Thank you for registering. Pls click the email for cash in 1000</p>
+                <p>To complete your registration and unlock all the features of your account, please verify your email address by clicking the button below:</p>
 
-		<p>
-			<a href="{{ verificationUrl }}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
-				Verify Email Address
-			</a>
-		</p>
+                <div class="verification-section">
+                    <a href="{{ verificationUrl }}" class="verify-button">Verify Email Address</a>
+                    <p style="font-size: 14px; color: #666;">This link will expire in 24 hours</p>
+                </div>
 
-		<p>Or copy and paste this link into your browser:</p>
-		<p>{{ verificationUrl }}</p>
+                <p>Or copy and paste this link into your browser:</p>
+                <div class="code-section">
+                    {{ verificationUrl }}
+                </div>
 
-		<p>If you did not create an account, dont ignore this email you waste blessings.</p>
+                <div class="info-box">
+                    <p><strong>⏱️ Link expires in:</strong> 24 hours</p>
+                    <p><strong>🔒 Security tip:</strong> Never share this link with anyone. Catalbas Bakery will never ask for this link via email or phone.</p>
+                </div>
 
-		<p>Thanks,<br>Catalbas Team</p>
-	</body>
+                <p><strong>After verification, you'll be able to:</strong></p>
+                <ul>
+                    <li>Access your account and profile</li>
+                    <li>View order history</li>
+                    <li>Save favorite products</li>
+                    <li>Receive exclusive offers and updates</li>
+                    <li>Participate in the Bake It Forward program</li>
+                </ul>
+
+                <p style="margin-top: 30px;">If you did not create this account, please ignore this email and no further action is needed.</p>
+
+                <p>Best regards,<br><strong>The Catalbas Bakery Team</strong></p>
+
+                <div class="footer">
+                    <p>&copy; Catalbas Bakery. All rights reserved.</p>
+                    <p>This is an automated email. Please do not reply directly to this message.</p>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>

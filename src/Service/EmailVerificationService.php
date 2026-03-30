@@ -29,7 +29,7 @@ class EmailVerificationService
     public function sendVerificationEmail(User $user, string $verificationUrl): void
     {
         $email = (new TemplatedEmail())
-            ->from(new Address('desireeadie143000@gmail.com', 'MAYA')) // Change this to verified sender
+            ->from(new Address('desireeadie143000@gmail.com', 'Catalbas Bakery')) // Change this to verified sender
             ->to(new Address($user->getEmail()))
             ->subject('Please verify your email address')
             ->htmlTemplate('emails/verification.html.twig')

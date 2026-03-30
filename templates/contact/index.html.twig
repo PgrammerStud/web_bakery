@@ -1,0 +1,280 @@
+{% extends 'landing.html.twig' %}
+
+{% block title %}Contact Catalbas Bakery - Get In Touch{% endblock %}
+
+{% block body %}
+    <!-- CONTACT HERO SECTION -->
+    <section class="contact-hero" id="contact-hero">
+        <div class="contact-hero-background" style="background-image: url('{{ asset('image/bakery-hero.jpg') }}'); background-color: var(--primary-brown);">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Contact Us</h1>
+                <p class="hero-subtitle">We'd Love to Hear From You - Reach Out Anytime</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT INFORMATION SECTION -->
+    <section class="contact-info-section" id="contact-info-section">
+        <div class="container">
+            <h2>Get In Touch</h2>
+            <p class="section-subtitle">Multiple ways to reach us</p>
+            
+            <div class="contact-grid">
+                <div class="contact-info-box">
+                    <div class="info-icon">📍</div>
+                    <h3>Visit Us</h3>
+                    <p>
+                        <strong>Catalbas Bakery</strong><br>
+                        123 Larena Street<br>
+                        Valencia, Philippines 1000
+                    </p>
+                </div>
+
+                <div class="contact-info-box">
+                    <div class="info-icon">📞</div>
+                    <h3>Call Us</h3>
+                    <p>
+                        <strong>Main Line:</strong><br>
+                        +63 (02) 1234-5678<br>
+                        <strong>Mobile:</strong><br>
+                        +63 9395929110
+                    </p>
+                </div>
+
+                <div class="contact-info-box">
+                    <div class="info-icon">✉️</div>
+                    <h3>Email Us</h3>
+                    <p>
+                        <strong>General Inquiries:</strong><br>
+                        desireeadie143000@gmail.com<br>
+                        <strong>Orders:</strong><br>
+                        desireeadie143000@gmail.com
+                    </p>
+                </div>
+
+                <div class="contact-info-box">
+                    <div class="info-icon">🕐</div>
+                    <h3>Business Hours</h3>
+                    <p>
+                        <strong>Monday - Friday:</strong> 6:00 AM - 8:00 PM<br>
+                        <strong>Saturday - Sunday:</strong> 7:00 AM - 9:00 PM<br>
+                        <strong>Holidays:</strong> 8:00 AM - 6:00 PM
+                    </p>
+                </div>
+
+                <div class="contact-info-box">
+                    <div class="info-icon">🚚</div>
+                    <h3>Delivery</h3>
+                    <p>
+                        Same-day delivery available<br>
+                        Free delivery for orders over ₱500<br>
+                    </p>
+                </div>
+
+                <div class="contact-info-box">
+                    <div class="info-icon">🌐</div>
+                    <h3>Follow Us</h3>
+                    <p>
+                        <strong>Social Media:</strong><br>
+                        Facebook: @CatalbAsBakery<br>
+                        Instagram: @CatalbAsBakery
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT FORM SECTION -->
+    <section class="contact-form-section" id="contact-form-section">
+        <div class="container">
+            <h2>Send Us a Message</h2>
+            <p class="section-subtitle">We'll respond to your inquiry within 24 hours</p>
+            
+            <div class="contact-form-container">
+                <!-- DEBUG: Show all variables -->
+                <!-- formSubmitted: {{ formSubmitted ? 'YES' : 'NO' }} | formSuccess: {{ formSuccess ? 'YES' : 'NO' }} | formError: {{ formError ?? 'NONE' }} -->
+                
+                {% if formSubmitted %}
+                    {% if formSuccess %}
+                        <div class="alert alert-success" role="alert">
+                            <div class="alert-icon">✓</div>
+                            <div class="alert-content">
+                                <h3>Message Sent Successfully!</h3>
+                                <p>Thank you for contacting Catalbas Bakery. We've received your message and will get back to you shortly.</p>
+                                <p>A confirmation email has been sent to your inbox.</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-error" role="alert">
+                            <div class="alert-icon">✕</div>
+                            <div class="alert-content">
+                                <h3>Oops! Something went wrong</h3>
+                                <p>{{ formError }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+
+                <form method="POST" action="{{ path('app_contact') }}" class="contact-form" data-turbo="false">
+                    <input type="hidden" name="_token" value="{{ csrf_token('contact') }}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contact-name">Full Name *</label>
+                            <input 
+                                type="text" 
+                                id="contact-name" 
+                                name="name" 
+                                value="{{ formData.name ?? '' }}"
+                                required 
+                                placeholder="Your Full Name"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-phone">Phone Number</label>
+                            <input 
+                                type="tel" 
+                                id="contact-phone" 
+                                name="phone" 
+                                value="{{ formData.phone ?? '' }}"
+                                placeholder="Your Phone Number"
+                                class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-email">Email Address *</label>
+                        <input 
+                            type="email" 
+                            id="contact-email" 
+                            name="email" 
+                            value="{{ formData.email ?? '' }}"
+                            required 
+                            placeholder="your@email.com"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-subject">Subject *</label>
+                        <select id="contact-subject" name="subject" value="{{ formData.subject ?? '' }}" required class="form-control">
+                            <option value="">-- Select a Subject --</option>
+                            <option value="General Inquiry" {% if formData.subject == 'General Inquiry' %}selected{% endif %}>General Inquiry</option>
+                            <option value="Custom Order" {% if formData.subject == 'Custom Order' %}selected{% endif %}>Custom Order</option>
+                            <option value="Bulk Order" {% if formData.subject == 'Bulk Order' %}selected{% endif %}>Bulk Order</option>
+                            <option value="Feedback" {% if formData.subject == 'Feedback' %}selected{% endif %}>Feedback</option>
+                            <option value="Partnership Opportunity" {% if formData.subject == 'Partnership Opportunity' %}selected{% endif %}>Partnership Opportunity</option>
+                            <option value="Other" {% if formData.subject == 'Other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-message">Message *</label>
+                        <textarea 
+                            id="contact-message" 
+                            name="message" 
+                            rows="6" 
+                            required 
+                            placeholder="Tell us how we can help you..."
+                            class="form-control">{{ formData.message ?? '' }}</textarea>
+                    </div>
+
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="contact-subscribe" name="subscribe" value="1" {% if formData.subscribe %}checked{% endif %}>
+                        <label for="contact-subscribe">Subscribe to our newsletter for updates and special offers</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ SECTION -->
+    <section class="contact-faq" id="contact-faq">
+        <div class="container">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How fast can I get a custom cake?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>For custom orders, we typically need 3-5 business days. However, we can accommodate rush orders (+₱200) if ordered at least 24 hours in advance.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Do you offer vegan or gluten-free options?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes! We have a selection of vegan and gluten-free baked goods. Please mention your dietary requirements when ordering, and we'll ensure nothing is cross-contaminated.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What's your refund policy?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We offer full refunds or replacements within 24 hours if there's any quality issue with your order. Custom cakes are non-refundable but can be remade if unsatisfactory.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Do you do wholesale or bulk orders?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Absolutely! We love working with businesses and events. Contact our bulk sales team for special pricing and availability. Minimum orders apply based on item selection.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How do I participate in Bake It Forward?</h3>
+                        <span class="faq-toggle">+</span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Every purchase automatically contributes to our Bake It Forward program! A portion of every sale goes directly to local animal shelters. You can also make direct donations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="contact-cta">
+        <div class="container">
+            <h2>Ready to Order or Learn More?</h2>
+            <p>Explore our full range of fresh baked goods or place your custom order today.</p>
+            <div class="cta-buttons">
+                <a href="{{ path('app_product_index') }}" class="btn btn-primary btn-lg">View All Products</a>
+                <a href="{{ path('app_about') }}" class="btn btn-secondary btn-lg">Meet Our Team</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // FAQ Toggle functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', function() {
+                const faqItem = this.parentElement;
+                const isActive = faqItem.classList.contains('active');
+                
+                document.querySelectorAll('.faq-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                if (!isActive) {
+                    faqItem.classList.add('active');
+                }
+            });
+        });
+    </script>
+{% endblock %}

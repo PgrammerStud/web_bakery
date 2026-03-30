@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Welcome to Catalbas Bakery!{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+        {% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body class="landing-page">
+        <header class="landing-header">
+            <div class="landing-header-content">
+                <div class="landing-logo-section">
+                    <img src="{{ asset('image/monochrome.png') }}" alt="Catalbas Bakery" class="landing-logo">
+                    {# <span class="bakery-name">Catalbas Bakery</span> #}
+                </div>
+                
+                <button class="hamburger-menu" id="hamburgerMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <nav class="landing-nav" id="landingNav">
+                    <a href="{{ path('app_home') }}" class="nav-link">Home</a>
+                    <a href="{{ path('app_product_index') }}" class="nav-link">Products</a>
+                    <a href="{{ path('app_about') }}" class="nav-link">About</a>
+                    <a href="{{ path('app_home') }}#bake-it-forward" class="nav-link">Bake It Forward</a>
+                    <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
+                     {% if app.user %}
+                        {# <a href="{{ path('app_profile') }}" class="nav-link nav-user">Profile</a> #}
+                        <a href="{{ path('app_logout') }}" class="nav-link nav-logout">Logout</a>
+                    {% else %}
+                        <a href="{{ path('app_login') }}" class="nav-link nav-login">Login</a>
+                        <a href="{{ path('app_register') }}" class="nav-link nav-register">Register</a>
+                    {% endif %} 
+                </nav>
+            </div>
+        </header>
+
+        {% for flash_message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ flash_message }}
+            </div>
+        {% endfor %}
+        {% set error_flashes = app.flashes('error') %}
+        {% for flash_message in error_flashes %}
+            <div class="alert alert-error">
+                {{ flash_message }}
+            </div>
+        {% endfor %}
+
+        <main class="landing-main">
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="landing-footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Catalbas Bakery</h3>
+                    <p>&copy; 2024 Catalbas Bakery. All rights reserved.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>Email: desireeadie143000@gmail.com</p>
+                    <p>Phone: +63 9395929110</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <p>Facebook | Instagram | Twitter</p>
+                </div>
+            </div>
+        </footer>
+
+        <script>
+            // Hamburger menu toggle
+            const hamburgerMenu = document.getElementById('hamburgerMenu');
+            const landingNav = document.getElementById('landingNav');
+
+            hamburgerMenu.addEventListener('click', function() {
+                landingNav.classList.toggle('active');
+                hamburgerMenu.classList.toggle('active');
+            });
+
+            // Close menu when a nav link is clicked
+            const navLinks = document.querySelectorAll('.landing-nav .nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    landingNav.classList.remove('active');
+                    hamburgerMenu.classList.remove('active');
+                });
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    if (href !== '#' && document.querySelector(href)) {
+                        e.preventDefault();
+                        const target = document.querySelector(href);
+                        const headerHeight = document.querySelector('.landing-header').offsetHeight;
+                        const targetPosition = target.offsetTop - headerHeight;
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Highlight active nav link based on scroll position
+            function updateActiveNavLink() {
+                const sections = document.querySelectorAll('[id]');
+                const headerHeight = document.querySelector('.landing-header').offsetHeight;
+                let currentSection = '';
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - headerHeight - 100;
+                    if (window.pageYOffset >= sectionTop) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNavLink);
+        </script>
+    </body>
+</html>
