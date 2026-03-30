@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                line-height: 1.6;
+                color: #333;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #fff;
+            }
+            .email-header {
+                background: linear-gradient(135deg, #8b4513 0%, #4a2511 100%);
+                color: white;
+                padding: 30px 20px;
+                text-align: center;
+                border-radius: 8px 8px 0 0;
+            }
+            .email-header h2 {
+                margin: 0;
+            }
+            .email-body {
+                padding: 30px 20px;
+                border: 1px solid #e0d5c8;
+                border-radius: 0 0 8px 8px;
+            }
+            .message-box {
+                background-color: #f9f6f0;
+                padding: 20px;
+                border-left: 4px solid #d4af37;
+                margin: 20px 0;
+                border-radius: 4px;
+            }
+            .contact-info {
+                background-color: #f0f0f0;
+                padding: 15px;
+                border-radius: 4px;
+                margin: 20px 0;
+                font-size: 14px;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e0d5c8;
+                font-size: 12px;
+                color: #999;
+            }
+            .button {
+                display: inline-block;
+                padding: 12px 30px;
+                background-color: #8b4513;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                margin-top: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="email-header">
+                <h2>Thank You for Contacting Us!</h2>
+            </div>
+            
+            <div class="email-body">
+                <p>Hello {{ name }},</p>
+                
+                <p>We've received your message and appreciate you reaching out to <strong>Catalbas Bakery</strong>!</p>
+                
+                <div class="message-box">
+                    <p>Our team will review your inquiry and get back to you as soon as possible, typically within 24 hours.</p>
+                </div>
+                
+                <p><strong>What's Next?</strong></p>
+                <ul>
+                    <li>We'll review your message carefully</li>
+                    <li>Our team will prepare a response tailored to your needs</li>
+                    <li>You'll hear from us via email at {{ userEmail }}</li>
+                </ul>
+                
+                <p>In the meantime, feel free to explore our website or check out our latest products and special offers!</p>
+                
+                <a href="https://catalbas-bakery.com/products" class="button">View Our Products</a>
+                
+                <div class="contact-info">
+                    <p><strong>Need immediate assistance?</strong></p>
+                    <p>📞 Call us: +63 (02) 1234-5678<br>
+                    🕐 Hours: Mon-Fri 6:00 AM - 8:00 PM | Sat-Sun 7:00 AM - 9:00 PM</p>
+                </div>
+                
+                <p>Best regards,<br><strong>The Catalbas Bakery Team</strong></p>
+                
+                <div class="footer">
+                    <p>This is an automated confirmation email. Please do not reply to this email. Use the contact form to reach us.</p>
+                    <p>&copy; Catalbas Bakery. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

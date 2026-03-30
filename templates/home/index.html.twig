@@ -1,0 +1,173 @@
+{% extends 'landing.html.twig' %}
+
+{% block title %}Catalbas Bakery - Freshly Baked Every Morning{% endblock %}
+
+{% block body %}
+    <!-- 1. HERO SECTION -->
+    <section class="hero" id="hero">
+        <div class="hero-background" style="background-image: url('{{ asset('image/bakery-hero.jpg') }}'); background-color: var(--primary-brown);">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Freshly Baked Every Morning</h1>
+                <p class="hero-subtitle">Handmade baked goods made with love, fresh ingredients, and traditional recipes passed down through generations.</p>
+                <div class="hero-buttons">
+                    <a href="{{ path('app_product_index') }}" class="btn btn-primary btn-lg">View Products</a>
+                    <a href="{{ path('app_product_index') }}" class="btn btn-secondary btn-lg">Order Now</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. FEATURED PRODUCTS -->
+    <section class="featured-products" id="featured-products">
+        <div class="container">
+            <h2>Featured Products</h2>
+            <p class="section-subtitle">Discover our most popular baked goods</p>
+            
+            <div class="products-grid">
+                {% if featuredProducts|length > 0 %}
+                    {% for product in featuredProducts %}
+                        <div class="product-card">
+                            <div class="product-image">
+                                {% if product.imageUrl %}
+                                    <img src="{{ asset('image/' ~ product.imageUrl) }}" alt="{{ product.name }}">
+                                {% else %}
+                                    <div class="no-image">No Image</div>
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">{{ product.name }}</h3>
+                                <p class="product-description">{{ product.description|slice(0, 80) ~ (product.description|length > 80 ? '...' : '') }}</p>
+                                <p class="product-price">₱{{ product.price }}</p>
+                                <a href="{{ path('app_product_index') }}" class="btn btn-primary btn-sm">Order Now</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-products">No featured products available at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. ABOUT THE BAKERY -->
+    <section class="about-bakery" id="about-bakery">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image">
+                    <img src="{{ asset('image/bakery-about.jpg') }}" alt="Catalbas Bakery" style="background-color: var(--gray-light);">
+                </div>
+                <div class="about-content">
+                    <h2>About Our Bakery</h2>
+                    <p>
+                        Welcome to Catalbas Bakery, where tradition meets passion. For years, we have been dedicated to bringing you the finest baked goods made from the freshest ingredients available.
+                    </p>
+                    <p>
+                        Our master bakers use time-honored recipes passed down through generations, combined with modern baking techniques to create an unforgettable experience with every bite. We believe in quality over quantity, which is why each product is carefully crafted with attention to detail.
+                    </p>
+                    <p>
+                        From artisan bread to delicate pastries, every item in our shop tells a story of craftsmanship, dedication, and love for our community. We source our ingredients responsibly and take pride in supporting local suppliers.
+                    </p>
+                    <div class="about-highlights">
+                        <div class="highlight">
+                            <h4>🌾 Fresh Ingredients</h4>
+                            <p>We use only the finest, freshest ingredients in all our baked goods</p>
+                        </div>
+                        <div class="highlight">
+                            <h4>👨‍🍳 Master Bakers</h4>
+                            <p>Our experienced bakers bring decades of expertise to every loaf and pastry</p>
+                        </div>
+                        <div class="highlight">
+                            <h4>❤️ Made with Love</h4>
+                            <p>Every product is crafted with care and passion for our community</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. BAKE IT FORWARD (DONATION FEATURE) -->
+    <section class="bake-it-forward" id="bake-it-forward">
+        <div class="container">
+            <h2>Bake It Forward - Help Us Help Others</h2>
+            <p class="section-subtitle">Every purchase helps provide meals to animals in need</p>
+            
+            <div class="donation-card">
+                <div class="donation-icons">
+                    <span class="donation-icon">🐕</span>
+                    <span class="donation-icon">🐈</span>
+                    <span class="donation-icon">🐕</span>
+                </div>
+                
+                <div class="donation-progress">
+                    {% if wallet %}
+                        {% set percentage = (wallet.getTotalBalance() / wallet.getGoalAmount() * 100)|round %}
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ percentage }}%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <p class="raised-amount">₱{{ wallet.getTotalBalance()|number_format(2) }} raised</p>
+                            <p class="goal-amount">of ₱{{ wallet.getGoalAmount()|number_format(2) }} goal</p>
+                        </div>
+                        <p class="progress-percentage">{{ percentage|round }}% Complete</p>
+                    {% else %}
+                        <p>Loading donation progress...</p>
+                    {% endif %}
+                </div>
+
+                <div class="donation-message">
+                    <p>Our Bake It Forward program donates a portion of every purchase to local animal shelters. Together, we're making a difference in the lives of animals in need.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. CONTACT US -->
+    <section class="contact-us" id="contact-us">
+        <div class="container">
+            <h2>Get In Touch</h2>
+            <p class="section-subtitle">We'd love to hear from you</p>
+            
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="info-block">
+                        <h3>📍 Address</h3>
+                        <p>123 Bakery Street<br>Manila, Philippines 1000</p>
+                    </div>
+                    <div class="info-block">
+                        <h3>📞 Phone</h3>
+                        <p>+63 (02) 1234-5678</p>
+                    </div>
+                    <div class="info-block">
+                        <h3>✉️ Email</h3>
+                        <p>contact@catalbas.com</p>
+                    </div>
+                    <div class="info-block">
+                        <h3>⏰ Business Hours</h3>
+                        <p>Monday - Friday: 6:00 AM - 8:00 PM<br>
+                           Saturday - Sunday: 7:00 AM - 9:00 PM</p>
+                    </div>
+                </div>
+
+                <div class="contact-form-wrapper">
+                    <form class="contact-form" action="{% if app.user %}{{ path('app_home') }}{% else %}#{% endif %}" method="POST">
+                        <div class="form-group">
+                            <label for="contact-name">Name</label>
+                            <input type="text" id="contact-name" name="name" required placeholder="Your Name">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email</label>
+                            <input type="email" id="contact-email" name="email" required placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-message">Message</label>
+                            <textarea id="contact-message" name="message" rows="5" required placeholder="Your message here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

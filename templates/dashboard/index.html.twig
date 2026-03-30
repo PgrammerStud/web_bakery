@@ -26,6 +26,22 @@
             <h2>Total Orders</h2>
             <p class="metric">{{ totalOrders }}</p>
         </div>
+
+        <div class="card">
+            <h2>Delivered Orders</h2>
+            <p class="metric">{{ totalDelivered }}</p>
+        </div>
+         
+          <div class="card">
+            <h2>Pending Orders</h2>
+            <p class="metric">{{ totalPending }}</p>
+        </div>
+      
+
+        <div class="card">
+            <h2>Total Donations</h2>
+            <p class="metric">${{ totalDonations|number_format(2) }}</p>
+        </div>
     </div>
 
     <div class="recent-activities">

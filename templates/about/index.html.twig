@@ -1,0 +1,146 @@
+{% extends 'landing.html.twig' %}
+
+{% block title %}About Catalbas Bakery - Our Story & Team{% endblock %}
+
+{% block body %}
+    <!-- ABOUT HERO SECTION -->
+    <section class="about-hero" id="about-hero">
+        <div class="about-hero-background" style="background-image: url('{{ asset('image/bakery-hero.jpg') }}'); background-color: var(--primary-brown);">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">About Catalbas Bakery</h1>
+                <p class="hero-subtitle">Tradition, Quality, and Community at the Heart of Everything We Do</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- OUR STORY SECTION -->
+    <section class="our-story" id="our-story">
+        <div class="container">
+            <h2>Our Story</h2>
+            <div class="story-content">
+                <p>
+                    Catalbas Bakery was born from a simple dream—to create a space where tradition meets passion, 
+                    and every bite tells a story. Founded by Maria Santos, a master baker with over two decades of 
+                    experience, our bakery stands as a testament to the power of handmade excellence and community spirit.
+                </p>
+                
+                <div class="story-grid">
+                    <div class="story-card">
+                        <h3>🌾 Our Roots</h3>
+                        <p>
+                            Starting with a small neighborhood shop, we've grown into a beloved local institution. 
+                            Our foundation is built on time-honored recipes passed down through generations, combined 
+                            with modern baking expertise.
+                        </p>
+                    </div>
+                    
+                    <div class="story-card">
+                        <h3>❤️ Our Values</h3>
+                        <p>
+                            We believe in quality over quantity. Every product is crafted with care, using only the 
+                            finest fresh ingredients. We support local suppliers and invest in our community's wellbeing.
+                        </p>
+                    </div>
+                    
+                    <div class="story-card">
+                        <h3>🤝 Our Mission</h3>
+                        <p>
+                            To bring joy through exceptional baked goods while making a positive impact on our community. 
+                            Our Bake It Forward program donates a portion of sales to local animal shelters.
+                        </p>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 2rem; text-align: center; font-style: italic; color: var(--text-muted);">
+                    "We don't just bake for sustenance—we bake for memories, celebrations, and connections."
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- MEET THE TEAM SECTION -->
+    <section class="meet-the-team" id="meet-the-team">
+        <div class="container">
+            <h2>Meet The Team</h2>
+            <p class="section-subtitle">The Skilled Hands Behind Every Delicious Bite</p>
+            
+            <div class="team-grid">
+                {% for member in teamMembers %}
+                    <div class="team-member-card">
+                        <div class="team-member-image">
+                            {% if member.image %}
+                                <img src="{{ asset('image/' ~ member.image) }}" alt="{{ member.name }}" 
+                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22%3E%3Crect fill=%22%23e0d5c8%22 width=%22300%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2224%22 fill=%22%23666%22%3E👤%3C/text%3E%3C/svg%3E'">
+                            {% else %}
+                                <div class="team-placeholder">👤</div>
+                            {% endif %}
+                        </div>
+                        <div class="team-member-info">
+                            <h3>{{ member.name }}</h3>
+                            <p class="team-position">{{ member.position }}</p>
+                            <p class="team-bio">{{ member.bio }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY CHOOSE US SECTION -->
+    <section class="why-choose-us" id="why-choose-us">
+        <div class="container">
+            <h2>Why Choose Catalbas Bakery?</h2>
+            
+            <div class="features-grid">
+                <div class="feature-box">
+                    <div class="feature-icon">🌾</div>
+                    <h3>Fresh Ingredients</h3>
+                    <p>We source only the freshest, highest-quality ingredients daily. No artificial preservatives or fillers.</p>
+                </div>
+                
+                <div class="feature-box">
+                    <div class="feature-icon">👨‍🍳</div>
+                    <h3>Expert Bakers</h3>
+                    <p>Our master bakers combine traditional techniques with modern expertise, perfecting every recipe.</p>
+                </div>
+                
+                <div class="feature-box">
+                    <div class="feature-icon">🚚</div>
+                    <h3>Fast Delivery</h3>
+                    <p>Fresh from the oven, delivered to your door. Same-day orders available for most items.</p>
+                </div>
+                
+                <div class="feature-box">
+                    <div class="feature-icon">💰</div>
+                    <h3>Competitive Pricing</h3>
+                    <p>Premium quality at affordable prices. Regular promotions and loyalty rewards for our valued customers.</p>
+                </div>
+                
+                <div class="feature-box">
+                    <div class="feature-icon">🎂</div>
+                    <h3>Custom Orders</h3>
+                    <p>Special occasions deserve special treats. We create custom cakes and pastries for your celebrations.</p>
+                </div>
+                
+                <div class="feature-box">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Community First</h3>
+                    <p>Every purchase supports local suppliers and our Bake It Forward program for animal shelters.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="about-cta">
+        <div class="container">
+            <h2>Ready to Experience the Catalbas Difference?</h2>
+            <p>Discover our full range of fresh baked goods and place your order today.</p>
+            <div class="cta-buttons">
+                <a href="{{ path('app_product_index') }}" class="btn btn-primary btn-lg">View All Products</a>
+                <a href="{{ path('app_contact') }}" class="btn btn-secondary btn-lg">Get In Touch</a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

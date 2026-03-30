@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                line-height: 1.6;
+                color: #333;
+            }
+            .email-container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #fff;
+            }
+            .email-header {
+                background: linear-gradient(135deg, #8b4513 0%, #4a2511 100%);
+                color: white;
+                padding: 30px 20px;
+                text-align: center;
+                border-radius: 8px 8px 0 0;
+            }
+            .email-body {
+                padding: 20px;
+                border: 1px solid #e0d5c8;
+                border-radius: 0 0 8px 8px;
+            }
+            .message-section {
+                background-color: #f9f6f0;
+                padding: 15px;
+                border-left: 4px solid #8b4513;
+                margin: 15px 0;
+                border-radius: 4px;
+            }
+            .info-row {
+                display: flex;
+                margin: 10px 0;
+                border-bottom: 1px solid #e0d5c8;
+                padding-bottom: 10px;
+            }
+            .info-label {
+                font-weight: bold;
+                width: 100px;
+                color: #8b4513;
+            }
+            .info-value {
+                flex: 1;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 20px;
+                font-size: 12px;
+                color: #999;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <div class="email-header">
+                <h2>New Contact Form Submission</h2>
+            </div>
+            
+            <div class="email-body">
+                <p>Hello,</p>
+                
+                <p>You have received a new message through the Catalbas Bakery contact form. Please see the details below:</p>
+                
+                <div class="info-row">
+                    <div class="info-label">Name:</div>
+                    <div class="info-value">{{ name }}</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value"><a href="mailto:{{ userEmail }}">{{ userEmail }}</a></div>
+                </div>
+                
+                {% if phone %}
+                <div class="info-row">
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value">{{ phone }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="info-row">
+                    <div class="info-label">Subject:</div>
+                    <div class="info-value">{{ subject }}</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">Subscribe:</div>
+                    <div class="info-value">{{ subscribe }}</div>
+                </div>
+                
+                <div class="message-section">
+                    <p><strong>Message:</strong></p>
+                    <p>{{ message|nl2br }}</p>
+                </div>
+                
+                <p>Please reply to this message directly or contact the visitor to assist with their inquiry.</p>
+                
+                <div class="footer">
+                    <p>&copy; Catalbas Bakery. This is an automated email notification.</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

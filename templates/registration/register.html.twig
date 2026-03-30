@@ -73,7 +73,7 @@ body {
                 {{ form_errors(registrationForm.agreeTerms) }}
             </div>
 
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('register') }}">
+            {{ form_rest(registrationForm) }}
 
             <button class="btn-primary" type="submit">Register</button>
 

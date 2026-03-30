@@ -28,6 +28,9 @@ class Bakeitforward
     #[ORM\Column]
     private ?\DateTime $created_at = null;
 
+    #[ORM\Column]
+    private ?bool $donated = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +92,18 @@ class Bakeitforward
     public function setCreatedAt(\DateTime $created_at): static
     {
         $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function isDonated(): ?bool
+    {
+        return $this->donated;
+    }
+
+    public function setDonated(bool $donated): static
+    {
+        $this->donated = $donated;
 
         return $this;
     }
