@@ -71,7 +71,7 @@
                         <div class="team-member-image">
                             {% if member.image %}
                                 <img src="{{ asset('image/' ~ member.image) }}" alt="{{ member.name }}" 
-                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22%3E%3Crect fill=%22%23e0d5c8%22 width=%22300%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2224%22 fill=%22%23666%22%3E👤%3C/text%3E%3C/svg%3E'">
+                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22%3E%3Crect fill=%22%23e0d5c8%22 width=%22300%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%2２Arial%２ font-size=%２２4%２ fill=%２２%23666%２%3E👤%3C/text%3E%3C/svg%3E'">
                             {% else %}
                                 <div class="team-placeholder">👤</div>
                             {% endif %}
@@ -135,7 +135,7 @@
     <!-- CTA SECTION -->
     <section class="about-cta">
         <div class="container">
-            <h2>Ready to Experience the Catalbas Difference?</h2>
+            <h2 class="hero-title">Ready to Experience the Catalbas Difference?</h2>
             <p>Discover our full range of fresh baked goods and place your order today.</p>
             <div class="cta-buttons">
                 <a href="{{ path('app_product_index') }}" class="btn btn-primary btn-lg">View All Products</a>

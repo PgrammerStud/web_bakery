@@ -13,28 +13,28 @@ final class AboutController extends AbstractController
     {
         $teamMembers = [
             [
-                'name' => 'Maria Santos',
+                'name' => 'Desiree Catalbas',
                 'position' => 'Head Baker & Founder',
-                'bio' => 'With over 20 years of baking experience, Maria founded Catalbas Bakery with a passion for traditional baking techniques and fresh ingredients.',
-                'image' => 'team-1.jpg'
+                'bio' => 'With over 20 years of baking experience, Desiree founded Catalbas Bakery with a passion for traditional baking techniques and fresh ingredients.',
+                'image' => 'desiree.jpg'
             ],
             [
-                'name' => 'Juan Cruz',
+                'name' => 'Jennie Kim',
                 'position' => 'Master Baker',
-                'bio' => 'Expert in artisan bread and pastries, Juan brings creativity and precision to every loaf. His passion for baking is evident in every product.',
-                'image' => 'team-2.jpg'
+                'bio' => 'Expert in artisan bread and pastries, Jennie brings creativity and precision to every loaf. Her passion for baking is evident in every product.',
+                'image' => 'desiree.jpg'
             ],
             [
-                'name' => 'Rosa Mendoza',
+                'name' => 'Lisa Manoban',
                 'position' => 'Customer Relations Manager',
-                'bio' => 'Rosa ensures every customer experience is exceptional. She coordinates special orders and manages our community relationships with dedication.',
-                'image' => 'team-3.jpg'
+                'bio' => 'Lisa ensures every customer experience is exceptional. She coordinates special orders and manages our community relationships with dedication.',
+                'image' => 'desiree.jpg'
             ],
             [
-                'name' => 'Carlos Reyes',
+                'name' => 'Rosé Park',
                 'position' => 'Production Manager',
-                'bio' => 'Carlos oversees our production process, ensuring quality control and timely delivery of all our baked products to customers.',
-                'image' => 'team-4.jpg'
+                'bio' => 'Rosé oversees our production process, ensuring quality control and timely delivery of all our baked products to customers.',
+                'image' => 'desiree.jpg'
             ]
         ];
 
