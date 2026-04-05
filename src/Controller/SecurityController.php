@@ -15,7 +15,12 @@ class SecurityController extends AbstractController
         
         return $clientRegistry
             ->getClient('google')
-            ->redirect(['email', 'profile']);
+            ->redirect(
+                  ['email', 'profile'],
+                  [
+                     'prompt' => 'select_account'
+                      ]
+);
     }
 
     #[Route('/connect/google/check', name: 'connect_google_check')]

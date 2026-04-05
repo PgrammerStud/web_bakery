@@ -50,13 +50,15 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
         }
         $roles = $token->getRoleNames();
 
-    if (in_array('ROLE_ADMIN', $roles, true)) {
-        return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
-    } elseif (in_array('ROLE_STAFF', $roles, true)) {
-        return new RedirectResponse($this->urlGenerator->generate('app_order_index')); // or product_index
-    }
-        // return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
-        // throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
+        if (in_array('ROLE_ADMIN', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
+            
+        } elseif (in_array('ROLE_STAFF', $roles, true)) {
+            return new RedirectResponse($this->urlGenerator->generate('app_order_index'));
+        }
+        
+        // For regular customers - redirect to product index
+        return new RedirectResponse($this->urlGenerator->generate('app_product_index'));
     }
 
     protected function getLoginUrl(Request $request): string

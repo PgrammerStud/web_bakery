@@ -13,9 +13,16 @@ class LoginController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
-            return $this->redirectToRoute('app_dashboard');
+            $user = $this->getUser();
+            
+            // Check if user is admin or staff
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true)) {
+                return $this->redirectToRoute('app_dashboard');
+            } else {
+                // Regular customer - redirect to product index
+                return $this->redirectToRoute('app_product_index');
+            }
         }
-
 
         $error = $authenticationUtils->getLastAuthenticationError();
        

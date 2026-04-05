@@ -5,7 +5,7 @@
 {% block body %}
     <!-- 1. HERO SECTION -->
     <section class="hero" id="hero">
-        <div class="hero-background" style="background-image: url('{{ asset('image/bakery-hero.jpg') }}'); background-color: var(--primary-brown);">
+        <div class="hero-background" style="background-image: url('{{ asset('image/logo.png') }}'); background-color: var(--primary-brown);">
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <h1 class="hero-title">Freshly Baked Every Morning</h1>
@@ -55,7 +55,7 @@
         <div class="container">
             <div class="about-grid">
                 <div class="about-image">
-                    <img src="{{ asset('image/bakery-about.jpg') }}" alt="Catalbas Bakery" style="background-color: var(--gray-light);">
+                    <img src="{{ asset('image/logo.png') }}" alt="Catalbas Bakery" style="background-color: var(--gray-light);">
                 </div>
                 <div class="about-content">
                     <h2>About Our Bakery</h2>
@@ -123,49 +123,65 @@
         </div>
     </section>
 
-    <!-- 5. CONTACT US -->
-    <section class="contact-us" id="contact-us">
-        <div class="container">
-            <h2>Get In Touch</h2>
-            <p class="section-subtitle">We'd love to hear from you</p>
-            
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <div class="info-block">
-                        <h3>📍 Address</h3>
-                        <p>123 Bakery Street<br>Manila, Philippines 1000</p>
+    <!-- 5. CONTACT US CTA -->
+    <section class="contact-us-cta" id="contact-us">
+        <div class="cta-container">
+            <!-- Left Column: Brand Copy -->
+            <div class="cta-left">
+                <!-- Pill Tag -->
+                <div class="cta-pill">
+                    <span class="cta-pill-dot"></span>
+                    We'd love to hear from you
+                </div>
+                
+                <!-- Headline -->
+                <h2 class="cta-headline">Still hungry for <span class="cta-highlight">more?</span></h2>
+                
+                <!-- Body Text -->
+                <p class="cta-body">Whether it's a custom cake, a bulk bread order, or just a question about today's bake — we're just a message away.</p>
+                
+                <!-- Trust Strip -->
+                <div class="cta-trust-strip">
+                    <div class="cta-stat">
+                        <div class="cta-stat-number">24h</div>
+                        <div class="cta-stat-label">Response time</div>
                     </div>
-                    <div class="info-block">
-                        <h3>📞 Phone</h3>
-                        <p>+63 (02) 1234-5678</p>
+                    <div class="cta-stat">
+                        <div class="cta-stat-number">Daily</div>
+                        <div class="cta-stat-label">Fresh bakes</div>
                     </div>
-                    <div class="info-block">
-                        <h3>✉️ Email</h3>
-                        <p>contact@catalbas.com</p>
-                    </div>
-                    <div class="info-block">
-                        <h3>⏰ Business Hours</h3>
-                        <p>Monday - Friday: 6:00 AM - 8:00 PM<br>
-                           Saturday - Sunday: 7:00 AM - 9:00 PM</p>
+                    <div class="cta-stat">
+                        <div class="cta-stat-number">Free</div>
+                        <div class="cta-stat-label">Consultations</div>
                     </div>
                 </div>
-
-                <div class="contact-form-wrapper">
-                    <form class="contact-form" action="{% if app.user %}{{ path('app_home') }}{% else %}#{% endif %}" method="POST">
-                        <div class="form-group">
-                            <label for="contact-name">Name</label>
-                            <input type="text" id="contact-name" name="name" required placeholder="Your Name">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-email">Email</label>
-                            <input type="email" id="contact-email" name="email" required placeholder="your@email.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-message">Message</label>
-                            <textarea id="contact-message" name="message" rows="5" required placeholder="Your message here..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
-                    </form>
+            </div>
+            
+            <!-- Right Column: Action Cards -->
+            <div class="cta-right">
+                <!-- Card 1: Send Message -->
+                <div class="cta-card">
+                    <div class="cta-card-icon cta-card-icon-message">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="cta-card-title">Send us a message</h3>
+                    <p class="cta-card-description">Have a question or a special request? Drop us a note and we'll get back to you fresh.</p>
+                    <a href="{{ path('app_contact') }}" class="cta-card-btn cta-card-btn-primary">Get in touch</a>
+                </div>
+                
+                <!-- Card 2: Contact Info -->
+                <div class="cta-card">
+                    <div class="cta-card-icon cta-card-icon-location">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="cta-card-title">Find us or call us</h3>
+                    <p class="cta-card-description">Prefer to visit or call? See our full contact details, hours, and location.</p>
+                    <a href="{{ path('app_contact') }}" class="cta-card-btn cta-card-btn-secondary">View contact info</a>
                 </div>
             </div>
         </div>

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Product index{% endblock %}
+{% block title %}Products - Catalbas Bakery{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -14,60 +14,172 @@
 {% endblock %}
 
 {% block body %}
-<div class="content-card">
-    <h1>Product Management</h1>
+    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+        <!-- Admin/Staff View -->
+        <div class="content-card">
+            <h1>Product Management</h1>
 
-    <div style="margin-bottom: 2rem;">
-        <a href="{{ path('app_product_new') }}" class="btn btn-create-new">Create New Product</a>
-    </div>
+            <div style="margin-bottom: 2rem;">
+                <a href="{{ path('app_product_new') }}" class="btn btn-create-new">Create New Product</a>
+            </div>
 
-    <table id="products-table">
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Created At</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for product in products %}
-            <tr>
-                <td>
-                    {% if product.imageUrl %}
-                        <img src="{{ asset('image/' ~ product.imageUrl) }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                    {% else %}
-                        <div style="width: 50px; height: 50px; background-color: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999;">No Image</div>
-                    {% endif %}
-                </td>
-                <td>{{ product.name }}</td>
-                <td>{{ product.description|slice(0, 50) ~ (product.description|length > 50 ? '...' : '') }}</td>
-                <td>{{ product.category ? product.category.name : 'N/A' }}</td>
-                <td>${{ product.price }}</td>
-                <td>{{ product.createdAt ? product.createdAt|date('Y-m-d H:i') : '' }}</td>
-                <td class="actions">
-                    <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-show">View</a>
-                    {% if is_granted('ROLE_ADMIN') or product.createdBy == app.user %}
-                        <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-edit">Edit</a>
-                        {{ include('product/_delete_form.html.twig') }}
-                    {% endif %}
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">No products found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+            <table id="products-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>
+                            {% if product.imageUrl %}
+                                <img src="{{ asset('image/' ~ product.imageUrl) }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                            {% else %}
+                                <div style="width: 50px; height: 50px; background-color: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999;">No Image</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.description|slice(0, 50) ~ (product.description|length > 50 ? '...' : '') }}</td>
+                        <td>{{ product.category ? product.category.name : 'N/A' }}</td>
+                        <td>₱{{ product.price }}</td>
+                        <td>{{ product.createdAt ? product.createdAt|date('Y-m-d H:i') : '' }}</td>
+                        <td class="actions">
+                            <a href="{{ path('app_product_show', {'id': product.id}) }}" class="btn btn-show">View</a>
+                            {% if is_granted('ROLE_ADMIN') or product.createdBy == app.user %}
+                                <a href="{{ path('app_product_edit', {'id': product.id}) }}" class="btn btn-edit">Edit</a>
+                                {{ include('product/_delete_form.html.twig') }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7">No products found</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <!-- Customer View -->
+        <div class="customer-products-container">
+            <!-- Header Section -->
+            <div class="customer-products-header">
+                <h1 class="customer-products-title">🥐 Our Delicious Products</h1>
+                <p class="customer-products-subtitle">Fresh baked goodness delivered daily to your doorstep</p>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="customer-products-controls">
+                <div class="search-box">
+                    <input type="text" id="productSearch" placeholder="Search for your favorite bake...">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+
+            <!-- Products Display -->
+            {% if products|length > 0 %}
+                <div class="customer-products-stats">
+                    <p class="products-count">Showing <strong>{{ products|length }}</strong> delicious products</p>
+                </div>
+
+                <div class="customer-products-grid">
+                    {% for product in products %}
+                        <div class="customer-product-card" data-product-name="{{ product.name|lower }}">
+                            <!-- Badge -->
+                            <div class="product-badge">
+                                <span class="badge-new">Fresh</span>
+                            </div>
+
+                            <!-- Image Container -->
+                            <div class="customer-product-image">
+                                {% if product.imageUrl %}
+                                    <img src="{{ asset('image/' ~ product.imageUrl) }}" alt="{{ product.name }}" loading="lazy">
+                                {% else %}
+                                    <div class="no-image-placeholder">
+                                        <span>🥐</span>
+                                    </div>
+                                {% endif %}
+                                <div class="product-overlay">
+                                    <a href="{{ path('app_product_index') }}" class="quick-view-btn">Quick View</a>
+                                </div>
+                            </div>
+
+                            <!-- Content Container -->
+                            <div class="customer-product-content">
+                                <!-- Category & Rating -->
+                                <div class="product-meta">
+                                    {% if product.category %}
+                                        <span class="customer-product-category">{{ product.category.name }}</span>
+                                    {% endif %}
+                                    <span class="product-rating">⭐ 4.8 (24)</span>
+                                </div>
+
+                                <!-- Product Name -->
+                                <h3 class="customer-product-name">{{ product.name }}</h3>
+
+                                <!-- Description -->
+                                <p class="customer-product-description">{{ product.description|slice(0, 80) ~ (product.description|length > 80 ? '...' : '') }}</p>
+
+                                <!-- Features -->
+                                <div class="product-features">
+                                    <span class="feature">✓ Fresh Daily</span>
+                                    <span class="feature">✓ No Preservatives</span>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="customer-product-footer">
+                                    <div class="price-section">
+                                        <span class="customer-product-price">₱{{ product.price }}</span>
+                                        <span class="price-label">per item</span>
+                                    </div>
+                                    <a href="{{ path('app_product_index') }}" class="btn btn-primary add-to-cart-btn">
+                                        <span>🛒</span> Add to Cart
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <!-- Empty State -->
+                <div class="empty-products-state">
+                    <div class="empty-icon">🥐</div>
+                    <h2>No Products Available</h2>
+                    <p>We're currently baking fresh products! Check back soon for our delicious selection.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Search Filter Script -->
+        <script>
+            document.getElementById('productSearch').addEventListener('keyup', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const products = document.querySelectorAll('.customer-product-card');
+                
+                products.forEach(product => {
+                    const productName = product.getAttribute('data-product-name');
+                    if (productName.includes(searchTerm) || searchTerm === '') {
+                        product.style.display = 'block';
+                    } else {
+                        product.style.display = 'none';
+                    }
+                });
+            });
+        </script>
+    {% endif %}
 
 <script>
+{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
 $(document).ready(function() {
     $('#products-table').DataTable();
 });
+{% endif %}
 </script>
 {% endblock %}

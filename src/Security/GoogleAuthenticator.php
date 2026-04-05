@@ -86,7 +86,7 @@ $user->setUsername($baseUsername . random_int(1000, 9999));
         string $firewallName
     ): ?RedirectResponse {
         // redirect after login
-        return new RedirectResponse($this->router->generate('app_login'));
+        return new RedirectResponse($this->router->generate('app_order_index'));
     }
 
     public function onAuthenticationFailure(
