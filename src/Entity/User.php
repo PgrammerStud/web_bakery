@@ -36,25 +36,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      */
-    #[ORM\Column]
+    // #[ORM\Column]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $password = null;
 
     /**
      * @var Collection<int, Order>
      */
-    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'createdBy')]
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'createdBy', cascade: ['remove'])]
     private Collection $orders;
 
     /**
      * @var Collection<int, ActivityLog>
      */
-    #[ORM\OneToMany(targetEntity: ActivityLog::class, mappedBy: 'user')]
+    #[ORM\OneToMany(targetEntity: ActivityLog::class, mappedBy: 'user', cascade: ['remove'])]
     private Collection $activityLogs;
 
     /**
      * @var Collection<int, Product>
      */
-    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'createdBy')]
+    #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'createdBy', cascade: ['remove'])]
     private Collection $products;
 
     #[ORM\Column(length: 255)]
@@ -75,7 +76,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Bakeitforward>
      */
-    #[ORM\OneToMany(targetEntity: Bakeitforward::class, mappedBy: 'user')]
+    #[ORM\OneToMany(targetEntity: Bakeitforward::class, mappedBy: 'user', cascade: ['remove'])]
     private Collection $bakeitforwards;
 
     public function __construct()

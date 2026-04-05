@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Catalbas Bakery - Fresh Baked Goods Delivered to Your Door">
+        <meta name="theme-color" content="#3b2416">
+        <title>{% block title %}Catalbas Bakery - Fresh Baked Goods{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
@@ -12,7 +15,7 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
+    <body{% if not is_granted('ROLE_ADMIN') and not is_granted('ROLE_STAFF') %} class="customer-view"{% endif %}>
         <header class="header">
             <img src="{{ asset('image/monochrome.png') }}" alt="Catalbas Bakery" class="logo">
             <nav class="header-nav">
@@ -22,13 +25,13 @@
         </header>
 
         {% for flash_message in app.flashes('success') %}
-            <div class="alert alert-success">
+            <div class="alert alert-success" role="alert">
                 {{ flash_message }}
             </div>
         {% endfor %}
         {% set error_flashes = app.flashes('error') %}
         {% for flash_message in error_flashes %}
-            <div class="alert alert-error">
+            <div class="alert alert-error" role="alert">
                 {{ flash_message }}
             </div>
         {% endfor %}
