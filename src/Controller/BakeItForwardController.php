@@ -14,10 +14,16 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/bakeitforward')]
-#[IsGranted('ROLE_ADMIN')]
 final class BakeItForwardController extends AbstractController
 {
+    #[Route('/feature', name: 'app_bakeitforward_feature', methods: ['GET'])]
+    public function feature(): Response
+    {
+        return $this->render('bakeitforward/feature.html.twig');
+    }
+
     #[Route('/', name: 'app_bakeitforward_index', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function index(BakeitforwardRepository $bakeitforwardRepository, BakeitforwardwalletRepository $walletRepository): Response
     {
         $contributions = $bakeitforwardRepository->findBy([], ['created_at' => 'DESC'], 50);
@@ -30,6 +36,7 @@ final class BakeItForwardController extends AbstractController
     }
 
     #[Route('/{id}/mark-donated', name: 'app_bakeitforward_mark_donated', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function markDonated(Bakeitforward $bakeitforward, EntityManagerInterface $entityManager): Response
     {
         $bakeitforward->setDonated(true);

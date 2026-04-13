@@ -50,6 +50,7 @@
     <table class="activity-log-table">
         <thead>
             <tr>
+                <th>id</th>
                 <th>Username</th>
                 <th>Role</th>
                 <th>Action</th>
@@ -60,6 +61,7 @@
         <tbody>
             {% for log in activity_logs %}
                 <tr>
+                    <td>{{ log.id }}</td>
                     <td>{{ log.user.username }}</td>
                     <td>{{ log.role }}</td>
                     <td>{{ log.action }}</td>

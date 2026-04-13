@@ -8,46 +8,60 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['order:read']],
+    denormalizationContext: ['groups' => ['order:write']]
+)]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order:read', 'order:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['order:read', 'order:write'])]
     private ?string $orderNumber = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['order:read', 'order:write'])]
     private ?string $customerName = null;
 
     #[ORM\Column(length: 11)]
+    #[Groups(['order:read', 'order:write'])]
     private ?string $customerContact = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['order:read', 'order:write'])]
     private ?string $status = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Groups(['order:read', 'order:write'])]
     private ?string $totalAmount = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[Groups(['order:read', 'order:write'])]
     private ?User $createdBy = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['order:read', 'order:write'])]
     private ?string $paymentMethod = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['order:read', 'order:write'])]
     private ?string $notes = null;
 
     /**
      * @var Collection<int, OrderItems>
      */
     #[ORM\OneToMany(targetEntity: OrderItems::class, mappedBy: 'orderEntity', cascade: ["persist", "remove"], orphanRemoval: true)]
+    #[Groups(['order:read'])]
 private Collection $orderItems;
 
     /**
@@ -59,7 +73,7 @@ private Collection $orderItems;
     /**
      * @var Collection<int, Delivery>
      */
-    #[ORM\OneToMany(targetEntity: Delivery::class, mappedBy: 'orders')]
+    #[ORM\OneToMany(targetEntity: Delivery::class, mappedBy: 'orders', cascade: ["persist", "remove"], orphanRemoval: true)]
     private Collection $deliveries;
 
 

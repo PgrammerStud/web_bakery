@@ -15,8 +15,8 @@ final class HomeController extends AbstractController
         ProductRepository $productRepository,
         BakeitforwardwalletRepository $walletRepository
     ): Response {
-        // Fetch featured products (limit to 6)
-        $featuredProducts = $productRepository->findBy([], ['created_at' => 'DESC'], 6);
+        // Fetch featured products (limit to 3)
+        $featuredProducts = $productRepository->findBy([], ['created_at' => 'DESC'], 3);
 
         // Fetch donation wallet
         $wallet = $walletRepository->findOneBy([]);

@@ -1,0 +1,538 @@
+{% extends 'landing.html.twig' %}
+
+{% block title %}Bake It Forward - Spreading Joy Through Generous Giving{% endblock %}
+
+{% block body %}
+    <!-- BAKE IT FORWARD HERO SECTION -->
+    <section class="bakeitforward-hero" id="bakeitforward-hero">
+        <div class="bakeitforward-hero-background" style="background-image: url('{{ asset('image/cat.jpg') }}'); background-color: var(--primary-brown);">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Bake It Forward</h1>
+                <p class="hero-subtitle">Spreading Joy and Delicious Treats to Those in Need</p>
+            </div>
+        </div>
+
+        <style>
+            .bakeitforward-hero {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .bakeitforward-hero-background {
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                padding: 4rem 2rem;
+                position: relative;
+                min-height: 400px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .bakeitforward-hero-background::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                filter: blur(5px);
+                z-index: 1;
+            }
+
+            .bakeitforward-hero .hero-overlay {
+                position: absolute;
+                inset: 0;
+                background: rgba(59, 36, 22, 0.6);
+                z-index: 2;
+            }
+
+            .bakeitforward-hero .hero-content {
+                position: relative;
+                z-index: 3;
+                text-align: center;
+                color: white;
+            }
+
+            .bakeitforward-hero .hero-title {
+                font-size: 3rem;
+                font-weight: bold;
+                margin: 0 0 1rem 0;
+            }
+
+            .bakeitforward-hero .hero-subtitle {
+                font-size: 1.2rem;
+                margin: 0;
+                opacity: 0.9;
+            }
+        </style>
+    </section>
+
+    <!-- WHAT IS BAKE IT FORWARD SECTION -->
+    <section class="bif-what-section">
+        <div class="container">
+            <div class="section-content">
+                <h2>What is Bake It Forward?</h2>
+                <p class="section-intro">At Catalbas Bakery, we believe that good food brings communities together. Bake It Forward is our initiative to share the warmth of fresh-baked goodness with those who need it most.</p>
+                
+                <div class="bif-grid">
+                    <div class="bif-card">
+                        <div class="bif-icon">❤️</div>
+                        <h3>Our Mission</h3>
+                        <p>We donate a portion of our proceeds from special orders to local charities and community organizations that fight hunger and food insecurity.</p>
+                    </div>
+                    <div class="bif-card">
+                        <div class="bif-icon">🤝</div>
+                        <h3>Community Impact</h3>
+                        <p>Every purchase through Bake It Forward directly helps feed families in our community. Together, we create meaningful change.</p>
+                    </div>
+                    <div class="bif-card">
+                        <div class="bif-icon">🍞</div>
+                        <h3>Quality & Freshness</h3>
+                        <p>We donate fresh, high-quality baked goods. No stale or second-rate items—only the best for those we serve.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .bif-what-section {
+                padding: 4rem 2rem;
+                background-color: white;
+            }
+
+            .bif-what-section h2 {
+                text-align: center;
+                font-size: 2.5rem;
+                color: var(--primary-brown);
+                margin-bottom: 1.5rem;
+                font-weight: bold;
+            }
+
+            .section-intro {
+                text-align: center;
+                font-size: 1.15rem;
+                color: var(--text-dark);
+                max-width: 700px;
+                margin: 0 auto 2rem;
+                line-height: 1.6;
+            }
+
+            .bif-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 2rem;
+                margin-top: 2rem;
+            }
+
+            .bif-card {
+                background: linear-gradient(135deg, #f9f7f4 0%, #fefbf8 100%);
+                padding: 2rem;
+                border-radius: 12px;
+                border: 2px solid #e8dcd2;
+                text-align: center;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .bif-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 10px 30px rgba(210, 105, 30, 0.15);
+            }
+
+            .bif-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+
+            .bif-card h3 {
+                color: var(--primary-brown);
+                font-size: 1.4rem;
+                margin-bottom: 1rem;
+            }
+
+            .bif-card p {
+                line-height: 1.6;
+                color: var(--text-dark);
+            }
+        </style>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section class="bif-how-section">
+        <div class="container">
+            <h2>How Bake It Forward Works</h2>
+            
+            <div class="bif-steps">
+                <div class="bif-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Choose & Order</h3>
+                        <p>Browse our delicious menu and select your favorite baked goods. Every order contributes to our Bake It Forward initiative.</p>
+                    </div>
+                </div>
+
+                <div class="bif-connector"></div>
+
+                <div class="bif-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>We Donate</h3>
+                        <p>A portion of your purchase is automatically allocated to preparing fresh baked goods for local charities and food banks.</p>
+                    </div>
+                </div>
+
+                <div class="bif-connector"></div>
+
+                <div class="bif-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Community Receives</h3>
+                        <p>Fresh, quality baked goods are delivered to those in need, creating smiles and nourishing our community.</p>
+                    </div>
+                </div>
+
+                <div class="bif-connector"></div>
+
+                <div class="bif-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Impact Grows</h3>
+                        <p>Your generosity makes a real difference. Track our collective impact and see how we're changing lives together.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .bif-how-section {
+                padding: 4rem 2rem;
+                background: linear-gradient(135deg, #f9f7f4 0%, #fefbf8 100%);
+            }
+
+            .bif-how-section h2 {
+                text-align: center;
+                font-size: 2.5rem;
+                color: var(--primary-brown);
+                margin-bottom: 3rem;
+                font-weight: bold;
+            }
+
+            .bif-steps {
+                max-width: 1000px;
+                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .bif-step {
+                display: flex;
+                gap: 2rem;
+                align-items: flex-start;
+                padding: 2rem;
+                background: white;
+                border-radius: 10px;
+                margin-bottom: 0.5rem;
+                border-left: 4px solid var(--primary-brown);
+            }
+
+            .step-number {
+                min-width: 50px;
+                width: 50px;
+                height: 50px;
+                background: var(--primary-brown);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 1.5rem;
+                flex-shrink: 0;
+            }
+
+            .step-content h3 {
+                color: var(--primary-brown);
+                margin: 0 0 0.5rem 0;
+                font-size: 1.3rem;
+            }
+
+            .step-content p {
+                color: var(--text-dark);
+                margin: 0;
+                line-height: 1.6;
+            }
+
+            .bif-connector {
+                height: 30px;
+                margin: 0;
+                border-left: 3px dashed var(--primary-brown);
+                margin-left: 25px;
+                opacity: 0.4;
+            }
+        </style>
+    </section>
+
+    <!-- VALUES SECTION -->
+    <section class="bif-values-section">
+        <div class="container">
+            <h2>Our Values</h2>
+            
+            <div class="values-grid">
+                <div class="value-item">
+                    <div class="value-icon">🌟</div>
+                    <h3>Generosity</h3>
+                    <p>We believe in giving back without expecting anything in return. It's about making a real difference in people's lives.</p>
+                </div>
+
+                <div class="value-item">
+                    <div class="value-icon">🍰</div>
+                    <h3>Quality</h3>
+                    <p>We never compromise on quality. Every item donated is made with the same care and love as items sold to our customers.</p>
+                </div>
+
+                <div class="value-item">
+                    <div class="value-icon">🌍</div>
+                    <h3>Sustainability</h3>
+                    <p>We're mindful of waste. Our approach ensures that good food reaches those who need it, reducing waste while doing good.</p>
+                </div>
+
+                <div class="value-item">
+                    <div class="value-icon">💬</div>
+                    <h3>Transparency</h3>
+                    <p>We believe in being open about our impact. You'll always know how your contribution is making a difference.</p>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .bif-values-section {
+                padding: 4rem 2rem;
+                background-color: white;
+            }
+
+            .bif-values-section h2 {
+                text-align: center;
+                font-size: 2.5rem;
+                color: var(--primary-brown);
+                margin-bottom: 3rem;
+                font-weight: bold;
+            }
+
+            .values-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 2rem;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .value-item {
+                background: linear-gradient(135deg, #f9f7f4 0%, #fefbf8 100%);
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border: 2px solid #e8dcd2;
+            }
+
+            .value-item:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 12px 35px rgba(210, 105, 30, 0.12);
+            }
+
+            .value-icon {
+                font-size: 3.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .value-item h3 {
+                color: var(--primary-brown);
+                font-size: 1.4rem;
+                margin-bottom: 1rem;
+            }
+
+            .value-item p {
+                color: var(--text-dark);
+                line-height: 1.6;
+                margin: 0;
+            }
+        </style>
+    </section>
+
+    <!-- CALL TO ACTION SECTION -->
+    <section class="bif-cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Make a Difference?</h2>
+                <p>Join us in spreading joy and fresh baked goods to those in need. Every order counts, and together we're building a stronger community.</p>
+                <div class="cta-buttons">
+                    <a href="{{ path('app_product_index') }}" class="btn btn-primary">Start Ordering Today</a>
+                    <a href="{{ path('app_contact') }}" class="btn btn-secondary">Learn More / Partner With Us</a>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .bif-cta-section {
+                padding: 4rem 2rem;
+                background: linear-gradient(135deg, var(--primary-brown) 0%, #8b5a3c 100%);
+                color: white;
+            }
+
+            .cta-content {
+                max-width: 700px;
+                margin: 0 auto;
+                text-align: center;
+            }
+
+            .bif-cta-section h2 {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+                color: white;
+            }
+
+            .bif-cta-section p {
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+                opacity: 0.95;
+                line-height: 1.6;
+            }
+
+            .cta-buttons {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 12px 30px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                border: none;
+                cursor: pointer;
+                display: inline-block;
+                text-align: center;
+                min-width: 200px;
+            }
+
+            .btn-primary {
+                background-color: #dd8928;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background-color: #c47420;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .btn-secondary {
+                background-color: transparent;
+                color: white;
+                border: 2px solid white;
+            }
+
+            .btn-secondary:hover {
+                background-color: white;
+                color: var(--primary-brown);
+            }
+
+            @media (max-width: 768px) {
+                .cta-buttons {
+                    flex-direction: column;
+                }
+
+                .btn {
+                    min-width: 100%;
+                }
+
+                .bif-cta-section h2 {
+                    font-size: 2rem;
+                }
+            }
+        </style>
+    </section>
+
+    <!-- IMPACT STATISTICS SECTION -->
+    <section class="bif-impact-section">
+        <div class="container">
+            <h2>Our Impact</h2>
+            
+            <div class="impact-stats">
+                <div class="stat-card">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Families Helped</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Items Donated</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Partner Organizations</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Active Supporters</div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .bif-impact-section {
+                padding: 4rem 2rem;
+                background: linear-gradient(135deg, #f9f7f4 0%, #fefbf8 100%);
+            }
+
+            .bif-impact-section h2 {
+                text-align: center;
+                font-size: 2.5rem;
+                color: var(--primary-brown);
+                margin-bottom: 3rem;
+                font-weight: bold;
+            }
+
+            .impact-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 2rem;
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+
+            .stat-card {
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                text-align: center;
+                border: 2px solid #e8dcd2;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .stat-card:hover {
+                transform: scale(1.05);
+                box-shadow: 0 10px 30px rgba(210, 105, 30, 0.1);
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+                font-weight: bold;
+                color: var(--primary-brown);
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-label {
+                color: var(--text-dark);
+                font-size: 1rem;
+                line-height: 1.4;
+            }
+        </style>
+    </section>
+
+{% endblock %}

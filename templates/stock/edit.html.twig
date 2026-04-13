@@ -7,7 +7,7 @@
 
     {{ include('stock/_form.html.twig', {'button_label': 'Update'}) }}
 
-    <a href="{{ path('app_stock_index') }}">back to list</a>
+    <a href="{{ path('app_stock_index') }}" class="btn btn-primary">back to list</a>
 
     {{ include('stock/_delete_form.html.twig') }}
 {% endblock %}

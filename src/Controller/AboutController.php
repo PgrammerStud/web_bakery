@@ -20,20 +20,34 @@ final class AboutController extends AbstractController
             ],
             [
                 'name' => 'Jennie Kim',
-                'position' => 'Master Baker',
-                'bio' => 'Expert in artisan bread and pastries, Jennie brings creativity and precision to every loaf. Her passion for baking is evident in every product.',
+                'position' => 'Assistant Baker',
+                'bio' => 'Helps the head baker preparing, baking and packaging products.',
                 'image' => 'desiree.jpg'
             ],
             [
                 'name' => 'Lisa Manoban',
-                'position' => 'Customer Relations Manager',
-                'bio' => 'Lisa ensures every customer experience is exceptional. She coordinates special orders and manages our community relationships with dedication.',
+                'position' => 'Inventory & Supply Manager',
+                'bio' => 'Manages inventory and supply chain operations to ensure seamless production and delivery and coordinates with shelters and beneficiaries.',
                 'image' => 'desiree.jpg'
             ],
             [
                 'name' => 'Rosé Park',
-                'position' => 'Production Manager',
-                'bio' => 'Rosé oversees our production process, ensuring quality control and timely delivery of all our baked products to customers.',
+                'position' => 'Delivery Staff & Rider',
+                'bio' => 'Responsible for delivering our fresh baked goods to customers and ensuring timely and safe delivery.',
+                'image' => 'desiree.jpg'
+            ],
+
+            [
+                'name' => 'Jisoo Kim',
+                'position' => 'System/Marketing Manager',
+                'bio' => 'Manages the website and marketing efforts to promote Catalbas Bakery.',
+                'image' => 'desiree.jpg'
+            ],
+
+            [
+                'name' => 'Desiree Catalbas',
+                'position' => 'System/Marketing Manager',
+                'bio' => 'Manages the website and marketing efforts to promote Catalbas Bakery.',
                 'image' => 'desiree.jpg'
             ]
         ];

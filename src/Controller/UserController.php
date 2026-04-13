@@ -36,6 +36,7 @@ public function new(Request $request, EntityManagerInterface $entityManager, Use
 {
     $user = new User();
     $user->setStatus(UserStatus::ACTIVE); // New users start as active
+    $user->setIsVerified(true); // New users are verified by default
     $form = $this->createForm(UserType::class, $user);
     $form->handleRequest($request);
 
