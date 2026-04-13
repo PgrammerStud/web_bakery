@@ -5,23 +5,75 @@
 {% block body %}
     <!-- ABOUT HERO SECTION -->
     <section class="about-hero" id="about-hero">
-        <div class="about-hero-background" style="background-image: url('{{ asset('image/bakery-hero.jpg') }}'); background-color: var(--primary-brown);">
+        <div class="about-hero-background" style="background-image: url('{{ asset('image/bg2.jpg') }}'); background-color: var(--primary-brown);">
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <h1 class="hero-title">About Catalbas Bakery</h1>
                 <p class="hero-subtitle">Tradition, Quality, and Community at the Heart of Everything We Do</p>
             </div>
         </div>
+
+        <style>
+            .about-hero {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .about-hero-background {
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                padding: 4rem 2rem;
+                position: relative;
+            }
+
+            .about-hero-background::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                filter: blur(5px);
+                z-index: 1;
+            }
+
+            .about-hero .hero-overlay {
+                position: absolute;
+                inset: 0;
+                background: rgba(59, 36, 22, 0.5);
+                z-index: 2;
+            }
+
+            .about-hero .hero-content {
+                position: relative;
+                z-index: 3;
+                text-align: center;
+                color: white;
+            }
+
+            .about-hero .hero-title {
+                font-size: 3rem;
+                font-weight: bold;
+                margin: 0 0 1rem 0;
+            }
+
+            .about-hero .hero-subtitle {
+                font-size: 1.2rem;
+                margin: 0;
+                opacity: 0.9;
+            }
+        </style>
     </section>
 
     <!-- OUR STORY SECTION -->
-    <section class="our-story" id="our-story">
+    <section class="our-story" id="our-story" style="background: url('{{ asset('image/contact.jpg') }}'); background-size: cover; background-position: center; background-attachment: fixed; padding: 4rem 2rem;">
         <div class="container">
             <h2>Our Story</h2>
             <div class="story-content">
                 <p>
                     Catalbas Bakery was born from a simple dream—to create a space where tradition meets passion, 
-                    and every bite tells a story. Founded by Maria Santos, a master baker with over two decades of 
+                    and every bite tells a story. Founded by Desiree Catalbas, a master baker with over two decades of 
                     experience, our bakery stands as a testament to the power of handmade excellence and community spirit.
                 </p>
                 
@@ -52,15 +104,47 @@
                     </div>
                 </div>
                 
-                <p style="margin-top: 2rem; text-align: center; font-style: italic; color: var(--text-muted);">
+                <p style="margin-top: 2rem; text-align: center; font-style: italic; color: white;">
                     "We don't just bake for sustenance—we bake for memories, celebrations, and connections."
                 </p>
             </div>
         </div>
+
+        <style>
+            #our-story h2 {
+                color: #dd8928;
+                font-size: 2.5rem;
+                font-weight: bold;
+                margin-bottom: 2rem;
+            }
+
+            #our-story .story-content p {
+                color: white;
+                font-size: 1.1rem;
+                line-height: 1.8;
+            }
+
+            #our-story .story-card h3 {
+                color: #dd8928;
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+
+            #our-story .story-card p {
+                color: white;
+                font-size: 1rem;
+            }
+
+            #our-story .story-card {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(221, 137, 40, 0.2);
+                backdrop-filter: blur(2px);
+            }
+        </style>
     </section>
 
     <!-- MEET THE TEAM SECTION -->
-    <section class="meet-the-team" id="meet-the-team">
+    <section class="meet-the-team" id="meet-the-team" style="background: url('{{ asset('image/contact.jpg') }}') var(--primary-brown); background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat; padding: 4rem 2rem;">
         <div class="container">
             <h2>Meet The Team</h2>
             <p class="section-subtitle">The Skilled Hands Behind Every Delicious Bite</p>
@@ -85,13 +169,71 @@
                 {% endfor %}
             </div>
         </div>
+
+        <style>
+            #meet-the-team h2 {
+                color: #dd8928;
+                font-size: 2.5rem;
+                font-weight: bold;
+                margin-bottom: 0.5rem;
+            }
+
+            #meet-the-team .section-subtitle {
+                color: white;
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin-bottom: 2rem;
+            }
+
+            #meet-the-team .team-member-card {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+
+            #meet-the-team .team-member-info h3 {
+                color: #dd8928;
+            }
+
+            #meet-the-team .team-position {
+                color: #dd8928;
+                font-weight: 600;
+            }
+
+            #meet-the-team .team-bio {
+                color: #f5deb3;
+            }
+        </style>
     </section>
 
     <!-- WHY CHOOSE US SECTION -->
-    <section class="why-choose-us" id="why-choose-us">
+        <section class="why-choose-us" id="why-choose-us" style="background: url('{{ asset('image/contact.jpg') }}'); background-size: cover; background-position: center; background-attachment: fixed; padding: 4rem 2rem;">
+
+    {# <section class="why-choose-us" id="why-choose-us" style="background: var(--primary-brown); padding: 4rem 2rem;"> #}
         <div class="container">
             <h2>Why Choose Catalbas Bakery?</h2>
             
+            <style>
+                #why-choose-us h2 {
+                    color: #dd8928;
+                    font-size: 2.5rem;
+                    font-weight: bold;
+                    margin-bottom: 2rem;
+                }
+
+                #why-choose-us .feature-box {
+                    background: rgba(255, 255, 255, 0.1);
+                    color: white;
+                    border: 1px solid rgba(221, 137, 40, 0.3);
+                }
+
+                #why-choose-us .feature-box h3 {
+                    color: #dd8928;
+                }
+
+                #why-choose-us .feature-box p {
+                    color: white;
+                }
+            </style>
             <div class="features-grid">
                 <div class="feature-box">
                     <div class="feature-icon">🌾</div>

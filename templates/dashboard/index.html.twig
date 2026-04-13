@@ -4,49 +4,102 @@
 
 {% block body %}
 <div class="dashboard-container">
-    <h1>Admin Dashboard</h1>
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <p class="dashboard-subtitle">Welcome back! Here's an overview of your bakery operations.</p>
+    </div>
 
-    <div class="dashboard-cards">
-        <div class="card">
-            <h2>Total Users</h2>
-            <p class="metric">{{ totalUsers }}</p>
+    <div class="dashboard-cards metrics-grid">
+        <div class="metric-card card-orange">
+            <div class="metric-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="metric-label">Total Users</div>
+            <div class="metric-value">{{ totalUsers }}</div>
+            <div class="metric-trend">Registered users</div>
         </div>
 
-        <div class="card">
-            <h2>Total Staff</h2>
-            <p class="metric">{{ totalStaff }}</p>
+        <div class="metric-card card-green">
+            <div class="metric-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg></div>
+            <div class="metric-label">Total Staff</div>
+            <div class="metric-value">{{ totalStaff }}</div>
+            <div class="metric-trend">Active staff members</div>
         </div>
 
-        <div class="card">
-            <h2>Total Records</h2>
-            <p class="metric">{{ totalRecords }}</p>
+        <div class="metric-card card-orange">
+            <div class="metric-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="metric-label">Total Records</div>
+            <div class="metric-value">{{ totalRecords }}</div>
+            <div class="metric-trend">Database records</div>
         </div>
 
-        <div class="card">
-            <h2>Total Orders</h2>
-            <p class="metric">{{ totalOrders }}</p>
+        <div class="metric-card card-blue">
+            <div class="metric-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></div>
+            <div class="metric-label">Total Orders</div>
+            <div class="metric-value">{{ totalOrders }}</div>
+            <div class="metric-trend">All orders</div>
         </div>
 
-        <div class="card">
-            <h2>Delivered Orders</h2>
-            <p class="metric">{{ totalDelivered }}</p>
+        {# <div class="metric-card card-green">
+            <div class="metric-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="metric-label">Delivered Orders</div>
+            <div class="metric-value">{{ totalDelivered }}</div>
+            <div class="metric-trend">Successfully completed</div>
         </div>
          
-          <div class="card">
-            <h2>Pending Orders</h2>
-            <p class="metric">{{ totalPending }}</p>
-        </div>
+        <div class="metric-card card-blue">
+            <div class="metric-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="metric-label">Pending Orders</div>
+            <div class="metric-value">{{ totalPending }}</div>
+            <div class="metric-trend">Awaiting fulfillment</div>
+        </div> #}
       
+        <div class="metric-card card-red">
+            <div class="metric-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+            <div class="metric-label">Total Donations</div>
+            <div class="metric-value">${{ totalDonations|number_format(2) }}</div>
+            <div class="metric-trend">Bake It Forward total</div>
+        </div>
+    </div>
 
-        <div class="card">
-            <h2>Total Donations</h2>
-            <p class="metric">${{ totalDonations|number_format(2) }}</p>
+    <div class="order-status-overview">
+        <h3>Order Status Overview</h3>
+        <div class="status-boxes">
+            <div class="status-box status-delivered">
+                <div class="status-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="status-label">Delivered</div>
+                <div class="status-number">{{ totalDelivered }}</div>
+            </div>
+            <div class="status-box status-pending">
+                <div class="status-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <div class="status-label">Pending</div>
+                <div class="status-number">{{ totalPending }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bake-it-forward-progress">
+        <div class="progress-header">
+            <h3>Bake It Forward Progress</h3>
+            <div class="progress-percentage">{{ wallet and wallet.goalAmount ? ((wallet.totalBalance / wallet.goalAmount * 100)|round(0)) : 0 }}%</div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: {{ wallet and wallet.goalAmount ? ((wallet.totalBalance / wallet.goalAmount * 100)|round(0)) : 0 }}%"></div>
+        </div>
+        <div class="progress-amounts">
+            <div class="amount-current">
+                <span class="amount-label">Current Amount</span>
+                <span class="amount-value">₱ {{ wallet and wallet.totalBalance ? (wallet.totalBalance|number_format(2, '.', ',')) : '0.00' }}</span>
+            </div>
+            <div class="amount-goal">
+                <span class="amount-label">Goal Amount</span>
+                <span class="amount-value">₱ {{ wallet and wallet.goalAmount ? (wallet.goalAmount|number_format(2, '.', ',')) : '0.00' }}</span>
+            </div>
         </div>
     </div>
 
     <div class="recent-activities">
         <h2>Recent Activities</h2>
-        <table class="activities-table">
+        <div class="table-responsive">
+            <table class="activities-table">
             <thead>
                 <tr>
                     <th>Username</th>
@@ -59,13 +112,18 @@
                 {% for activity in recentActivities %}
                     <tr>
                         <td>{{ activity.username }}</td>
-                        <td>{{ activity.action }}</td>
+                        <td>
+                            <span class="action-badge{% if 'success' in activity.action|lower %} badge-success{% elseif 'pending' in activity.action|lower %} badge-pending{% elseif 'error' in activity.action|lower %} badge-error{% else %} badge-neutral{% endif %}">
+                                {{ activity.action }}
+                            </span>
+                        </td>
                         <td>{{ activity.targetData }}</td>
                         <td>{{ activity.createdAt|date('Y-m-d H:i:s') }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 {% endblock %}

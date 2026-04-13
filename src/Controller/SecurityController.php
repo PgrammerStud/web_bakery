@@ -16,10 +16,10 @@ class SecurityController extends AbstractController
         return $clientRegistry
             ->getClient('google')
             ->redirect(
-                  ['email', 'profile'],
-                  [
-                     'prompt' => 'select_account'
-                      ]
+                  [  'openid','email', 'profile']
+                //   [
+                //      'prompt' => 'select_account'
+                //       ]
 );
     }
 

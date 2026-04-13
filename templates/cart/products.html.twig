@@ -1,0 +1,591 @@
+{% extends 'landing.html.twig' %}
+
+{% block title %}Products - Catalbas Bakery{% endblock %}
+
+{% block body %}
+    <!-- Products Header -->
+
+    <section class="contact-hero" id="contact-hero">
+        <div class="contact-hero-background" style="background-image: url('{{ asset('image/bread.jpg') }}'); background-color: var(--primary-brown);">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Our Products</h1>
+                <p class="hero-subtitle">Discover our freshly baked selection of delicious treats</p>
+            </div>
+        </div>
+
+    <div class="products-container">
+        <!-- Search and Filter Section -->
+        <div class="products-controls">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="productSearch" 
+                    placeholder="Search products..." 
+                    class="search-input"
+                >
+            </div>
+        </div>
+
+        <!-- Products Display -->
+        {% if products|length > 0 %}
+            <!-- Product Count -->
+            <div class="products-stats">
+                <p class="products-count">
+                    Showing <strong>{{ products|length }}</strong> 
+                    {% if products|length == 1 %}product{% else %}products{% endif %}
+                </p>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid">
+                {% for product in products %}
+                    <div class="product-card" data-product-name="{{ product.name|lower }}">
+                        <!-- Product Badge -->
+                        <div class="product-card-badge">
+                            <span class="badge badge-fresh">Fresh</span>
+                        </div>
+
+                        <!-- Product Image Container -->
+                        <div class="product-card-image-wrapper">
+                            {% if product.imageUrl %}
+                                <img 
+                                    src="{{ asset('image/' ~ product.imageUrl) }}" 
+                                    alt="{{ product.name }}" 
+                                    class="product-card-image"
+                                    loading="lazy"
+                                >
+                            {% else %}
+                                <div class="product-card-no-image">
+                                    <span>🥐</span>
+                                </div>
+                            {% endif %}
+                            <div class="product-card-overlay">
+                                <a href="#" class="quick-view-btn">Quick View</a>
+                            </div>
+                        </div>
+
+                        <!-- Product Content -->
+                        <div class="product-card-content">
+                            <!-- Category -->
+                            {% if product.category %}
+                                <p class="product-card-category">{{ product.category.name }}</p>
+                            {% endif %}
+
+                            <!-- Product Name -->
+                            <h3 class="product-card-name">{{ product.name }}</h3>
+
+                            <!-- Description -->
+                            <p class="product-card-description">
+                                {{ product.description|slice(0, 100) ~ (product.description|length > 100 ? '...' : '') }}
+                            </p>
+
+                            <!-- Product Features -->
+                            <ul class="product-card-features">
+                                <li class="feature-item">✓ Fresh Daily</li>
+                                <li class="feature-item">✓ No Preservatives</li>
+                            </ul>
+
+                            <!-- Product Footer - Price and Button -->
+                            <div class="product-card-footer">
+                                <div class="product-price-section">
+                                    <span class="product-card-price">₱{{ product.price }}</span>
+                                    <span class="price-unit">per item</span>
+                                </div>
+
+                                <!-- Add to Cart Form -->
+                                {% if app.user %}
+                                    <form method="POST" action="{{ path('app_add_to_cart', {'id': product.id}) }}" class="add-to-cart-form">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <input type="hidden" name="redirect_to" value="app_products">
+                                        <button type="submit" class="btn btn-add-to-cart">
+                                            <span class="cart-icon">🛒</span> Add to Cart
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <a href="{{ path('app_login') }}" class="btn btn-add-to-cart btn-login-required">
+                                        <span class="cart-icon">🛒</span> Login to Add
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="products-empty-state">
+                <div class="empty-state-icon">🥐</div>
+                <h2>No Products Available</h2>
+                <p>We're preparing our freshly baked selection. Check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- View Cart Link -->
+    {% set cart_items = app.session.get('cart_items', {}) %}
+    {% if app.user and cart_items|length > 0 %}
+        <div class="cart-floating-action">
+            <a href="{{ path('app_cart') }}" class="floating-cart-btn">
+                <span class="cart-count-badge">{{ cart_items|length }}</span>
+                View Cart
+            </a>
+        </div>
+    {% endif %}
+
+    <style>
+        /* Products Hero Section */
+        .products-hero {
+            background: linear-gradient(135deg, var(--primary-brown) 0%, var(--primary-orange) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .products-hero-content h1 {
+            font-size: 2.5rem;
+            margin: 0 0 1rem 0;
+            font-weight: bold;
+        }
+
+        .products-hero-content p {
+            font-size: 1.1rem;
+            margin: 0;
+            opacity: 0.95;
+        }
+
+        /* Products Container */
+        .products-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Search Controls */
+        .products-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--primary-orange);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-brown);
+            box-shadow: 0 0 0 3px rgba(221, 137, 40, 0.1);
+        }
+
+        .search-icon {
+            flex-shrink: 0;
+            color: var(--primary-orange);
+            stroke: var(--primary-orange);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-icon:hover {
+            color: var(--primary-brown);
+            stroke: var(--primary-brown);
+        }
+
+        /* Products Stats */
+        .products-stats {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .products-count {
+            font-size: 1rem;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Product Card */
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Badge */
+        .product-card-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-fresh {
+            background-color: var(--primary-orange);
+            color: white;
+        }
+
+        /* Image Container */
+        .product-card-image-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+            background-color: var(--gray-light);
+        }
+
+        .product-card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-card-image {
+            transform: scale(1.05);
+        }
+
+        .product-card-no-image {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--primary-cream) 0%, var(--primary-wheat) 100%);
+        }
+
+        /* Overlay */
+        .product-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(59, 36, 22, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-card:hover .product-card-overlay {
+            opacity: 1;
+        }
+
+        .quick-view-btn {
+            background: var(--primary-orange);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .quick-view-btn:hover {
+            background: var(--primary-brown);
+            transform: scale(1.05);
+        }
+
+        /* Card Content */
+        .product-card-content {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-card-category {
+            font-size: 0.85rem;
+            color: var(--primary-orange);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .product-card-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0.5rem 0 0.75rem 0;
+        }
+
+        .product-card-description {
+            font-size: 0.9rem;
+            color: var(--gray-dark);
+            line-height: 1.6;
+            margin: 0 0 1rem 0;
+            flex-grow: 1;
+        }
+
+        /* Features */
+        .product-card-features {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .feature-item {
+            font-size: 0.85rem;
+            color: var(--success-color);
+            font-weight: 500;
+        }
+
+        /* Product Footer */
+        .product-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-light);
+        }
+
+        .product-price-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .product-card-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-orange);
+        }
+
+        .price-unit {
+            font-size: 0.8rem;
+            color: var(--gray-dark);
+        }
+
+        /* Add to Cart Button */
+        .btn-add-to-cart {
+            background: var(--primary-orange);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-add-to-cart:hover {
+            background: var(--primary-brown);
+            transform: scale(1.02);
+        }
+
+        .btn-add-to-cart:active {
+            transform: scale(0.98);
+        }
+
+        .btn-login-required {
+            background: var(--gray-medium);
+        }
+
+        .btn-login-required:hover {
+            background: var(--gray-dark);
+        }
+
+        .cart-icon {
+            font-size: 1.1rem;
+        }
+
+        /* Add to Cart Form */
+        .add-to-cart-form {
+            flex-grow: 1;
+            display: flex;
+        }
+
+        .add-to-cart-form button {
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        /* Empty State */
+        .products-empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .products-empty-state h2 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .products-empty-state p {
+            color: var(--gray-dark);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        /* Floating Cart Button */
+        .cart-floating-action {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+        }
+
+        .floating-cart-btn {
+            background: var(--primary-orange);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+        }
+
+        .floating-cart-btn:hover {
+            background: var(--primary-brown);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .cart-count-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--error-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Search Functionality */
+        .product-card.hidden {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .products-hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .product-card-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-add-to-cart {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .cart-floating-action {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .products-container {
+                padding: 1rem;
+            }
+
+            .products-hero {
+                padding: 2rem 1rem;
+            }
+
+            .products-hero-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .products-hero-content p {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+
+    <script>
+        // Search functionality
+        document.getElementById('productSearch')?.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const cards = document.querySelectorAll('.product-card');
+
+            cards.forEach(card => {
+                const productName = card.dataset.productName;
+                if (productName && productName.includes(searchTerm)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+{% endblock %}

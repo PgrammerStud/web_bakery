@@ -44,6 +44,7 @@ final class DashboardController extends AbstractController
             'totalPending' => $totalPending,
             'recentActivities' => $recentActivities,
             'totalDonations' => $totalDonations,
+            'wallet' => $wallet,
         ]);
     }
 }

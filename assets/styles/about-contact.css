@@ -270,12 +270,14 @@
 }
 
 .contact-info-box {
-    background-color: var(--primary-cream);
+    background: rgba(255, 255, 255, 0.1);
     padding: 2rem;
     border-radius: 10px;
-    border-left: 4px solid var(--primary-brown);
+    border-left: 4px solid rgba(221, 137, 40, 0.5);
     transition: var(--transition);
     text-align: center;
+    backdrop-filter: blur(2px);
+    color: white;
 }
 
 .contact-info-box:hover {
@@ -289,13 +291,13 @@
 }
 
 .contact-info-box h3 {
-    color: var(--primary-brown);
+    color: var(--primary-orange);
     margin-bottom: 1rem;
     font-size: 1.2rem;
 }
 
 .contact-info-box p {
-    color: var(--text-dark);
+    color: white;
     line-height: 1.8;
     font-size: 0.95rem;
 }

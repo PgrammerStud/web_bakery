@@ -69,6 +69,15 @@ security:
         - { path: ^/verify-email, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        
+        # Public shopping routes (no authentication required)
+        - { path: ^/products$, roles: PUBLIC_ACCESS }
+        - { path: ^/add-to-cart, roles: PUBLIC_ACCESS }
+        - { path: ^/cart$, roles: PUBLIC_ACCESS }
+        - { path: ^/remove-from-cart, roles: PUBLIC_ACCESS }
+        - { path: ^/cart/update, roles: PUBLIC_ACCESS }
+        - { path: ^/cart/clear, roles: PUBLIC_ACCESS }
+        
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
         # Admin-only routes
         - { path: ^/dashboard, roles: ROLE_ADMIN }

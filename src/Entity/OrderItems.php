@@ -6,30 +6,40 @@ use App\Repository\OrderItemsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 
 #[ORM\Entity(repositoryClass: OrderItemsRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['order_item:read']],
+    denormalizationContext: ['groups' => ['order_item:write']]
+)]
 class OrderItems
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order_item:read', 'order_item:write', 'order:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Order::class, inversedBy: "orderItems")]
+    #[Groups(['order_item:write'])]
     private ?Order $orderEntity = null;
     
     #[ORM\ManyToOne(inversedBy: 'orderItems')]
+    #[Groups(['order_item:read', 'order_item:write', 'order:read'])]
     private ?Product $product = null;
 
     #[ORM\Column]
+    #[Groups(['order_item:read', 'order_item:write', 'order:read'])]
     private ?int $quantity = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Groups(['order_item:read', 'order_item:write', 'order:read'])]
     private ?string $price = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[Groups(['order_item:read', 'order_item:write', 'order:read'])]
     private ?string $subtotal = null;
 
     

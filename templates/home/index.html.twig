@@ -5,14 +5,14 @@
 {% block body %}
     <!-- 1. HERO SECTION -->
     <section class="hero" id="hero">
-        <div class="hero-background" style="background-image: url('{{ asset('image/logo.png') }}'); background-color: var(--primary-brown);">
+        <div class="hero-background" style="background-image: url('{{ asset('image/breadbackg.jpg') }}'); background-color: var(--primary-brown);">
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <h1 class="hero-title">Freshly Baked Every Morning</h1>
                 <p class="hero-subtitle">Handmade baked goods made with love, fresh ingredients, and traditional recipes passed down through generations.</p>
                 <div class="hero-buttons">
-                    <a href="{{ path('app_product_index') }}" class="btn btn-primary btn-lg">View Products</a>
-                    <a href="{{ path('app_product_index') }}" class="btn btn-secondary btn-lg">Order Now</a>
+                    <a href="{{ path('app_products') }}" class="btn btn-primary btn-lg">View Products</a>
+                    <a href="{{ path('app_products') }}" class="btn btn-secondary btn-lg">Order Now</a>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
                                 <h3 class="product-name">{{ product.name }}</h3>
                                 <p class="product-description">{{ product.description|slice(0, 80) ~ (product.description|length > 80 ? '...' : '') }}</p>
                                 <p class="product-price">₱{{ product.price }}</p>
-                                <a href="{{ path('app_product_index') }}" class="btn btn-primary btn-sm">Order Now</a>
+                                <a href="{{ path('app_products') }}" class="btn btn-primary btn-sm">Order Now</a>
                             </div>
                         </div>
                     {% endfor %}
@@ -51,44 +51,60 @@
     </section>
 
     <!-- 3. ABOUT THE BAKERY -->
-    <section class="about-bakery" id="about-bakery">
+    <section class="about-bakery" id="about-bakery" style="background-image: url('{{ asset('image/wheat.jpg') }}');">
+        <div class="about-bakery-overlay"></div>
         <div class="container">
-            <div class="about-grid">
-                <div class="about-image">
-                    <img src="{{ asset('image/logo.png') }}" alt="Catalbas Bakery" style="background-color: var(--gray-light);">
-                </div>
-                <div class="about-content">
-                    <h2>About Our Bakery</h2>
-                    <p>
-                        Welcome to Catalbas Bakery, where tradition meets passion. For years, we have been dedicated to bringing you the finest baked goods made from the freshest ingredients available.
-                    </p>
-                    <p>
-                        Our master bakers use time-honored recipes passed down through generations, combined with modern baking techniques to create an unforgettable experience with every bite. We believe in quality over quantity, which is why each product is carefully crafted with attention to detail.
-                    </p>
-                    <p>
-                        From artisan bread to delicate pastries, every item in our shop tells a story of craftsmanship, dedication, and love for our community. We source our ingredients responsibly and take pride in supporting local suppliers.
-                    </p>
-                    <div class="about-highlights">
-                        <div class="highlight">
-                            <h4>🌾 Fresh Ingredients</h4>
-                            <p>We use only the finest, freshest ingredients in all our baked goods</p>
-                        </div>
-                        <div class="highlight">
-                            <h4>👨‍🍳 Master Bakers</h4>
-                            <p>Our experienced bakers bring decades of expertise to every loaf and pastry</p>
-                        </div>
-                        <div class="highlight">
-                            <h4>❤️ Made with Love</h4>
-                            <p>Every product is crafted with care and passion for our community</p>
-                        </div>
+            <div class="about-header">
+                {# <img src="{{ asset('image/monochrome.png') }}" alt="Catalbas Bakery Logo" class="about-logo"> #}
+                <h2>About Our Bakery</h2>
+            </div>
+            
+            <div class="about-cards-grid">
+                <div class="about-card">
+                    <div class="about-card-image">
+                        <img src="{{ asset('image/wheat.jpg') }}" alt="Fresh Ingredients">
+                    </div>
+                    <div class="about-card-content">
+                        <h3>Fresh Ingredients</h3>
+                        <p>Welcome to Catalbas Bakery, where tradition meets passion. For years, we have been dedicated to bringing you the finest baked goods made from the freshest ingredients available.</p>
                     </div>
                 </div>
+                
+                <div class="about-card">
+                    <div class="about-card-image">
+                        <img src="{{ asset('image/dough.jpg') }}" alt="Master Bakers">
+                    </div>
+                    <div class="about-card-content">
+                        <h3>Master Bakers</h3>
+                        <p>Our master bakers use time-honored recipes passed down through generations, combined with modern baking techniques to create an unforgettable experience with every bite. We believe in quality over quantity, which is why each product is carefully crafted with attention to detail.</p>
+                    </div>
+                </div>
+                
+                <div class="about-card">
+                    <div class="about-card-image">
+                        <img src="{{ asset('image/breadbackg.jpg') }}" alt="Made with Love">
+                    </div>
+                    <div class="about-card-content">
+                        <h3>Made with Love</h3>
+                        <p>From artisan bread to delicate pastries, every item in our shop tells a story of craftsmanship, dedication, and love for our community. We source our ingredients responsibly and take pride in supporting local suppliers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-summary">
+                <p>Every loaf, pastry, and treat that leaves our ovens carries with it our commitment to excellence. At Catalbas Bakery, we don't just bake—we create moments of joy, one fresh bite at a time. <strong>Baked daily, delivered with love.</strong></p>
+            </div>
+
+            <div class="about-team-section">
+                <p class="about-team-description">Get to know the passionate bakers and team members who make every loaf special. Our dedicated crew brings creativity, skill, and heart to everything we do.</p>
+                <a href="{{ path('app_about') }}" class="btn btn-primary btn-lg">Meet Our Team</a>
             </div>
         </div>
     </section>
 
     <!-- 4. BAKE IT FORWARD (DONATION FEATURE) -->
-    <section class="bake-it-forward" id="bake-it-forward">
+    <section class="bake-it-forward" id="bake-it-forward" style="background-image: url('{{ asset('image/cat.jpg') }}');">
+        <div class="bake-it-forward-overlay"></div>
         <div class="container">
             <h2>Bake It Forward - Help Us Help Others</h2>
             <p class="section-subtitle">Every purchase helps provide meals to animals in need</p>
@@ -99,26 +115,36 @@
                     <span class="donation-icon">🐈</span>
                     <span class="donation-icon">🐕</span>
                 </div>
-                
-                <div class="donation-progress">
-                    {% if wallet %}
-                        {% set percentage = (wallet.getTotalBalance() / wallet.getGoalAmount() * 100)|round %}
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: {{ percentage }}%"></div>
-                        </div>
-                        <div class="progress-text">
-                            <p class="raised-amount">₱{{ wallet.getTotalBalance()|number_format(2) }} raised</p>
-                            <p class="goal-amount">of ₱{{ wallet.getGoalAmount()|number_format(2) }} goal</p>
-                        </div>
-                        <p class="progress-percentage">{{ percentage|round }}% Complete</p>
-                    {% else %}
-                        <p>Loading donation progress...</p>
-                    {% endif %}
-                </div>
 
                 <div class="donation-message">
                     <p>Our Bake It Forward program donates a portion of every purchase to local animal shelters. Together, we're making a difference in the lives of animals in need.</p>
                 </div>
+            </div>
+
+            <div class="donation-images-grid">
+                <div class="donation-image-card">
+                    <div class="donation-image">
+                        <img src="{{ asset('image/cat.jpg') }}" alt="Happy Animals">
+                    </div>
+                    <div class="donation-image-description">
+                        <h3>Happy Animals</h3>
+                        <p>Your support helps shelters provide nutritious meals to dogs, cats, and other animals in need, bringing them joy and hope for a better future.</p>
+                    </div>
+                </div>
+
+                <div class="donation-image-card">
+                    <div class="donation-image">
+                        <img src="{{ asset('image/dogncat3.jpg') }}" alt="Community Care">
+                    </div>
+                    <div class="donation-image-description">
+                        <h3>Community Care</h3>
+                        <p>Bake It Forward connects us all—when you buy our baked goods, you're part of a community that cares for the voiceless and feeds those who need it most.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bif-cta-button">
+                <a href="{{ path('app_bakeitforward_feature') }}" class="btn btn-primary btn-lg">Get to Know More About Bake It Forward</a>
             </div>
         </div>
     </section>

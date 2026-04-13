@@ -45,6 +45,76 @@ body {
     height: 1.25rem;
     display: inline-block;
 }
+
+.login-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.bake-it-forward-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-left: 5px solid #dd8928;
+}
+
+.bake-it-forward-card h2 {
+    color: #dd8928;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bake-it-forward-card .card-icon {
+    font-size: 2rem;
+}
+
+.bake-it-forward-card p {
+    color: #3b2416;
+    line-height: 1.6;
+    margin: 0.75rem 0;
+    font-size: 0.95rem;
+}
+
+.bake-it-forward-card .highlight {
+    color: #dd8928;
+    font-weight: bold;
+}
+
+.bake-it-forward-card .feature-list {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(221, 137, 40, 0.05);
+    border-radius: 10px;
+}
+
+.bake-it-forward-card .feature-item {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    color: #3b2416;
+}
+
+.bake-it-forward-card .feature-item::before {
+    content: '✓';
+    color: #dd8928;
+    font-weight: bold;
+    min-width: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .login-container {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 
 {% block title %}{% endblock %}
@@ -52,8 +122,30 @@ body {
 {% block body %}
 
 <div class="main">
-<div class="login-page">
-    <form method="post" class="login-card">
+<div class="login-page" style="position: relative; background-image: url('{{ asset('image/bg4.jpg') }}'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <div style="position: absolute; inset: 0; "></div>
+    
+    <div class="login-container">
+        <!-- Bake It Forward Info Card -->
+        <div class="bake-it-forward-card">
+            <h2><span class="card-icon">🐾</span>Bake It Forward</h2>
+            <p>At <span class="highlight">Catalbas Bakery</span>, we believe in giving back to our community.</p>
+            
+            <div class="feature-list">
+                <div class="feature-item">Every purchase contributes to local animal shelters</div>
+                <div class="feature-item">We partner with rescue centers for cats and dogs</div>
+                <div class="feature-item">A portion of every sale goes directly to animal care</div>
+                <div class="feature-item">Help us make a difference with every order</div>
+            </div>
+            
+            <p style="margin-top: 1.5rem; font-size: 0.9rem; color: #666; font-style: italic;">
+                "We don't just bake for sustenance—we bake for memories, celebrations, <span class="highlight">and making a difference.</span>"
+            </p>
+        </div>
+
+        <!-- Login Form Card -->
+        <div>
+    <form method="post" class="login-card" style="position: relative; z-index: 2;">
         {% if error %}
             <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
         {% endif %}
@@ -64,7 +156,7 @@ body {
             </div>
         {% endif %}
 
-        <h1>Please sign in</h1>
+        <h1>Please Sign in</h1>
         
         <div class="form-group">
             <label for="inputUsername">Username</label>
@@ -109,6 +201,8 @@ body {
 
 
     </form>
+        </div>
+    </div>
 </div>
 </div>
 {% endblock %}
