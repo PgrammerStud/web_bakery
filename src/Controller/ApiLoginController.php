@@ -2,11 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use App\Entity\User;
 
 class ApiLoginController extends AbstractController
 {
@@ -14,12 +14,17 @@ class ApiLoginController extends AbstractController
     public function login(#[CurrentUser] ?User $user): JsonResponse
     {
         if (null === $user) {
-            return $this->json(['message' => 'missing credentials'], 401);
+            return $this->json([
+                'success' => false,
+                'error'   => 'unauthorized',
+                'message' => 'Invalid credentials. Please check your username and password.',
+            ], 401);
         }
 
         return $this->json([
-            'user' => $user->getUserIdentifier(),
-            'roles' => $user->getRoles(),
+            'success' => true,
+            'user'    => $user->getUserIdentifier(),
+            'roles'   => $user->getRoles(),
         ]);
     }
 }

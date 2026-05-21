@@ -5,6 +5,15 @@
 {% block stylesheets %}
 {{ parent() }}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<style>
+    .new-row-flash {
+        animation: flashRow 2s ease;
+    }
+    @keyframes flashRow {
+        0%   { background-color: #dcfce7; }
+        100% { background-color: transparent; }
+    }
+</style>
 {% endblock %}
 
 {% block javascripts %}
@@ -42,32 +51,27 @@
                 <td>{{ order.totalAmount }}</td>
                 <td>{{ order.paymentMethod }}</td>
                 <td>{{ order.notes }}</td>
-
-<td>
-    {% if order.orderItems|length > 0 %}
-        <ul>
-            {% for item in order.orderItems %}
-                <li>
-                    {{ item.product.name }}
-                    × {{ item.quantity }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <em>No items</em>
-    {% endif %}
-</td>
-
-<td class="actions">
-    <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-show">show</a>
-    {% if is_granted('ROLE_ADMIN') or order.createdBy == app.user %}
-        <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-edit">edit</a>
-        {{ include('order/_delete_form.html.twig') }}
-    {% endif %}
-</td>
+                <td>
+                    {% if order.orderItems|length > 0 %}
+                        <ul>
+                            {% for item in order.orderItems %}
+                                <li>{{ item.product.name }} × {{ item.quantity }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <em>No items</em>
+                    {% endif %}
+                </td>
+                <td class="actions">
+                    <a href="{{ path('app_order_show', {'id': order.id}) }}" class="btn btn-show">show</a>
+                    {% if is_granted('ROLE_ADMIN') or order.createdBy == app.user %}
+                        <a href="{{ path('app_order_edit', {'id': order.id}) }}" class="btn btn-edit">edit</a>
+                        {{ include('order/_delete_form.html.twig') }}
+                    {% endif %}
+                </td>
             </tr>
         {% else %}
-            <tr>
+            <tr id="no-records-row">
                 <td colspan="10">no records found</td>
             </tr>
         {% endfor %}
@@ -78,7 +82,43 @@
 
 <script>
 $(document).ready(function() {
-    $('#orders-table').DataTable();
+    var table = $('#orders-table').DataTable();
+
+    // Called from base.html.twig when new order arrives
+    window.onNewOrder = function(data) {
+        // Remove "no records" row if present
+        $('#no-records-row').remove();
+
+        // Add new row at top
+        var newRow = table.row.add([
+            data.id,
+            data.orderNumber,
+            data.customer,
+            '',
+            'PENDING',
+            data.total,
+            'pending',
+            '',
+            '<em>Loading items...</em>',
+            '<a href="/order/" class="btn btn-show">show</a>'
+        ]).draw(false).node();
+
+        // Flash green highlight
+        $(newRow).addClass('new-row-flash');
+    };
+
+    // Called from base.html.twig when order is paid
+    window.onOrderPaid = function(data) {
+        // Update status cell for matching order row
+        table.rows().every(function() {
+            var rowData = this.data();
+            if (rowData[1] === data.orderNumber) {
+                rowData[4] = 'PAID';
+                this.data(rowData).draw(false);
+                $(this.node()).addClass('new-row-flash');
+            }
+        });
+    };
 });
 </script>
 {% endblock %}

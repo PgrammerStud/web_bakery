@@ -39,7 +39,11 @@
                                 <h3 class="product-name">{{ product.name }}</h3>
                                 <p class="product-description">{{ product.description|slice(0, 80) ~ (product.description|length > 80 ? '...' : '') }}</p>
                                 <p class="product-price">₱{{ product.price }}</p>
-                                <a href="{{ path('app_products') }}" class="btn btn-primary btn-sm">Order Now</a>
+                                {% if app.user %}
+                                    <a href="{{ path('app_products') }}" class="btn btn-primary btn-sm">Order Now</a>
+                                {% else %}
+                                    <a href="{{ path('app_login') }}" class="btn btn-primary btn-sm">Order Now</a>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}

@@ -5,8 +5,7 @@ namespace App\Entity;
 use App\Repository\StockRepository;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
-
-
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: StockRepository::class)]
 #[ApiResource]
@@ -18,9 +17,13 @@ class Stock
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'stocks')]
+    #[Assert\NotNull(message: 'A product must be assigned to this stock entry.')]
     private ?Product $product = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'Quantity is required.')]
+    #[Assert\GreaterThanOrEqual(value: 0, message: 'Stock quantity cannot be negative.')]
+    #[Assert\LessThanOrEqual(value: 99999, message: 'Stock quantity cannot exceed 99,999.')]
     private ?int $quantity = null;
 
     #[ORM\Column]

@@ -1,0 +1,49 @@
+{% extends 'landing.html.twig' %}
+
+{% block title %}Our Products - Catalbas Bakery{% endblock %}
+
+{% block body %}
+    <!-- Products Page Hero -->
+    <section class="products-hero">
+        <div class="hero-background" style="background-image: url('{{ asset('image/breadbackg.jpg') }}'); background-color: var(--primary-brown);">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Our Products</h1>
+                <p class="hero-subtitle">Browse our complete selection of freshly baked goods</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- All Products Grid -->
+    <section class="products-section">
+        <div class="container">
+            <div class="products-grid">
+                {% if products|length > 0 %}
+                    {% for product in products %}
+                        <div class="product-card">
+                            <div class="product-image">
+                                {% if product.imageUrl %}
+                                    <img src="{{ asset('image/' ~ product.imageUrl) }}" alt="{{ product.name }}">
+                                {% else %}
+                                    <div class="no-image">No Image</div>
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">{{ product.name }}</h3>
+                                <p class="product-description">{{ product.description }}</p>
+                                <p class="product-price">₱{{ product.price }}</p>
+                                {% if app.user %}
+                                    <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}" data-product-name="{{ product.name }}">Add to Cart</button>
+                                {% else %}
+                                    <a href="{{ path('app_login') }}" class="btn btn-primary btn-sm">Order Now</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-products">No products available at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

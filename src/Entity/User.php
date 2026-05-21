@@ -68,17 +68,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $profilePictureUrl = null;
+
     #[ORM\Column]
     private ?bool $isVerified = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $verificationToken = null;
+    
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    private ?string $firebaseUid = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $displayName = null;
+
+    
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $lastname = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $firstname = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $fcmToken = null;
 
     /**
      * @var Collection<int, Bakeitforward>
@@ -86,12 +99,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Bakeitforward::class, mappedBy: 'user', cascade: ['remove'])]
     private Collection $bakeitforwards;
 
+    /**
+     * @var Collection<int, Cart>
+     */
+    #[ORM\OneToMany(targetEntity: Cart::class, mappedBy: 'customer')]
+    private Collection $carts;
+
     public function __construct()
     {
         $this->orders = new ArrayCollection();
         $this->activityLogs = new ArrayCollection();
         $this->products = new ArrayCollection();
         $this->bakeitforwards = new ArrayCollection();
+        $this->carts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -179,13 +199,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
      */
     public function __serialize(): array
-    {
-        $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
-        return $data;
-    }
-
+{
+  $data = (array) $this;
+  $data["\0".self::class."\0password"] = hash('crc32c', $this->password ?? '');
+  return $data;
+}
     #[\Deprecated]
     public function eraseCredentials(): void
     {
@@ -259,6 +277,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    
+
+
 
     public function getEmail(): ?string
     {
@@ -320,6 +341,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
+
+    public function getFcmToken(): ?string
+    {
+    return $this->fcmToken;
+    }
+
+    public function setFcmToken(?string $fcmToken): static
+    {
+    $this->fcmToken = $fcmToken;
+    return $this;
+     }
+
     /**
      * @return Collection<int, Bakeitforward>
      */
@@ -349,4 +383,72 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    
+    public function getProfilePictureUrl(): ?string
+    {
+        return $this->profilePictureUrl;
+    }
+
+    public function setProfilePictureUrl(?string $profilePictureUrl): static
+    {
+        $this->profilePictureUrl = $profilePictureUrl;
+
+        return $this;
+    }
+
+    public function getFirebaseUid(): ?string
+    {
+        return $this->firebaseUid;
+    }
+
+    public function setFirebaseUid(?string $firebaseUid): static
+    {
+        $this->firebaseUid = $firebaseUid;
+
+        return $this;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(?string $displayName): static
+    {
+        $this->displayName = $displayName;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cart>
+     */
+    public function getCarts(): Collection
+    {
+        return $this->carts;
+    }
+
+    public function addCart(Cart $cart): static
+    {
+        if (!$this->carts->contains($cart)) {
+            $this->carts->add($cart);
+            $cart->setCustomer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCart(Cart $cart): static
+    {
+        if ($this->carts->removeElement($cart)) {
+            // set the owning side to null (unless already changed)
+            if ($cart->getCustomer() === $this) {
+                $cart->setCustomer(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

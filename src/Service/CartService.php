@@ -2,167 +2,137 @@
 
 namespace App\Service;
 
+use App\Entity\Cart;
+use App\Entity\CartItem;
+use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class CartService
 {
-    private const CART_SESSION_KEY = 'cart_items';
-    
-    private RequestStack $requestStack;
-    private ProductRepository $productRepository;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private ProductRepository $productRepository,
+        private CartRepository $cartRepository,
+        private Security $security,
+    ) {}
 
-    public function __construct(RequestStack $requestStack, ProductRepository $productRepository)
+    private function getOrCreateCart(): Cart
     {
-        $this->requestStack = $requestStack;
-        $this->productRepository = $productRepository;
+        $user = $this->security->getUser();
+        $cart = $this->cartRepository->findOneBy(['customer' => $user]);
+
+        if (!$cart) {
+            $cart = new Cart();
+            $cart->setCustomer($user);
+            $cart->setCreatedAt(new \DateTime());
+            $cart->setUpdatedAt(new \DateTime());
+            $this->em->persist($cart);
+            $this->em->flush();
+        }
+
+        return $cart;
     }
 
-    /**
-     * Add or update a product in the cart
-     */
     public function addToCart(int $productId, int $quantity = 1): bool
     {
-        // Verify product exists
         $product = $this->productRepository->find($productId);
-        if (!$product) {
-            return false;
-        }
+        if (!$product) return false;
 
-        $session = $this->requestStack->getSession();
-        $cart = $session->get(self::CART_SESSION_KEY, []);
+        $cart = $this->getOrCreateCart();
 
-        // If product already in cart, increase quantity
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] += $quantity;
-        } else {
-            // Add new product to cart
-            $cart[$productId] = [
-                'quantity' => $quantity,
-                'price' => $product->getPrice(),
-                'name' => $product->getName(),
-            ];
-        }
-
-        $session->set(self::CART_SESSION_KEY, $cart);
-        return true;
-    }
-
-    /**
-     * Remove a product from the cart
-     */
-    public function removeFromCart(int $productId): bool
-    {
-        $session = $this->requestStack->getSession();
-        $cart = $session->get(self::CART_SESSION_KEY, []);
-
-        if (isset($cart[$productId])) {
-            unset($cart[$productId]);
-            $session->set(self::CART_SESSION_KEY, $cart);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Update quantity of a product in the cart
-     */
-    public function updateQuantity(int $productId, int $quantity): bool
-    {
-        $session = $this->requestStack->getSession();
-        $cart = $session->get(self::CART_SESSION_KEY, []);
-
-        if (!isset($cart[$productId])) {
-            return false;
-        }
-
-        if ($quantity <= 0) {
-            return $this->removeFromCart($productId);
-        }
-
-        $cart[$productId]['quantity'] = $quantity;
-        $session->set(self::CART_SESSION_KEY, $cart);
-        return true;
-    }
-
-    /**
-     * Get all cart items
-     */
-    public function getCart(): array
-    {
-        $session = $this->requestStack->getSession();
-        return $session->get(self::CART_SESSION_KEY, []);
-    }
-
-    /**
-     * Get cart item count
-     */
-    public function getItemCount(): int
-    {
-        $cart = $this->getCart();
-        $count = 0;
-
-        foreach ($cart as $item) {
-            $count += $item['quantity'];
-        }
-
-        return $count;
-    }
-
-    /**
-     * Get cart total price
-     */
-    public function getCartTotal(): float
-    {
-        $cart = $this->getCart();
-        $total = 0;
-
-        foreach ($cart as $item) {
-            $total += (float)$item['price'] * $item['quantity'];
-        }
-
-        return round($total, 2);
-    }
-
-    /**
-     * Clear entire cart
-     */
-    public function clearCart(): void
-    {
-        $session = $this->requestStack->getSession();
-        $session->remove(self::CART_SESSION_KEY);
-    }
-
-    /**
-     * Check if product is in cart
-     */
-    public function isInCart(int $productId): bool
-    {
-        $cart = $this->getCart();
-        return isset($cart[$productId]);
-    }
-
-    /**
-     * Get cart with product details (full product objects)
-     */
-    public function getCartWithDetails(): array
-    {
-        $cart = $this->getCart();
-        $cartDetails = [];
-
-        foreach ($cart as $productId => $item) {
-            $product = $this->productRepository->find($productId);
-            if ($product) {
-                $cartDetails[$productId] = [
-                    'product' => $product,
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price'],
-                    'subtotal' => (float)$item['price'] * $item['quantity'],
-                ];
+        foreach ($cart->getCartItems() as $item) {
+            if ($item->getProduct()->getId() === $productId) {
+                $item->setQuantity($item->getQuantity() + $quantity);
+                $cart->setUpdatedAt(new \DateTime());
+                $this->em->flush();
+                return true;
             }
         }
 
-        return $cartDetails;
+        $cartItem = new CartItem();
+        $cartItem->setCart($cart);
+        $cartItem->setProduct($product);
+        $cartItem->setQuantity($quantity);
+        $cartItem->setAddedAt(new \DateTime());
+        $this->em->persist($cartItem);
+
+        $cart->setUpdatedAt(new \DateTime());
+        $this->em->flush();
+        return true;
+    }
+
+    public function removeCartItemById(int $cartItemId): bool
+    {
+        $cartItem = $this->em->getRepository(CartItem::class)->find($cartItemId);
+        if (!$cartItem) return false;
+
+        $this->em->remove($cartItem);
+        $this->em->flush();
+        return true;
+    }
+
+    public function updateCartItemById(int $cartItemId, int $quantity): bool
+    {
+        $cartItem = $this->em->getRepository(CartItem::class)->find($cartItemId);
+        if (!$cartItem) return false;
+
+        if ($quantity <= 0) {
+            $this->em->remove($cartItem);
+        } else {
+            $cartItem->setQuantity($quantity);
+        }
+
+        $this->em->flush();
+        return true;
+    }
+
+    public function getCartWithDetails(): array
+    {
+        $user = $this->security->getUser();
+        $cart = $this->cartRepository->findOneBy(['customer' => $user]);
+        if (!$cart) return [];
+
+        $result = [];
+        foreach ($cart->getCartItems() as $item) {
+            $product = $item->getProduct();
+            $result[] = [
+                'id'          => $item->getId(),
+                'productId'   => $product->getId(),
+                'name'        => $product->getName(),
+                'description' => $product->getDescription(),
+                'price'       => $product->getPrice(),
+                'imageUrl'    => $product->getImageUrl(),
+                'quantity'    => $item->getQuantity(),
+            ];
+        }
+
+        return $result;
+    }
+
+    public function getCartTotal(): float
+    {
+        return round(array_sum(array_map(
+            fn($i) => (float)$i['price'] * $i['quantity'],
+            $this->getCartWithDetails()
+        )), 2);
+    }
+
+    public function getItemCount(): int
+    {
+        return array_sum(array_column($this->getCartWithDetails(), 'quantity'));
+    }
+
+    public function clearCart(): void
+    {
+        $user = $this->security->getUser();
+        $cart = $this->cartRepository->findOneBy(['customer' => $user]);
+        if (!$cart) return;
+
+        foreach ($cart->getCartItems() as $item) {
+            $this->em->remove($item);
+        }
+        $this->em->flush();
     }
 }
