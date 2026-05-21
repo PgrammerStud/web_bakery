@@ -5,10 +5,6 @@ echo "Running Symfony cache clear & warmup..."
 php /app/bin/console cache:clear --env=prod --no-debug
 php /app/bin/console cache:warmup --env=prod --no-debug
 
-echo "Generating Doctrine proxies..."
-php /app/bin/console doctrine:cache:clear-metadata --env=prod --no-debug
-php /app/bin/console doctrine:generate:proxies --env=prod
-
 echo "Running database migrations..."
 php /app/bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
