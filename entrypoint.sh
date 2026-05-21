@@ -5,6 +5,9 @@ echo "Running Symfony cache clear & warmup..."
 php /app/bin/console cache:clear --env=prod --no-debug
 php /app/bin/console cache:warmup --env=prod --no-debug
 
+echo "Dumping assets..."
+php /app/bin/console asset-map:compile --no-interaction
+
 echo "Fixing permissions after cache warmup..."
 chown -R www-data:www-data /app/var
 chmod -R 775 /app/var
