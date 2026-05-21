@@ -113,64 +113,34 @@
             </div>
         </footer>
 
-        <script>
-            // Hamburger menu toggle
-            const hamburgerMenu = document.getElementById('hamburgerMenu');
-            const landingNav = document.getElementById('landingNav');
+       <script>
+    function initHamburger() {
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const landingNav = document.getElementById('landingNav');
 
-            hamburgerMenu.addEventListener('click', function() {
-                landingNav.classList.toggle('active');
-                hamburgerMenu.classList.toggle('active');
+        if (!hamburgerMenu || !landingNav) return;
+
+        // Clone to remove old event listeners
+        const newHamburger = hamburgerMenu.cloneNode(true);
+        hamburgerMenu.parentNode.replaceChild(newHamburger, hamburgerMenu);
+
+        newHamburger.addEventListener('click', function() {
+            landingNav.classList.toggle('active');
+            newHamburger.classList.toggle('active');
+        });
+
+        const navLinks = document.querySelectorAll('.landing-nav .nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                landingNav.classList.remove('active');
+                newHamburger.classList.remove('active');
             });
+        });
+    }
 
-            // Close menu when a nav link is clicked
-            const navLinks = document.querySelectorAll('.landing-nav .nav-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    landingNav.classList.remove('active');
-                    hamburgerMenu.classList.remove('active');
-                });
-            });
-
-            // Smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    const href = this.getAttribute('href');
-                    if (href !== '#' && document.querySelector(href)) {
-                        e.preventDefault();
-                        const target = document.querySelector(href);
-                        const headerHeight = document.querySelector('.landing-header').offsetHeight;
-                        const targetPosition = target.offsetTop - headerHeight;
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-
-            // Highlight active nav link based on scroll position
-            function updateActiveNavLink() {
-                const sections = document.querySelectorAll('[id]');
-                const headerHeight = document.querySelector('.landing-header').offsetHeight;
-                let currentSection = '';
-
-                sections.forEach(section => {
-                    const sectionTop = section.offsetTop - headerHeight - 100;
-                    if (window.pageYOffset >= sectionTop) {
-                        currentSection = section.getAttribute('id');
-                    }
-                });
-
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === '#' + currentSection) {
-                        link.classList.add('active');
-                    }
-                });
-            }
-
-            window.addEventListener('scroll', updateActiveNavLink);
-        </script>
+    // Run on normal page load AND after Turbo navigation
+    document.addEventListener('DOMContentLoaded', initHamburger);
+    document.addEventListener('turbo:load', initHamburger);
+</script>
     </body>
 </html>
