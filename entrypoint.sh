@@ -1,10 +1,9 @@
-cat > entrypoint.sh << 'EOF'
+$content = @'
 #!/bin/bash
 set -e
 
 echo "Clearing and warming up cache..."
 php bin/console cache:clear --env=prod --no-debug
-php bin/console doctrine:cache:clear-metadata --flush || true
 php bin/console cache:warmup --env=prod --no-debug
 
 echo "Starting PHP-FPM..."
@@ -18,4 +17,7 @@ echo "Starting Nginx..."
 nginx -g "daemon off;"
 
 wait $PHP_PID
-EOF
+'@
+
+$content = $content -replace "`r`n", "`n"
+[System.IO.File]::WriteAllText("$PWD\entrypoint.sh", $content)
