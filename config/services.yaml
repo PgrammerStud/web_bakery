@@ -29,5 +29,14 @@ services:
         tags:
             - { name: security.user_checker }
 
+    # Firebase Authentication Service for mobile app Google Sign-In
+    App\Service\FirebaseAuthService:
+        arguments:
+            $credentialsPath: '%kernel.project_dir%/config/firebase/serviceAccountKey.json'
+
+    App\Service\PaymentService:
+        arguments:
+            $stripeSecretKey: '%env(STRIPE_SECRET_KEY)%'
+    
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

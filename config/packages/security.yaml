@@ -65,25 +65,36 @@ security:
          # Allow login/logout for everyone
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/logout, roles: PUBLIC_ACCESS }
-
         - { path: ^/verify-email, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
-        
-        # Public shopping routes (no authentication required)
+        - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }
+
+    # ← ADD THESE TWO LINES
+        - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/add-to-cart, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/cart, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/remove-from-cart, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/cart/update, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/cart/clear, roles: IS_AUTHENTICATED_FULLY }  
+
+        - { path: ^/api/payment, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/order/create, roles: IS_AUTHENTICATED_FULLY }
+            
+    
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }  # ← this stays
+
+     # Public shopping routes
         - { path: ^/products$, roles: PUBLIC_ACCESS }
-        - { path: ^/add-to-cart, roles: PUBLIC_ACCESS }
-        - { path: ^/cart$, roles: PUBLIC_ACCESS }
-        - { path: ^/remove-from-cart, roles: PUBLIC_ACCESS }
-        - { path: ^/cart/update, roles: PUBLIC_ACCESS }
-        - { path: ^/cart/clear, roles: PUBLIC_ACCESS }
-        
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-        # Admin-only routes
+        - { path: ^/add-to-cart, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/cart$, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/remove-from-cart, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/cart/update, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/cart/clear, roles: IS_AUTHENTICATED_FULLY }
+
         - { path: ^/dashboard, roles: ROLE_ADMIN }
         - { path: ^/user, roles: ROLE_ADMIN }
-        
-        # Staff and Admin routes (product, category, stock, order management)
         - { path: ^/product, roles: [ROLE_ADMIN, ROLE_STAFF, ROLE_USER] }
         - { path: ^/category, roles: [ROLE_ADMIN, ROLE_STAFF] }
         - { path: ^/stock, roles: [ROLE_ADMIN, ROLE_STAFF] }

@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\MercurePublisher; 
 
 #[Route('/bakeitforward')]
 final class BakeItForwardController extends AbstractController
@@ -37,10 +38,28 @@ final class BakeItForwardController extends AbstractController
 
     #[Route('/{id}/mark-donated', name: 'app_bakeitforward_mark_donated', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function markDonated(Bakeitforward $bakeitforward, EntityManagerInterface $entityManager): Response
+    public function markDonated(
+        Bakeitforward $bakeitforward, 
+        EntityManagerInterface $entityManager,
+        MercurePublisher $mercure 
+        
+        ): Response
     {
         $bakeitforward->setDonated(true);
         $entityManager->flush();
+
+        // 👇 Publish to Mercure
+        $mercure->publishNewDonation([
+            'id'         => $bakeitforward->getId(),
+            'donor'      => $bakeitforward->getDonorName() ?? 'Anonymous',
+            'amount'     => $bakeitforward->getAmount(),
+            'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
+        ]);
+
+        $mercure->publishNotification(
+            'A new Bake It Forward donation has been marked!',
+            'info'
+        );
 
         $this->addFlash('success', 'Contribution marked as donated.');
 

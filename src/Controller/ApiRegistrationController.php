@@ -28,37 +28,49 @@ class ApiRegistrationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        // Validate required fields
-        if (!isset($data['username']) || !isset($data['email']) || !isset($data['password'])) {
+        // ── Required fields ───────────────────────────────────────────
+        if (empty($data['username']) || empty($data['email']) || empty($data['password'])) {
             return $this->json([
                 'success' => false,
-                'message' => 'Username, email, and password are required'
+                'error'   => 'bad_request',
+                'message' => 'Username, email, and password are required.',
             ], 400);
         }
 
-        // Basic validation
+        // ── Field validation ──────────────────────────────────────────
         if (strlen($data['username']) < 3) {
             return $this->json([
                 'success' => false,
-                'message' => 'Username must be at least 3 characters long'
+                'error'   => 'bad_request',
+                'message' => 'Username must be at least 3 characters long.',
+            ], 400);
+        }
+
+        if (strlen($data['username']) > 50) {
+            return $this->json([
+                'success' => false,
+                'error'   => 'bad_request',
+                'message' => 'Username cannot exceed 50 characters.',
             ], 400);
         }
 
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             return $this->json([
                 'success' => false,
-                'message' => 'Invalid email address'
+                'error'   => 'bad_request',
+                'message' => 'Please enter a valid email address.',
             ], 400);
         }
 
         if (strlen($data['password']) < 6) {
             return $this->json([
                 'success' => false,
-                'message' => 'Password must be at least 6 characters long'
+                'error'   => 'bad_request',
+                'message' => 'Password must be at least 6 characters long.',
             ], 400);
         }
 
-        // Check if username already exists
+        // ── Duplicate checks ──────────────────────────────────────────
         $existingUser = $this->entityManager
             ->getRepository(User::class)
             ->findOneBy(['username' => $data['username']]);
@@ -66,11 +78,11 @@ class ApiRegistrationController extends AbstractController
         if ($existingUser) {
             return $this->json([
                 'success' => false,
-                'message' => 'Username already exists'
+                'error'   => 'conflict',
+                'message' => 'Username already exists.',
             ], 409);
         }
 
-        // Check if email already exists
         $existingEmail = $this->entityManager
             ->getRepository(User::class)
             ->findOneBy(['email' => $data['email']]);
@@ -78,30 +90,25 @@ class ApiRegistrationController extends AbstractController
         if ($existingEmail) {
             return $this->json([
                 'success' => false,
-                'message' => 'Email already registered'
+                'error'   => 'conflict',
+                'message' => 'Email is already registered.',
             ], 409);
         }
 
-        // Create new user
+        // ── Create user ───────────────────────────────────────────────
         $user = new User();
         $user->setUsername($data['username']);
-        $user->setLastname($data['lastname']);
-        $user->setFirstname($data['firstname']);
+        $user->setLastname($data['lastname'] ?? '');
+        $user->setFirstname($data['firstname'] ?? '');
         $user->setEmail($data['email']);
-
-        // Hash password
-        $hashedPassword = $this->passwordHasher->hashPassword($user, $data['password']);
-        $user->setPassword($hashedPassword);
-
-        // Set default role
+        $user->setPassword($this->passwordHasher->hashPassword($user, $data['password']));
         $user->setRoles(['ROLE_USER']);
 
-        // Generate verification token
         $verificationToken = $this->emailVerificationService->generateVerificationToken();
         $user->setVerificationToken($verificationToken);
         $user->setIsVerified(false);
 
-        // Validate entity
+        // ── Entity-level validation ───────────────────────────────────
         $errors = $this->validator->validate($user);
         if (count($errors) > 0) {
             $errorMessages = [];
@@ -110,42 +117,40 @@ class ApiRegistrationController extends AbstractController
             }
             return $this->json([
                 'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $errorMessages
+                'error'   => 'bad_request',
+                'message' => 'Validation failed.',
+                'details' => $errorMessages,
             ], 400);
         }
 
-        // Save user
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        // Generate verification URL
-        $verificationUrl = $this->generateUrl(
-            'app_verify_email',
-            ['token' => $verificationToken],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
-
-        // Send verification email
+        // ── Send verification email ───────────────────────────────────
         try {
+            $verificationUrl = $this->generateUrl(
+                'app_verify_email',
+                ['token' => $verificationToken],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
             $this->emailVerificationService->sendVerificationEmail($user, $verificationUrl);
         } catch (\Exception $e) {
-            // Log error but don't fail registration
+            // Don't fail registration if email sending fails
             // User can request resend later
         }
 
         return $this->json([
             'success' => true,
             'message' => 'Registration successful. Please check your email to verify your account.',
-            'user' => [
-                'id' => $user->getId(),
-                'username' => $user->getUsername(),
-                'lastname' => $user->getLastname(),
-                'firstname' => $user->getFirstname(),
-                'email' => $user->getEmail(),
+            'user'    => [
+                'id'         => $user->getId(),
+                'username'   => $user->getUsername(),
+                'lastname'   => $user->getLastname(),
+                'firstname'  => $user->getFirstname(),
+                'email'      => $user->getEmail(),
                 'isVerified' => $user->isVerified(),
-                'roles' => $user->getRoles()
-            ]
+                'roles'      => $user->getRoles(),
+            ],
         ], 201);
     }
 }

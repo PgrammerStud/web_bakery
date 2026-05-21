@@ -2,6 +2,19 @@
 
 {% block title %}Bake It Forward{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .new-row-flash {
+        animation: flashRow 2s ease;
+    }
+    @keyframes flashRow {
+        0%   { background-color: #dbeafe; }
+        100% { background-color: transparent; }
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="container">
     <h1>Bake It Forward</h1>
@@ -19,7 +32,7 @@
 
     <div class="card">
         <h2>Recent Contributions</h2>
-        <table class="table">
+        <table class="table" id="donations-table">
             <thead>
                 <tr>
                     <th>User</th>
@@ -30,7 +43,7 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="donations-tbody">
                 {% for contribution in contributions %}
                 <tr>
                     <td>{{ contribution.user ? contribution.user.email : 'N/A' }}</td>
@@ -58,4 +71,24 @@
         </table>
     </div>
 </div>
+
+<script>
+    // Called from base.html.twig when donation arrives
+    window.onNewDonation = function(data) {
+        var tbody = document.getElementById('donations-tbody');
+
+        var row = document.createElement('tr');
+        row.className = 'new-row-flash';
+        row.innerHTML = `
+            <td>${data.donor}</td>
+            <td>N/A</td>
+            <td>$${parseFloat(data.amount).toFixed(2)}</td>
+            <td>${data.created_at}</td>
+            <td><span class="badge badge-warning">Pending</span></td>
+            <td></td>
+        `;
+
+        tbody.insertBefore(row, tbody.firstChild);
+    };
+</script>
 {% endblock %}

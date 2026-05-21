@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use App\Entity\Order;
-use App\Enum\PaymentStatus;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -17,7 +16,14 @@ class OrderType extends AbstractType
             ->add('orderNumber')
             ->add('customerName')
             ->add('customerContact')
-            ->add('paymentMethod')
+            ->add('paymentMethod', ChoiceType::class, [
+                'choices' => [
+                'Cash on Delivery' => 'cod',
+                'Stripe (Card)' => 'stripe',
+                        ],
+                'placeholder' => 'Select Payment Method',
+                'required' => true,
+                  ])
             // ->add('paymentMethod', ChoiceType::class, [
             //     'choices' => [
             //         'GCash' => PaymentStatus::GCASH,
@@ -28,14 +34,14 @@ class OrderType extends AbstractType
             // ])
             ->add('notes')
             ->add('status', ChoiceType::class, [
-                'choices' => [
-                    'Pending' => 'pending',
-                    'Processing' => 'processing',
-                    'Completed' => 'completed',
-                    'Cancelled' => 'cancelled',
-                ],
-                'data' => 'pending', // default value
-            ])
+                  'choices' => [
+                  'Pending'    => 'PENDING',
+                  'Paid'       => 'PAID',
+                  'Processing' => 'PROCESSING',
+                  'Cancelled'  => 'CANCELLED',
+                           ],
+                   'data' => 'PENDING',
+                    ])
         ;
     }
 

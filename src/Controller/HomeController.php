@@ -26,4 +26,15 @@ final class HomeController extends AbstractController
             'wallet' => $wallet,
         ]);
     }
+
+    #[Route('/products', name: 'app_products', methods: ['GET'])]
+    public function products(ProductRepository $productRepository): Response
+    {
+        $products = $productRepository->findAll();
+
+        return $this->render('product/products.html.twig', [
+            'products' => $products,
+        ]);
+    }
 }
+

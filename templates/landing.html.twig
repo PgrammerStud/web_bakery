@@ -34,11 +34,11 @@
                     <a href="{{ path('app_bakeitforward_feature') }}" class="nav-link">Bake It Forward</a>
                     <a href="{{ path('app_contact') }}" class="nav-link">Contact</a>
                     {% if app.user %}
-                        <a href="{{ path('app_cart') }}" class="nav-link nav-cart">
+                        {# <a href="{{ path('app_cart') }}" class="nav-link nav-cart">
                             🛒 Cart
                             {% if app.session.get('cart_items', {})|length > 0 %}
                                 <span class="cart-badge">{{ app.session.get('cart_items', {})|length }}</span>
-                            {% endif %}
+                            {% endif %} #}
                         </a>
                         {# <a href="{{ path('app_profile') }}" class="nav-link nav-user">Profile</a> #}
                         <a href="{{ path('app_logout') }}" class="nav-link nav-logout">Logout</a>

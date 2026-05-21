@@ -3,57 +3,126 @@
 namespace App\Service;
 
 use App\Entity\Order;
-use App\Entity\Bakeitforward;
-use App\Repository\BakeitforwardRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\CardException;
+use Stripe\Exception\RateLimitException;
+use Stripe\Exception\InvalidRequestException;
+use Stripe\Exception\AuthenticationException;
 
 class PaymentService
 {
     private $em;
     private $bakeService;
+    private string $stripeSecretKey;
 
-    public function __construct(EntityManagerInterface $em, BakeItForwardService $bakeService)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        BakeItForwardService $bakeService,
+        string $stripeSecretKey
+    ) {
         $this->em = $em;
         $this->bakeService = $bakeService;
+        $this->stripeSecretKey = $stripeSecretKey;
     }
 
-    /**
-     * Process a successful payment
-     *
-     * @param Order $order
-     * @param float|null $paidAmount
-     * @return Order
-     */
-    public function processPayment(Order $order, ?float $paidAmount = null): Order
+    public function createPaymentIntent(float $amount): string
     {
-        // 1. Validate order
+        // Validation belongs HERE
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException('Payment amount must be greater than zero.');
+        }
+
+        Stripe::setApiKey($this->stripeSecretKey);
+
+        try {
+            $paymentIntent = PaymentIntent::create([
+                'amount'   => (int) round($amount * 100),
+                'currency' => 'php',
+                'automatic_payment_methods' => ['enabled' => true],
+            ]);
+
+            return $paymentIntent->client_secret;
+
+        } catch (CardException $e) {
+            throw new \Exception('Card declined: ' . $e->getMessage());
+        } catch (RateLimitException $e) {
+            throw new \Exception('Too many requests to Stripe. Please try again.');
+        } catch (InvalidRequestException $e) {
+            throw new \Exception('Invalid payment request: ' . $e->getMessage());
+        } catch (AuthenticationException $e) {
+            throw new \Exception('Stripe authentication failed. Check your API key.');
+        } catch (ApiErrorException $e) {
+            throw new \Exception('Stripe error: ' . $e->getMessage());
+        }
+    }
+
+    public function verifyPaymentIntent(string $paymentIntentId): bool
+    {
+        // No amount check here — only verifying Stripe status
+        Stripe::setApiKey($this->stripeSecretKey);
+
+        try {
+            $paymentIntent = PaymentIntent::retrieve($paymentIntentId);
+            return $paymentIntent->status === 'succeeded';
+        } catch (ApiErrorException $e) {
+            return false;
+        }
+    }
+
+    public function processPayment(
+        Order $order,
+        ?float $paidAmount = null,
+        string $paymentMethod = 'cod',
+        ?string $paymentIntentId = null
+    ): Order {
         if (!$order) {
             throw new \Exception('Order not found.');
         }
 
-        // 2. Update paid amount and status
-        if ($paidAmount !== null) {
-            $order->setTotalAmount($paidAmount);
+        // Stripe: verify before processing
+        if ($paymentMethod === 'stripe') {
+            if (!$paymentIntentId) {
+                throw new \Exception('Missing Stripe PaymentIntent ID.');
+            }
+
+            $verified = $this->verifyPaymentIntent($paymentIntentId);
+            if (!$verified) {
+                throw new \Exception('Stripe payment not verified. Order not processed.');
+            }
+
+            $order->setPaymentIntentId($paymentIntentId);
         }
-        $order->setStatus('PAID');
+
+        // Update order fields
+        if ($paidAmount !== null) {
+            $order->setPaidAmount($paidAmount);
+            $order->setTotalAmount((string) $paidAmount);
+        }
+
+        $order->setPaymentMethod($paymentMethod);
+        $order->setStatus($paymentMethod === 'cod' ? 'PENDING' : 'PAID');
+        $order->setPaymentProcessedAt(new \DateTimeImmutable());
         $order->setUpdatedAt(new \DateTimeImmutable());
 
-        $this->em->persist($order);
+        $this->em->persist($order); // ← was missing
 
-        // 3. Update stock quantities
+        // Deduct stock
         foreach ($order->getOrderItems() as $item) {
             $product = $item->getProduct();
-            $stock = $product->getStocks()->first(); // assume first stock record
+            $stock = $product->getStocks()->first();
             if ($stock) {
-                $stock->setQuantity($stock->getQuantity() - $item->getQuantity());
+                $newQty = $stock->getQuantity() - $item->getQuantity();
+                $stock->setQuantity(max(0, $newQty));
                 $this->em->persist($stock);
             }
         }
 
         $this->em->flush();
 
-        // 4. Trigger BakeItForward donation
+        // Trigger BakeItForward — 10% of paid amount goes to donation wallet
         $this->bakeService->processOrderContribution($order);
 
         return $order;
