@@ -188,12 +188,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
-    {
-        $this->password = $password;
-
-        return $this;
-    }
+    public function setPassword(?string $password): static  // ← add ?
+{
+    $this->password = $password;
+    return $this;
+}
 
     /**
      * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
@@ -322,26 +321,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->lastname;
     }
 
-    public function setLastname(string $lastname): static
-    {
-        $this->lastname = $lastname;
-
-        return $this;
-    }
+    public function setLastname(?string $lastname): static  // ← add ?
+{
+    $this->lastname = $lastname;
+    return $this;
+}
 
     public function getFirstname(): ?string
     {
         return $this->firstname;
     }
 
-    public function setFirstname(string $firstname): static
-    {
-        $this->firstname = $firstname;
-
-        return $this;
-    }
-
-
+    public function setFirstname(?string $firstname): static  // ← add ?
+{
+    $this->firstname = $firstname;
+    return $this;
+}
 
     public function getFcmToken(): ?string
     {
