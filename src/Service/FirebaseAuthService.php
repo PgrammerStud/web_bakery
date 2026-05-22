@@ -15,14 +15,32 @@ class FirebaseAuthService
         private readonly string $credentialsPath,
         private readonly LoggerInterface $logger,
     ) {
-        if (!file_exists($this->credentialsPath)) {
-            throw new \RuntimeException('Firebase credentials file not found: ' . $this->credentialsPath);
+        $factory = new Factory();
+
+        // Prefer env var (Railway) over file (local dev)
+        $credentialsJson = $_ENV['FIREBASE_CREDENTIALS_JSON'] ?? getenv('FIREBASE_CREDENTIALS_JSON');
+
+        if ($credentialsJson) {
+            $this->logger->info('Loading Firebase credentials from environment variable');
+            $decoded = json_decode($credentialsJson, true);
+
+            if (!$decoded) {
+                throw new \RuntimeException('FIREBASE_CREDENTIALS_JSON is set but contains invalid JSON');
+            }
+
+            $factory = $factory->withServiceAccount($decoded);
+
+        } elseif (file_exists($this->credentialsPath)) {
+            $this->logger->info('Loading Firebase credentials from file: ' . $this->credentialsPath);
+            $factory = $factory->withServiceAccount($this->credentialsPath);
+
+        } else {
+            throw new \RuntimeException(
+                'No Firebase credentials found. Set FIREBASE_CREDENTIALS_JSON env var or provide a valid file path.'
+            );
         }
 
-        // ← initialize once in constructor, not on every request
-        $this->auth = (new Factory())
-            ->withServiceAccount($this->credentialsPath)
-            ->createAuth();
+        $this->auth = $factory->createAuth();
     }
 
     public function verifyToken(string $idToken): ?array
