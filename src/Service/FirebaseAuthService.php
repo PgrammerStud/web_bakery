@@ -21,14 +21,35 @@ class FirebaseAuthService
         $credentialsJson = $_ENV['FIREBASE_CREDENTIALS_JSON'] ?? getenv('FIREBASE_CREDENTIALS_JSON');
 
         if ($credentialsJson) {
-            $this->logger->info('Loading Firebase credentials from environment variable');
-            $decoded = json_decode($credentialsJson, true);
+    $this->logger->info('Loading Firebase credentials from environment variable');
 
-            if (!$decoded) {
-                throw new \RuntimeException('FIREBASE_CREDENTIALS_JSON is set but contains invalid JSON');
-            }
+    // Railway sometimes escapes the JSON — try to fix common issues
+    $decoded = json_decode($credentialsJson, true);
 
-            $factory = $factory->withServiceAccount($decoded);
+    if (!$decoded) {
+        // Try stripping surrounding quotes if Railway wrapped it
+        $credentialsJson = trim($credentialsJson, '"\'');
+        $decoded = json_decode($credentialsJson, true);
+    }
+
+    if (!$decoded) {
+        throw new \RuntimeException('FIREBASE_CREDENTIALS_JSON contains invalid JSON. Error: ' . json_last_error_msg());
+    }
+
+    // ← ADD THIS TEMPORARILY
+    $this->logger->info('Firebase creds check', [
+    'project_id'  => $decoded['project_id'] ?? 'MISSING',
+    'client_email'=> $decoded['client_email'] ?? 'MISSING',
+    'key_start'   => substr($decoded['private_key'] ?? '', 0, 40),
+    'key_has_real_newlines' => str_contains($decoded['private_key'] ?? '', "\n") ? 'YES' : 'NO (needs str_replace)',
+]);
+
+    // Fix private_key if newlines got double-escaped
+    if (isset($decoded['private_key'])) {
+        $decoded['private_key'] = str_replace('\\n', "\n", $decoded['private_key']);
+    }
+
+    $factory = $factory->withServiceAccount($decoded);
 
         } elseif (file_exists($this->credentialsPath)) {
             $this->logger->info('Loading Firebase credentials from file: ' . $this->credentialsPath);
