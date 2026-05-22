@@ -99,15 +99,19 @@ class AuthController extends AbstractController
                 ],
             ], JsonResponse::HTTP_OK);
 
-        } catch (\Exception $e) {
-            $this->logger->error('Unexpected error during Firebase authentication', [
-                'error' => $e->getMessage(),
-            ]);
+        } catch (\Throwable $e) {   // ← change \Exception to \Throwable
+    $this->logger->error('Unexpected error during Firebase authentication', [
+        'error'     => $e->getMessage(),
+        'exception' => get_class($e),
+        'file'      => $e->getFile(),
+        'line'      => $e->getLine(),
+        'trace'     => $e->getTraceAsString(),
+    ]);
 
-            return new JsonResponse(
-                ['error' => 'Authentication failed'],
-                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
+    return new JsonResponse(
+        ['error' => 'Authentication failed'],
+        JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+    );
+}
     }
 }
