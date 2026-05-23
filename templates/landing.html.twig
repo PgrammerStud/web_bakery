@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Welcome to Catalbas Bakery!{% endblock %}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         {# <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>"> #}
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
@@ -66,52 +67,57 @@
             {% block body %}{% endblock %}
         </main>
 
-        <footer class="landing-footer">
-            <!-- Footer Content -->
-            <div class="footer-content">
-                <!-- Logo Section -->
-                <div class="footer-section footer-logo-section">
-                    <img src="{{ asset('image/logo1.png') }}" alt="Catalbas Bakery" class="footer-logo">
-                    <p>Freshly baked every morning, made with love and tradition.</p>
-                </div>
+       <footer class="landing-footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <img src="{{ asset('image/logo1.png') }}" alt="Catalbas Bakery" class="footer-logo">
+            <p class="footer-tagline">Freshly baked every morning,<br>made with love and tradition.</p>
+            <div class="footer-socials">
+    <a href="#" class="social-btn" aria-label="Facebook">
+        <i class="fab fa-facebook-f"></i>
+    </a>
+    <a href="#" class="social-btn" aria-label="Instagram">
+        <i class="fab fa-instagram"></i>
+    </a>
+    <a href="#" class="social-btn" aria-label="Twitter / X">
+        <i class="fab fa-x-twitter"></i>
+    </a>
+</div>
+        </div>
 
-                <!-- Quick Navigation Section -->
-                <div class="footer-section">
-                    <h3>Navigation</h3>
-                    <ul class="footer-links">
-                        <li><a href="{{ path('app_home') }}">Home</a></li>
-                        <li><a href="{{ path('app_products') }}">Products</a></li>
-                        <li><a href="{{ path('app_bakeitforward_feature') }}">Bake It Forward</a></li>
-                        <li><a href="{{ path('app_contact') }}">Contact</a></li>
-                        <li><a href="{{ path('app_about') }}">About</a></li>
-                    </ul>
-                </div>
+        <div class="footer-col">
+            <h4 class="footer-heading">Quick Links</h4>
+            <ul class="footer-links">
+                <li><a href="{{ path('app_home') }}">Home</a></li>
+                <li><a href="{{ path('app_products') }}">Products</a></li>
+                <li><a href="{{ path('app_bakeitforward_feature') }}">Bake It Forward</a></li>
+                <li><a href="{{ path('app_about') }}">About</a></li>
+            </ul>
+        </div>
 
-                <!-- Contact Section -->
-                <div class="footer-section">
-                    <h3>Contact Us</h3>
-                    <p><strong>Email:</strong> desireeadie143000@gmail.com</p>
-                    <p><strong>Phone:</strong> +63 9395929110</p>
-                    <p><strong>Address:</strong> 123 Larena Street, Valencia, Philippines</p>
-                </div>
+        <div class="footer-col">
+            <h4 class="footer-heading">Contact</h4>
+            <ul class="footer-contact-list">
+                <li>
+                    <span class="contact-label">Email</span>
+                    <a href="mailto:desireeadie143000@gmail.com">desireeadie143000@gmail.com</a>
+                </li>
+                <li>
+                    <span class="contact-label">Phone</span>
+                    <span>+63 939 592 9110</span>
+                </li>
+                <li>
+                    <span class="contact-label">Address</span>
+                    <span>123 Larena Street, Valencia, Philippines</span>
+                </li>
+            </ul>
+        </div>
+    </div>
 
-                <!-- Social Section -->
-                <div class="footer-section">
-                    <h3>Follow Us</h3>
-                    <p>Stay connected for updates and special offers</p>
-                    <p class="social-links">
-                        <a href="#" class="social-link">Facebook</a> | 
-                        <a href="#" class="social-link">Instagram</a> | 
-                        <a href="#" class="social-link">Twitter</a>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Copyright Section -->
-            <div class="footer-bottom">
-                <p>&copy; 2024 Catalbas Bakery. All rights reserved.</p>
-            </div>
-        </footer>
+    <div class="footer-bottom">
+        <p>&copy; 2025 Catalbas Bakery. All rights reserved.</p>
+    </div>
+</footer>
 
        <script>
     function initHamburger() {
