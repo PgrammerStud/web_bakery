@@ -23,12 +23,9 @@ COPY . .
 
 RUN if [ ! -f /app/.env ]; then echo "APP_ENV=${APP_ENV:-prod}\nAPP_DEBUG=${APP_DEBUG:-false}\nAPP_SECRET=${APP_SECRET:-ChangeMe}\n" > /app/.env; fi
 
-RUN php bin/console importmap:install --no-interaction
+RUN php bin/console importmap:install --no-interaction || true
 RUN php bin/console asset-map:compile --no-interaction || true
 RUN rm -rf /app/var/cache/prod || true
-
-
-RUN php bin/console cache:warmup --env=prod --no-debug || true
 
 FROM php:8.3-fpm as runtime
 
