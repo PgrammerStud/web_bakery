@@ -16,13 +16,16 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
 COPY composer.json composer.lock ./
-
 RUN composer install --no-interaction --no-scripts --optimize-autoloader
 
 COPY . .
 
 RUN if [ ! -f /app/.env ]; then echo "APP_ENV=${APP_ENV:-prod}\nAPP_DEBUG=${APP_DEBUG:-false}\nAPP_SECRET=${APP_SECRET:-ChangeMe}\n" > /app/.env; fi
 
+# Run composer again with scripts now that app code exists
+RUN composer install --no-interaction --optimize-autoloader --no-ansi || true
+
+# These will partially fail without DATABASE_URL but that's OK
 RUN php bin/console importmap:install --no-interaction || true
 RUN php bin/console asset-map:compile --no-interaction || true
 RUN rm -rf /app/var/cache/prod || true
