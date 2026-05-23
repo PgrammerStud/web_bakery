@@ -26,6 +26,6 @@
 
 ###> Firebase credentials ###
 /config/firebase/serviceAccountKey.json
-/config/firebase/service-account.json
 ###< Firebase credentials ###
+
 
