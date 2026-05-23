@@ -1173,7 +1173,13 @@ textarea:focus {
 }
 
 /* Login Page Styles */
-/* ===== LOGIN PAGE STYLES ===== */
+.login-container {
+    min-height: calc(100vh - 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
 
 .login-form {
     background-color: var(--white);
@@ -1184,7 +1190,6 @@ textarea:focus {
     max-width: 400px;
     position: relative;
     border-top: 4px solid var(--primary-orange);
-    box-sizing: border-box;
 }
 
 .login-form::before {
@@ -1263,10 +1268,9 @@ textarea:focus {
     border: 2px solid var(--gray-medium);
     border-radius: 10px;
     font-family: 'Open Sans Condensed', sans-serif;
-    font-size: 16px; /* prevents iOS zoom */
+    font-size: 1rem;
     transition: var(--transition);
     background-color: var(--gray-light);
-    box-sizing: border-box;
 }
 
 .login-form input[type="text"]:focus,
@@ -1367,16 +1371,14 @@ textarea:focus {
     text-decoration: underline;
 }
 
-/* ===== LOGIN PAGE (card variant) ===== */
-
+/* Login Page Styles */
 .login-page {
     min-height: 100vh;
     display: flex;
-    align-items: flex-start; /* changed from center — allows scroll when keyboard opens */
+    align-items: center;
     justify-content: center;
-    padding: 5rem 1.5rem 2rem; /* top padding accounts for the floating logo circle */
+    padding: 2rem;
     font-family: 'Open Sans Condensed', sans-serif;
-    box-sizing: border-box;
 }
 
 .login-page .login-card {
@@ -1387,7 +1389,6 @@ textarea:focus {
     width: 100%;
     max-width: 450px;
     position: relative;
-    box-sizing: border-box;
 }
 
 .login-page .login-card::before {
@@ -1466,10 +1467,9 @@ textarea:focus {
     border: 2px solid var(--gray-medium);
     border-radius: 12px;
     font-family: 'Open Sans Condensed', sans-serif;
-    font-size: 16px; /* prevents iOS auto-zoom */
+    font-size: 1.05rem;
     transition: var(--transition);
     background-color: var(--gray-light);
-    box-sizing: border-box;
 }
 
 .login-page .form-control:focus {
@@ -1585,6 +1585,28 @@ textarea:focus {
     text-decoration: underline;
 }
 
+/* Responsive for Login Page */
+@media (max-width: 768px) {
+    .login-page {
+        padding: 1.5rem;
+    }
+    
+    .login-page .login-card {
+        padding: 2.5rem 2rem;
+    }
+    
+    .login-page .login-card::before {
+        width: 80px;
+        height: 80px;
+        top: -50px;
+        background-size: 45px;
+    }
+    
+    .login-page h1 {
+        font-size: 1.75rem;
+        margin-top: 1rem;
+    }
+}
 
 /* Category Index Page Styles */
 .category-page {
@@ -3406,6 +3428,15 @@ textarea:focus {
     align-items: center;
 }
 
+.landing-header-content {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .landing-logo-section {
     display: flex;
     align-items: center;
@@ -3565,26 +3596,6 @@ textarea:focus {
 
 .hamburger-menu.active span:nth-child(3) {
     transform: rotate(-45deg) translate(7px, -7px);
-}
-
-/* Menu Backdrop Overlay */
-.landing-nav::before {
-    content: '';
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-    z-index: 998;
-}
-
-.landing-nav.active::before {
-    opacity: 1;
-    pointer-events: auto;
 }
 
 /* Body adjustments for landing page */
@@ -4667,43 +4678,37 @@ body.landing-page .sidebar {
     }
 
     .landing-nav {
-        position: fixed;
+        position: absolute;
         top: 70px;
-        left: -260px;
-        width: 260px;
-        height: calc(100vh - 70px);
+        left: 0;
+        right: 0;
         background: linear-gradient(135deg, var(--primary-brown) 0%, var(--secondary-dark) 100%);
         flex-direction: column;
         gap: 0;
-        overflow-y: auto;
-        transition: left 0.3s ease;
-        z-index: 999;
-        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
     }
 
     .landing-nav.active {
-        left: 0;
+        max-height: 500px;
+        box-shadow: var(--shadow-lg);
     }
 
     .nav-link {
-        padding: 1rem 1.5rem;
+        padding: 1rem 2rem;
         border-radius: 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        display: block;
-        width: 100%;
-        text-align: left;
     }
 
     .nav-link:hover {
         background-color: rgba(255, 255, 255, 0.15);
-        transform: translateX(8px);
+        transform: none;
     }
 
     .nav-link.active {
         background-color: var(--primary-cream);
         color: var(--primary-brown);
-        border-left: 4px solid var(--primary-orange);
-        padding-left: calc(1.5rem - 4px);
     }
 
     .hero {
