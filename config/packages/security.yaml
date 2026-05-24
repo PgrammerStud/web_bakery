@@ -19,6 +19,12 @@ security:
 
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        
+        # ✅ ADD THIS — isolates auth endpoints from api_platform's json_login
+        api_auth:
+            pattern: ^/api/auth
+            stateless: true
+            security: false
 
         api_platform:
             pattern: ^/api
