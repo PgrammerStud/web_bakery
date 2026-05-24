@@ -18,7 +18,11 @@ class ActivityLoggerService
         $log->setUser($user);
         $log->setUsername($user->getUsername());
         $roles = $user->getRoles();
-        $role = in_array('ROLE_ADMIN', $roles, true) ? 'Admin' : 'Staff';
+        $role = in_array('ROLE_ADMIN', $roles, true) 
+    ? 'Admin' 
+    : (in_array('ROLE_STAFF', $roles, true) 
+        ? 'Staff' 
+        : 'User');  // ✅ ROLE_USER now correctly saves as 'User'
         $log->setRole($role);
         $log->setAction($action);
         $log->setTargetData($targetData);
