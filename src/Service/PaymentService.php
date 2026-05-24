@@ -73,58 +73,54 @@ class PaymentService
     }
 
     public function processPayment(
-        Order $order,
-        ?float $paidAmount = null,
-        string $paymentMethod = 'cod',
-        ?string $paymentIntentId = null
-    ): Order {
-        if (!$order) {
-            throw new \Exception('Order not found.');
-        }
-
-        // Stripe: verify before processing
-        if ($paymentMethod === 'stripe') {
-            if (!$paymentIntentId) {
-                throw new \Exception('Missing Stripe PaymentIntent ID.');
-            }
-
-            $verified = $this->verifyPaymentIntent($paymentIntentId);
-            if (!$verified) {
-                throw new \Exception('Stripe payment not verified. Order not processed.');
-            }
-
-            $order->setPaymentIntentId($paymentIntentId);
-        }
-
-        // Update order fields
-        if ($paidAmount !== null) {
-            $order->setPaidAmount($paidAmount);
-            $order->setTotalAmount((string) $paidAmount);
-        }
-
-        $order->setPaymentMethod($paymentMethod);
-        $order->setStatus($paymentMethod === 'cod' ? 'PENDING' : 'PAID');
-        $order->setPaymentProcessedAt(new \DateTimeImmutable());
-        $order->setUpdatedAt(new \DateTimeImmutable());
-
-        $this->em->persist($order); // ← was missing
-
-        // Deduct stock
-        foreach ($order->getOrderItems() as $item) {
-            $product = $item->getProduct();
-            $stock = $product->getStocks()->first();
-            if ($stock) {
-                $newQty = $stock->getQuantity() - $item->getQuantity();
-                $stock->setQuantity(max(0, $newQty));
-                $this->em->persist($stock);
-            }
-        }
-
-        $this->em->flush();
-
-        // Trigger BakeItForward — 10% of paid amount goes to donation wallet
-        $this->bakeService->processOrderContribution($order);
-
-        return $order;
+    Order $order,
+    ?float $paidAmount = null,
+    string $paymentMethod = 'cod',
+    ?string $paymentIntentId = null
+): Order {
+    if (!$order) {
+        throw new \Exception('Order not found.');
     }
+
+    if ($paymentMethod === 'stripe') {
+        if (!$paymentIntentId) {
+            throw new \Exception('Missing Stripe PaymentIntent ID.');
+        }
+        $verified = $this->verifyPaymentIntent($paymentIntentId);
+        if (!$verified) {
+            throw new \Exception('Stripe payment not verified. Order not processed.');
+        }
+        $order->setPaymentIntentId($paymentIntentId);
+    }
+
+    // ✅ FIX: only update amount if explicitly provided
+    // For COD, paidAmount is null — don't overwrite totalAmount with null
+    if ($paidAmount !== null) {
+        $order->setPaidAmount($paidAmount);
+        $order->setTotalAmount((string) $paidAmount);
+    }
+
+    $order->setPaymentMethod($paymentMethod);
+    $order->setStatus($paymentMethod === 'cod' ? 'PENDING' : 'PAID');
+    $order->setPaymentProcessedAt(new \DateTimeImmutable());
+    $order->setUpdatedAt(new \DateTimeImmutable());
+
+    $this->em->persist($order);
+
+    foreach ($order->getOrderItems() as $item) {
+        $product = $item->getProduct();
+        $stock = $product->getStocks()->first();
+        if ($stock) {
+            $newQty = $stock->getQuantity() - $item->getQuantity();
+            $stock->setQuantity(max(0, $newQty));
+            $this->em->persist($stock);
+        }
+    }
+
+    $this->em->flush();
+
+    $this->bakeService->processOrderContribution($order);
+
+    return $order;
+}
 }
