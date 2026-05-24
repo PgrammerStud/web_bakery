@@ -22,30 +22,18 @@ class LoginSuccessListener implements EventSubscriberInterface
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
         $request = $event->getRequest();
-
-        // ✅ FIX: Only log LOGIN for the actual authentication endpoints.
-        // The JWT firewall fires LoginSuccessEvent on EVERY authenticated
-        // request, not just the initial login — so we guard by route/path.
         $path = $request->getPathInfo();
 
-        $loginPaths = [
-            '/api/auth/google',   // mobile Firebase/Google login
-            '/api/login',         // standard username+password login (add yours here)
-        ];
-
-        $isLoginRequest = false;
-        foreach ($loginPaths as $loginPath) {
-            if (str_starts_with($path, $loginPath)) {
-                $isLoginRequest = true;
-                break;
-            }
+        if ($path === '/login') {
+            $user = $event->getUser();
+            $this->activityLogger->log($user, 'LOGIN', 'User: ' . $user->getUsername());
+            return;
         }
 
-        if (!$isLoginRequest) {
-            return; // ← skip logging for all other JWT-authenticated requests
+        if ($path === '/api/login') {
+            $user = $event->getUser();
+            $this->activityLogger->log($user, 'LOGIN', 'User: ' . $user->getUsername());
+            return;
         }
-
-        $user = $event->getUser();
-        $this->activityLogger->log($user, 'LOGIN', 'User: ' . $user->getUsername());
     }
 }
