@@ -39,18 +39,25 @@ final class CartController extends AbstractController
     }
 
     #[Route('/cart', name: 'app_cart', methods: ['GET'])]
-    public function viewCart(Request $request, CartService $cartService): Response
-    {
-        if ($request->headers->has('Authorization')) {
-            return new JsonResponse($cartService->getCartWithDetails());
-        }
+public function viewCart(Request $request, CartService $cartService): Response
+{
+    $authHeader = $request->headers->get('Authorization', '');
+    $isApiRequest = str_starts_with($authHeader, 'Bearer ') 
+                    && strlen(trim(substr($authHeader, 7))) > 0;
 
-        return $this->render('cart/view.html.twig', [
-            'cartDetails' => $cartService->getCartWithDetails(),
-            'cartTotal'   => $cartService->getCartTotal(),
-            'itemCount'   => $cartService->getItemCount(),
-        ]);
+    if ($isApiRequest) {
+        if (!$this->getUser()) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+        return new JsonResponse($cartService->getCartWithDetails());
     }
+
+    return $this->render('cart/view.html.twig', [
+        'cartDetails' => $cartService->getCartWithDetails(),
+        'cartTotal'   => $cartService->getCartTotal(),
+        'itemCount'   => $cartService->getItemCount(),
+    ]);
+}
 
     #[Route('/remove-from-cart/{id}', name: 'app_remove_from_cart', methods: ['POST'])]
     public function removeFromCart(int $id, CartService $cartService): Response
