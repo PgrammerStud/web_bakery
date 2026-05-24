@@ -28,19 +28,20 @@ class AuthController extends AbstractController
     ) {}
 
     // Change from /logout to a path that can't be confused
-#[Route('/api/user/logout', name: 'api_user_logout', methods: ['POST'])]
-public function logout(Request $request): JsonResponse
-{
-    $user = $this->getUser();
+ #[Route('/logout', name: 'logout', methods: ['POST'])]  // ✅ becomes /api/auth/logout
+    public function logout(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
 
-    if (!$user instanceof User) {
-        return new JsonResponse(['error' => 'Not authenticated'], JsonResponse::HTTP_UNAUTHORIZED);
+        if (!$user instanceof User) {
+            return new JsonResponse(['error' => 'Not authenticated'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+
+        $this->activityLogger->log($user, 'LOGOUT', 'User: ' . $user->getUsername());
+
+        return new JsonResponse(['success' => true, 'message' => 'Logged out successfully']);
     }
 
-    $this->activityLogger->log($user, 'LOGOUT', 'User: ' . $user->getUsername());
-
-    return new JsonResponse(['success' => true, 'message' => 'Logged out successfully']);
-}
 
     #[Route('/google', name: 'google', methods: ['POST'])]
     public function googleAuth(Request $request): JsonResponse
