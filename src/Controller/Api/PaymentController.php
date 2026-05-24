@@ -39,7 +39,6 @@ class PaymentController extends AbstractController
             ], 400);
         }
 
-        // ── Stock validation before creating the order ────────────────
         foreach ($cart->getCartItems() as $cartItem) {
             $product   = $cartItem->getProduct();
             $requested = $cartItem->getQuantity();
@@ -54,7 +53,6 @@ class PaymentController extends AbstractController
                 ], 400);
             }
         }
-        // ─────────────────────────────────────────────────────────────
 
         $total = 0.0;
         foreach ($cart->getCartItems() as $cartItem) {
@@ -95,18 +93,22 @@ class PaymentController extends AbstractController
         $em->persist($order);
         $em->flush();
 
-        $mercure->publishNewOrder([
-            'id'          => $order->getId(),
-            'orderNumber' => $order->getOrderNumber(),
-            'customer'    => $order->getCustomerName(),
-            'total'       => $total,
-            'created_at'  => (new \DateTime())->format('Y-m-d H:i:s'),
-        ]);
+        try {
+            $mercure->publishNewOrder([
+                'id'          => $order->getId(),
+                'orderNumber' => $order->getOrderNumber(),
+                'customer'    => $order->getCustomerName(),
+                'total'       => $total,
+                'created_at'  => (new \DateTime())->format('Y-m-d H:i:s'),
+            ]);
 
-        $mercure->publishNotification(
-            'New order ' . $order->getOrderNumber() . ' has been placed!',
-            'success'
-        );
+            $mercure->publishNotification(
+                'New order ' . $order->getOrderNumber() . ' has been placed!',
+                'success'
+            );
+        } catch (\Throwable $e) {
+            // ✅ Don't let Mercure failure break the order creation
+        }
 
         return $this->json([
             'success'     => true,
@@ -194,7 +196,6 @@ class PaymentController extends AbstractController
             ], 404);
         }
 
-        // Prevent re-processing an already paid order
         if (strtolower($order->getStatus()) === 'paid') {
             return $this->json([
                 'success' => false,
@@ -211,28 +212,43 @@ class PaymentController extends AbstractController
                 $paymentIntentId
             );
 
-            $mercure->publishOrderPaid([
-                'id'          => $order->getId(),
-                'orderNumber' => $order->getOrderNumber(),
-                'customer'    => $order->getCustomerName(),
-                'total'       => $order->getTotalAmount(),
-                'paid_at'     => (new \DateTime())->format('Y-m-d H:i:s'),
-            ]);
-
-            $mercure->publishNotification(
-                'Order ' . $order->getOrderNumber() . ' has been paid successfully!',
-                'success'
-            );
+            // ✅ FIX: separate Mercure events for COD vs Stripe
+            // Mercure errors must NOT crash the payment response
+            try {
+                if ($paymentMethod === 'stripe') {
+                    $mercure->publishOrderPaid([
+                        'id'          => $order->getId(),
+                        'orderNumber' => $order->getOrderNumber(),
+                        'customer'    => $order->getCustomerName(),
+                        'total'       => $order->getTotalAmount(),
+                        'paid_at'     => (new \DateTime())->format('Y-m-d H:i:s'),
+                    ]);
+                    $mercure->publishNotification(
+                        'Order ' . $order->getOrderNumber() . ' has been paid successfully!',
+                        'success'
+                    );
+                } else {
+                    // COD — order is pending, not paid yet
+                    $mercure->publishNotification(
+                        'Order ' . $order->getOrderNumber() . ' placed! Payment on delivery.',
+                        'success'
+                    );
+                }
+            } catch (\Throwable $e) {
+                // ✅ Mercure failure must never cause a 500 —
+                // the payment already succeeded at this point
+            }
 
             return $this->json([
                 'success' => true,
                 'status'  => $order->getStatus(),
             ]);
+
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
                 'error'   => 'server_error',
-                'message' => 'Payment processing failed. Please try again.',
+                'message' => $e->getMessage(), // ✅ expose real error for debugging
             ], 500);
         }
     }
