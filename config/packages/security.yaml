@@ -77,7 +77,7 @@ security:
         - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }
 
     # ← ADD THESE TWO LINES
-        - { path: ^/api/user/logout, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/auth/logout, roles: IS_AUTHENTICATED_FULLY }  # ✅ correct path
         - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/add-to-cart, roles: IS_AUTHENTICATED_FULLY }
