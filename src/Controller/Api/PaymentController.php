@@ -20,14 +20,15 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class PaymentController extends AbstractController
 {
     #[Route('/api/order/create', name: 'api_order_create', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
-    public function createOrder(
-        Request $request,
-        EntityManagerInterface $em,
-        CartRepository $cartRepository,
-        StockRepository $stockRepository,
-        MercurePublisher $mercure
-    ): JsonResponse {
+#[IsGranted('ROLE_USER')]
+public function createOrder(
+    Request $request,
+    EntityManagerInterface $em,
+    CartRepository $cartRepository,
+    StockRepository $stockRepository,
+    MercurePublisher $mercure
+): JsonResponse {
+    try {
         $user = $this->getUser();
         $cart = $cartRepository->findOneBy(['customer' => $user]);
 
@@ -39,7 +40,12 @@ class PaymentController extends AbstractController
             ], 400);
         }
 
-        foreach ($cart->getCartItems() as $cartItem) {
+        // ✅ Convert to plain array FIRST — never iterate live Doctrine collection
+        // while removing elements from it
+        $cartItems = $cart->getCartItems()->toArray();
+
+        // Stock validation
+        foreach ($cartItems as $cartItem) {
             $product   = $cartItem->getProduct();
             $requested = $cartItem->getQuantity();
             $stock     = $stockRepository->findOneBy(['product' => $product]);
@@ -54,11 +60,13 @@ class PaymentController extends AbstractController
             }
         }
 
+        // Calculate total
         $total = 0.0;
-        foreach ($cart->getCartItems() as $cartItem) {
+        foreach ($cartItems as $cartItem) {
             $total += $cartItem->getProduct()->getPrice() * $cartItem->getQuantity();
         }
 
+        // Create order
         $order = new Order();
         $order->setCreatedBy($user);
         $order->setOrderNumber('ORD-' . strtoupper(uniqid()));
@@ -72,7 +80,10 @@ class PaymentController extends AbstractController
         $order->setPaymentMethod('pending');
         $order->setUpdatedAt(new \DateTimeImmutable());
 
-        foreach ($cart->getCartItems() as $cartItem) {
+        $em->persist($order);
+
+        // ✅ Use plain array — safe to remove while iterating
+        foreach ($cartItems as $cartItem) {
             $product  = $cartItem->getProduct();
             $quantity = $cartItem->getQuantity();
             $price    = $product->getPrice();
@@ -87,10 +98,11 @@ class PaymentController extends AbstractController
             $em->persist($orderItem);
             $order->addOrderItem($orderItem);
 
+            // ✅ Also detach from cart collection to keep Doctrine state clean
+            $cart->removeCartItem($cartItem);
             $em->remove($cartItem);
         }
 
-        $em->persist($order);
         $em->flush();
 
         try {
@@ -101,13 +113,12 @@ class PaymentController extends AbstractController
                 'total'       => $total,
                 'created_at'  => (new \DateTime())->format('Y-m-d H:i:s'),
             ]);
-
             $mercure->publishNotification(
                 'New order ' . $order->getOrderNumber() . ' has been placed!',
                 'success'
             );
         } catch (\Throwable $e) {
-            // ✅ Don't let Mercure failure break the order creation
+            // Mercure failure must not break order creation
         }
 
         return $this->json([
@@ -116,7 +127,16 @@ class PaymentController extends AbstractController
             'orderNumber' => $order->getOrderNumber(),
             'total'       => $total,
         ]);
+
+    } catch (\Throwable $e) {
+        // ✅ Expose real error message for debugging
+        return $this->json([
+            'success' => false,
+            'error'   => 'server_error',
+            'message' => $e->getMessage(),
+        ], 500);
     }
+}
 
     #[Route('/api/payment/create-intent', name: 'api_payment_create_intent', methods: ['POST'])]
     #[IsGranted('ROLE_USER')]
