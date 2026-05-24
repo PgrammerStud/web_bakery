@@ -26,6 +26,7 @@
             <table id="products-table">
                 <thead>
                     <tr>
+                        <th>id</th>
                         <th>Image</th>
                         <th>Name</th>
                         <th>Description</th>
@@ -38,6 +39,7 @@
                 <tbody>
                 {% for product in products %}
                     <tr>
+                        <td>{{ product.id }}</td>
                         <td>
                             {% if product.imageUrl %}
                                 <img src="{{ asset('image/' ~ product.imageUrl) }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
