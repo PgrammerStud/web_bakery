@@ -15,31 +15,36 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/api')]
 class NotificationController extends AbstractController
 {
-    #[Route('/notifications/send', name: 'api_notifications_send', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
-    public function send(
-        Request $request,
-        UserRepository $userRepository
-    ): JsonResponse {
-        $body = json_decode($request->getContent(), true);
+   #[Route('/notifications/send', name: 'api_notifications_send', methods: ['POST'])]
+#[IsGranted('ROLE_USER')]
+public function send(
+    Request $request,
+    UserRepository $userRepository
+): JsonResponse {
+    $body = json_decode($request->getContent(), true);
 
-        $topic   = $body['topic']  ?? null;
-        $title   = $body['title']  ?? 'Notification';
-        $msgBody = $body['body']   ?? '';
-        $data    = $body['data']   ?? [];
+    $topic   = $body['topic']  ?? null;
+    $title   = $body['title']  ?? 'Notification';
+    $msgBody = $body['body']   ?? '';
+    $data    = $body['data']   ?? [];
 
-        if (!$topic) {
-            return $this->json(['message' => 'topic is required'], 400);
-        }
+    if (!$topic) {
+        return $this->json(['message' => 'topic is required'], 400);
+    }
 
-        // ✅ Fix 1: initialize $messaging before using it
+    try {
         $credentialsPath = $this->getParameter('kernel.project_dir') . '/config/firebase/serviceAccountKey.json';
-        $factory   = (new Factory)->withServiceAccount($credentialsPath);
-        $messaging = $factory->createMessaging(); // ← was missing
+        $factory         = (new Factory)->withServiceAccount($credentialsPath);
+        $messaging       = $factory->createMessaging();
+    } catch (\Throwable $e) {
+        // Firebase not configured — log and return 200 so the order flow isn't blocked
+        return $this->json(['message' => 'Notification service unavailable'], 200);
+    }
 
-        /** @var \App\Entity\User $sender */
-        $sender = $this->getUser();
+    /** @var \App\Entity\User $sender */
+    $sender = $this->getUser();
 
+    try {
         if ($topic === 'staff') {
             $staffUsers = array_filter(
                 $userRepository->findAll(),
@@ -55,7 +60,6 @@ class NotificationController extends AbstractController
                 return $this->json(['message' => 'No staff tokens found'], 200);
             }
 
-            // ✅ Fix 2: CloudMessage::new() needs a target for multicast
             $message = CloudMessage::new()
                 ->withNotification(Notification::create($title, $msgBody))
                 ->withData($data);
@@ -79,6 +83,15 @@ class NotificationController extends AbstractController
             return $this->json(['message' => 'Unknown topic'], 400);
         }
 
-        return $this->json(['message' => 'Notification sent']);
+    } catch (\Throwable $e) {
+        // Firebase send failed — never let this crash the caller's order flow
+        // Log it properly if you have a logger injected
+        return $this->json([
+            'message' => 'Notification delivery failed',
+            'detail'  => $e->getMessage(), // remove this in production
+        ], 200); // ← 200, not 500 — notifications are non-critical
     }
+
+    return $this->json(['message' => 'Notification sent']);
+}
 }
