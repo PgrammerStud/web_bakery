@@ -165,7 +165,9 @@ public function createOrder(
             return $this->json([
                 'success' => false,
                 'error'   => 'server_error',
-                'message' => 'Failed to create payment intent. Please try again.',
+                'message' => $e->getMessage(), // ← real error
+                'class'   => get_class($e),    // ← which exception type
+                'file'    => $e->getFile() . ':' . $e->getLine(),
             ], 500);
         }
     }
