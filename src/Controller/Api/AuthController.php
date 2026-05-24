@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\ActivityLoggerService;
 use App\Service\FirebaseAuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -23,6 +24,7 @@ class AuthController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly JWTTokenManagerInterface $jwtTokenManager,
         private readonly LoggerInterface $logger,
+        private readonly ActivityLoggerService $activityLogger, // ✅ ADDED
     ) {}
 
     #[Route('/google', name: 'google', methods: ['POST'])]
@@ -53,7 +55,6 @@ class AuthController extends AbstractController
             $user = $this->userRepository->findOneBy(['email' => $email]);
 
             if (null === $user) {
-                // Split displayName into firstname and lastname
                 $nameParts = explode(' ', $firebaseUser['name'] ?? 'User', 2);
 
                 $user = new User();
@@ -65,13 +66,12 @@ class AuthController extends AbstractController
                 $user->setLastname($nameParts[1] ?? '');
                 $user->setProfilePictureUrl($firebaseUser['photo'] ?? null);
                 $user->setRoles(['ROLE_USER']);
-                $user->setPassword(null);       // ← OAuth users have no password
-                $user->setIsVerified(true);     // ← Firebase already verified email
+                $user->setPassword(null);
+                $user->setIsVerified(true);
 
                 $this->em->persist($user);
                 $this->logger->info('New user created', ['email' => $email]);
             } else {
-                // Update info if changed
                 if ($user->getDisplayName() !== ($firebaseUser['name'] ?? '')) {
                     $user->setDisplayName($firebaseUser['name'] ?? '');
                 }
@@ -87,6 +87,11 @@ class AuthController extends AbstractController
 
             $jwt = $this->jwtTokenManager->create($user);
 
+            // ✅ ADDED — log the mobile Google login directly here because
+            // api_auth firewall has security: false so LoginSuccessEvent
+            // never fires for this route
+            $this->activityLogger->log($user, 'LOGIN', 'User: ' . $user->getUsername());
+
             return new JsonResponse([
                 'token' => $jwt,
                 'user' => [
@@ -101,12 +106,12 @@ class AuthController extends AbstractController
             ], JsonResponse::HTTP_OK);
 
         } catch (\Throwable $e) {
-    $this->logger->error('Unexpected error during Firebase authentication: ' . get_class($e) . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
+            $this->logger->error('Unexpected error during Firebase authentication: ' . get_class($e) . ' | ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
 
-    return new JsonResponse(
-        ['error' => 'Authentication failed'],
-        JsonResponse::HTTP_INTERNAL_SERVER_ERROR
-    );
-}
+            return new JsonResponse(
+                ['error' => 'Authentication failed'],
+                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 }
