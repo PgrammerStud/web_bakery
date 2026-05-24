@@ -22,7 +22,7 @@ security:
         
         # ✅ ADD THIS — isolates auth endpoints from api_platform's json_login
         api_auth:
-            pattern: ^/api/auth
+            pattern: ^/api/auth/google
             stateless: true
             security: false
 
@@ -77,6 +77,7 @@ security:
         - { path: ^/api/auth/google, roles: PUBLIC_ACCESS }
 
     # ← ADD THESE TWO LINES
+        - { path: ^/api/user/logout, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/add-to-cart, roles: IS_AUTHENTICATED_FULLY }
@@ -84,6 +85,7 @@ security:
         - { path: ^/api/remove-from-cart, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/cart/update, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/cart/clear, roles: IS_AUTHENTICATED_FULLY }  
+
 
         - { path: ^/api/payment, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/order/create, roles: IS_AUTHENTICATED_FULLY }
