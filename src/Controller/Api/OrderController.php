@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class OrderController extends AbstractController
 {
-    #[Route('/api/my-orders', name: 'api_my_orders', methods: ['GET'])]
+    #[Route('/api/my-orders', name: 'api_customer_orders', methods: ['GET'])]  // different name
     #[IsGranted('ROLE_USER')]
     public function myOrders(OrderRepository $orderRepository): JsonResponse
     {
