@@ -199,115 +199,112 @@
 
         {# ===== MERCURE JAVASCRIPT (admin/staff only) ===== #}
         {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
-        <script>
-            // ── Toast ──────────────────────────────────────────────
-            function showToast(title, message, type = 'success') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = 'toast ' + type;
-                toast.innerHTML = `<div class="toast-title">${title}</div><div class="toast-message">${message}</div>`;
-                container.appendChild(toast);
-                setTimeout(() => toast.remove(), 5000);
-            }
-
-            // ── Notification bell ──────────────────────────────────
-            let notifCount = 0;
-
-            function addNotification(title, message) {
-                notifCount++;
-                const badge  = document.getElementById('notif-badge');
-                const list   = document.getElementById('notif-list');
-                const empty  = document.getElementById('notif-empty');
-
-                badge.style.display = 'flex';
-                badge.textContent   = notifCount;
-
-                if (empty) empty.remove();
-
-                const item = document.createElement('div');
-                item.className = 'notif-item';
-                item.innerHTML = `
-                    <div class="notif-item-title">${title}</div>
-                    <div class="toast-message">${message}</div>
-                    <div class="notif-item-time">${new Date().toLocaleTimeString()}</div>
-                `;
-                list.prepend(item);
-            }
-
-            // Bell toggle
-document.addEventListener('click', function(e) {
-    const bell     = document.getElementById('notif-bell');
-    const dropdown = document.getElementById('notif-dropdown');
-    const clearBtn = document.getElementById('notif-clear');
-
-    if (!bell || !dropdown) return;
-
-    // Clicked clear button
-    if (clearBtn && clearBtn.contains(e.target)) {
-        e.stopPropagation();
-        const list = document.getElementById('notif-list');
-        list.innerHTML = '<div class="notif-empty" id="notif-empty">No notifications yet</div>';
-        notifCount = 0;
-        document.getElementById('notif-badge').style.display = 'none';
-        return;
+<script>
+    // ── Toast ──────────────────────────────────────────────
+    function showToast(title, message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.innerHTML = `<div class="toast-title">${title}</div><div class="toast-message">${message}</div>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
     }
 
-    // Clicked bell or inside bell
-    if (bell.contains(e.target)) {
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
+    // ── Notification bell ──────────────────────────────────
+    let notifCount = 0;
 
-        // Reset counter when opened
-        if (dropdown.classList.contains('open')) {
+    function addNotification(title, message) {
+        notifCount++;
+        const badge  = document.getElementById('notif-badge');
+        const list   = document.getElementById('notif-list');
+        const empty  = document.getElementById('notif-empty');
+
+        badge.style.display = 'flex';
+        badge.textContent   = notifCount;
+
+        if (empty) empty.remove();
+
+        const item = document.createElement('div');
+        item.className = 'notif-item';
+        item.innerHTML = `
+            <div class="notif-item-title">${title}</div>
+            <div class="toast-message">${message}</div>
+            <div class="notif-item-time">${new Date().toLocaleTimeString()}</div>
+        `;
+        list.prepend(item);
+    }
+
+    // ── Bell toggle ────────────────────────────────────────
+    document.addEventListener('click', function(e) {
+        const bell     = document.getElementById('notif-bell');
+        const dropdown = document.getElementById('notif-dropdown');
+        const clearBtn = document.getElementById('notif-clear');
+
+        if (!bell || !dropdown) return;
+
+        if (clearBtn && clearBtn.contains(e.target)) {
+            e.stopPropagation();
+            const list = document.getElementById('notif-list');
+            list.innerHTML = '<div class="notif-empty" id="notif-empty">No notifications yet</div>';
             notifCount = 0;
             document.getElementById('notif-badge').style.display = 'none';
-            document.getElementById('notif-badge').textContent = '0';
+            return;
         }
-        return;
-    }
 
-    // Clicked outside — close dropdown
-    dropdown.classList.remove('open');
-});
+        if (bell.contains(e.target)) {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+            if (dropdown.classList.contains('open')) {
+                notifCount = 0;
+                document.getElementById('notif-badge').style.display = 'none';
+                document.getElementById('notif-badge').textContent = '0';
+            }
+            return;
+        }
 
+        dropdown.classList.remove('open');
+    });
 
-            // ── Mercure listeners ──────────────────────────────────
-        const MERCURE_PUBLIC_URL = '{{ mercure_public_url }}';
+    // ── Mercure ────────────────────────────────────────────
+    const MERCURE_PUBLIC_URL = '{{ mercure_public_url }}';  
 
-        function connectMercure(topic, handler) {
+    function connectMercure(topic, handler) {                
         const url = new URL(MERCURE_PUBLIC_URL);
         url.searchParams.append('topic', topic);
         const es = new EventSource(url.toString());
         es.onmessage = (e) => handler(JSON.parse(e.data));
         es.onerror   = () => console.warn('Mercure reconnecting: ' + topic);
     }
-            // New order
-            connectMercure('/orders/new', function(data) {
-                showToast('New Order', 'Order ' + data.orderNumber + ' placed by ' + data.customer, 'success');
-                addNotification('New Order', 'Order ' + data.orderNumber + ' placed by ' + data.customer);
-                if (typeof onNewOrder === 'function') onNewOrder(data);
-            });
 
-            // Order paid
-            connectMercure('/orders/paid', function(data) {
-                showToast('Order Paid', 'Order ' + data.orderNumber + ' has been paid!', 'success');
-                addNotification('Order Paid', 'Order ' + data.orderNumber + ' — ' + data.customer + ' paid successfully');
-                if (typeof onOrderPaid === 'function') onOrderPaid(data);
-            });
+    // ── Listeners (wrapped in DOMContentLoaded) ────────────
+    document.addEventListener('DOMContentLoaded', function () {
 
-            // Notifications
-            connectMercure('/notifications/new', function(data) {
-                // Already handled per-event above, skip duplicates
-            });
+        connectMercure('/orders/new', function(data) {
+            showToast('🧁 New Order!', 'Order ' + data.orderNumber + ' placed by ' + data.customer, 'success');
+            addNotification('New Order', 'Order ' + data.orderNumber + ' placed by ' + data.customer);
+            if (typeof onNewOrder === 'function') onNewOrder(data);
+        });
 
-            // Donations
-            connectMercure('/donations/new', function(data) {
-                showToast('Bake It Forward', 'New donation of $' + data.amount + ' from ' + data.donor, 'info');
-                addNotification('New Donation', data.donor + ' donated $' + data.amount);
-                if (typeof onNewDonation === 'function') onNewDonation(data);
-            });
-        </script>
-        {% endif %}
+        connectMercure('/orders/paid', function(data) {
+            showToast('💰 Order Paid', 'Order ' + data.orderNumber + ' has been paid!', 'success');
+            addNotification('Order Paid', 'Order ' + data.orderNumber + ' — ' + data.customer + ' paid successfully');
+            if (typeof onOrderPaid === 'function') onOrderPaid(data);
+        });
 
+        connectMercure('/notifications/new', function(data) {
+            if (data.type !== 'new_order' && data.type !== 'order_paid') {
+                showToast('Notification', data.message, data.type);
+            }
+        });
+
+        connectMercure('/donations/new', function(data) {
+            showToast('🍰 Bake It Forward', 'New donation of ₱' + data.amount + ' from ' + data.donor, 'info');
+            addNotification('New Donation', data.donor + ' donated ₱' + data.amount);
+            if (typeof onNewDonation === 'function') onNewDonation(data);
+        });
+
+    });
+</script>
+{% endif %}
     </body>
 </html>
