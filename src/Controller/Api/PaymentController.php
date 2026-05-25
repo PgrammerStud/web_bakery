@@ -29,26 +29,17 @@ public function createOrder(
     CartRepository $cartRepository,
     StockRepository $stockRepository,
     MercurePublisher $mercure,
-    FirebaseMessagingService $firebase, 
-    UserRepository $userRepository,   
 ): JsonResponse {
     try {
         $user = $this->getUser();
         $cart = $cartRepository->findOneBy(['customer' => $user]);
 
         if (!$cart || $cart->getCartItems()->isEmpty()) {
-            return $this->json([
-                'success' => false,
-                'error'   => 'bad_request',
-                'message' => 'Your cart is empty.',
-            ], 400);
+            return $this->json(['success' => false, 'error' => 'bad_request', 'message' => 'Your cart is empty.'], 400);
         }
 
-        // ✅ Convert to plain array FIRST — never iterate live Doctrine collection
-        // while removing elements from it
         $cartItems = $cart->getCartItems()->toArray();
 
-        // Stock validation
         foreach ($cartItems as $cartItem) {
             $product   = $cartItem->getProduct();
             $requested = $cartItem->getQuantity();
@@ -64,13 +55,11 @@ public function createOrder(
             }
         }
 
-        // Calculate total
         $total = 0.0;
         foreach ($cartItems as $cartItem) {
             $total += $cartItem->getProduct()->getPrice() * $cartItem->getQuantity();
         }
 
-        // Create order
         $order = new Order();
         $order->setCreatedBy($user);
         $order->setOrderNumber('ORD-' . strtoupper(uniqid()));
@@ -86,7 +75,6 @@ public function createOrder(
 
         $em->persist($order);
 
-        // ✅ Use plain array — safe to remove while iterating
         foreach ($cartItems as $cartItem) {
             $product  = $cartItem->getProduct();
             $quantity = $cartItem->getQuantity();
@@ -102,13 +90,13 @@ public function createOrder(
             $em->persist($orderItem);
             $order->addOrderItem($orderItem);
 
-            // ✅ Also detach from cart collection to keep Doctrine state clean
             $cart->removeCartItem($cartItem);
             $em->remove($cartItem);
         }
 
         $em->flush();
 
+        // ✅ Mercure only — Firebase handled in confirmPayment
         try {
             $mercure->publishNewOrder([
                 'id'          => $order->getId(),
@@ -117,30 +105,7 @@ public function createOrder(
                 'total'       => $total,
                 'created_at'  => (new \DateTime())->format('Y-m-d H:i:s'),
             ]);
-            $mercure->publishNotification(
-                'New order ' . $order->getOrderNumber() . ' has been placed!',
-                'success'
-            );
-        } catch (\Throwable $e) {
-            // Mercure failure must not break order creation
-        }
-        
-        // 🔔 Push notification to all staff/admin
-$staffUsers = array_filter(
-    $userRepository->findAll(),
-    fn($u) => in_array('ROLE_STAFF', $u->getRoles(), true)
-           || in_array('ROLE_ADMIN', $u->getRoles(), true)
-);
-$tokens = array_values(array_filter(
-    array_map(fn($u) => $u->getFcmToken(), $staffUsers)
-));
-$firebase->sendToTokens(
-    $tokens,
-    '🧁 New Order!',
-    'Order ' . $order->getOrderNumber() . ' — ₱' . $total . ' from ' . $order->getCustomerName(),
-    ['orderId' => (string) $order->getId(), 'screen' => 'Orders']
-);
-          
+        } catch (\Throwable $e) {}
 
         return $this->json([
             'success'     => true,
@@ -150,12 +115,7 @@ $firebase->sendToTokens(
         ]);
 
     } catch (\Throwable $e) {
-        // ✅ Expose real error message for debugging
-        return $this->json([
-            'success' => false,
-            'error'   => 'server_error',
-            'message' => $e->getMessage(),
-        ], 500);
+        return $this->json(['success' => false, 'error' => 'server_error', 'message' => $e->getMessage()], 500);
     }
 }
 
