@@ -272,13 +272,15 @@ document.addEventListener('click', function(e) {
 
 
             // ── Mercure listeners ──────────────────────────────────
-            function connectMercure(topic, handler) {
-                const url = 'http://localhost:3000/.well-known/mercure?topic=' + encodeURIComponent(topic);
-                const es  = new EventSource(url);
-                es.onmessage = (e) => handler(JSON.parse(e.data));
-                es.onerror   = () => console.warn('Mercure reconnecting: ' + topic);
-            }
+        const MERCURE_PUBLIC_URL = '{{ mercure_public_url }}';
 
+        function connectMercure(topic, handler) {
+        const url = new URL(MERCURE_PUBLIC_URL);
+        url.searchParams.append('topic', topic);
+        const es = new EventSource(url.toString());
+        es.onmessage = (e) => handler(JSON.parse(e.data));
+        es.onerror   = () => console.warn('Mercure reconnecting: ' + topic);
+    }
             // New order
             connectMercure('/orders/new', function(data) {
                 showToast('New Order', 'Order ' + data.orderNumber + ' placed by ' + data.customer, 'success');
