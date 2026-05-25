@@ -2,6 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Service\FirebaseMessagingService;
+use App\Repository\UserRepository;
 use App\Entity\Order;
 use App\Entity\OrderItems;
 use App\Exception\InsufficientStockException;
@@ -26,7 +28,9 @@ public function createOrder(
     EntityManagerInterface $em,
     CartRepository $cartRepository,
     StockRepository $stockRepository,
-    MercurePublisher $mercure
+    MercurePublisher $mercure,
+    FirebaseMessagingService $firebase, 
+    UserRepository $userRepository,   
 ): JsonResponse {
     try {
         $user = $this->getUser();
@@ -120,6 +124,23 @@ public function createOrder(
         } catch (\Throwable $e) {
             // Mercure failure must not break order creation
         }
+        
+        // 🔔 Push notification to all staff/admin
+$staffUsers = array_filter(
+    $userRepository->findAll(),
+    fn($u) => in_array('ROLE_STAFF', $u->getRoles(), true)
+           || in_array('ROLE_ADMIN', $u->getRoles(), true)
+);
+$tokens = array_values(array_filter(
+    array_map(fn($u) => $u->getFcmToken(), $staffUsers)
+));
+$firebase->sendToTokens(
+    $tokens,
+    '🧁 New Order!',
+    'Order ' . $order->getOrderNumber() . ' — ₱' . $total . ' from ' . $order->getCustomerName(),
+    ['orderId' => (string) $order->getId(), 'screen' => 'Orders']
+);
+          
 
         return $this->json([
             'success'     => true,
@@ -172,106 +193,90 @@ public function createOrder(
         }
     }
 
-    #[Route('/api/payment/confirm', name: 'api_payment_confirm', methods: ['POST'])]
-    #[IsGranted('ROLE_USER')]
-    public function confirmPayment(
-        Request $request,
-        PaymentService $paymentService,
-        OrderRepository $orderRepository,
-        MercurePublisher $mercure
-    ): JsonResponse {
-        $data            = json_decode($request->getContent(), true);
-        $orderId         = $data['orderId'] ?? null;
-        $paymentMethod   = $data['paymentMethod'] ?? 'cod';
-        $paymentIntentId = $data['paymentIntentId'] ?? null;
+   #[Route('/api/payment/confirm', name: 'api_payment_confirm', methods: ['POST'])]
+#[IsGranted('ROLE_USER')]
+public function confirmPayment(
+    Request $request,
+    PaymentService $paymentService,
+    OrderRepository $orderRepository,
+    MercurePublisher $mercure,
+    FirebaseMessagingService $firebase,   // ← ADD
+    UserRepository $userRepository,       // ← ADD
+): JsonResponse {
+    $data            = json_decode($request->getContent(), true);
+    $orderId         = $data['orderId'] ?? null;
+    $paymentMethod   = $data['paymentMethod'] ?? 'cod';
+    $paymentIntentId = $data['paymentIntentId'] ?? null;
 
-        if (!$orderId) {
-            return $this->json([
-                'success' => false,
-                'error'   => 'bad_request',
-                'message' => 'Order ID is required.',
-            ], 400);
-        }
-
-        if (!in_array($paymentMethod, ['cod', 'stripe'], true)) {
-            return $this->json([
-                'success' => false,
-                'error'   => 'bad_request',
-                'message' => 'Invalid payment method. Must be cod or stripe.',
-            ], 400);
-        }
-
-        if ($paymentMethod === 'stripe' && !$paymentIntentId) {
-            return $this->json([
-                'success' => false,
-                'error'   => 'bad_request',
-                'message' => 'Payment intent ID is required for Stripe payments.',
-            ], 400);
-        }
-
-        $order = $orderRepository->find($orderId);
-        if (!$order) {
-            return $this->json([
-                'success' => false,
-                'error'   => 'not_found',
-                'message' => 'Order not found.',
-            ], 404);
-        }
-
-        if (strtolower($order->getStatus()) === 'paid') {
-            return $this->json([
-                'success' => false,
-                'error'   => 'conflict',
-                'message' => 'This order has already been paid.',
-            ], 409);
-        }
-
-        try {
-            $order = $paymentService->processPayment(
-                $order,
-                null,
-                $paymentMethod,
-                $paymentIntentId
-            );
-
-            // ✅ FIX: separate Mercure events for COD vs Stripe
-            // Mercure errors must NOT crash the payment response
-            try {
-                if ($paymentMethod === 'stripe') {
-                    $mercure->publishOrderPaid([
-                        'id'          => $order->getId(),
-                        'orderNumber' => $order->getOrderNumber(),
-                        'customer'    => $order->getCustomerName(),
-                        'total'       => $order->getTotalAmount(),
-                        'paid_at'     => (new \DateTime())->format('Y-m-d H:i:s'),
-                    ]);
-                    $mercure->publishNotification(
-                        'Order ' . $order->getOrderNumber() . ' has been paid successfully!',
-                        'success'
-                    );
-                } else {
-                    // COD — order is pending, not paid yet
-                    $mercure->publishNotification(
-                        'Order ' . $order->getOrderNumber() . ' placed! Payment on delivery.',
-                        'success'
-                    );
-                }
-            } catch (\Throwable $e) {
-                // ✅ Mercure failure must never cause a 500 —
-                // the payment already succeeded at this point
-            }
-
-            return $this->json([
-                'success' => true,
-                'status'  => $order->getStatus(),
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error'   => 'server_error',
-                'message' => $e->getMessage(), // ✅ expose real error for debugging
-            ], 500);
-        }
+    if (!$orderId) {
+        return $this->json(['success' => false, 'error' => 'bad_request', 'message' => 'Order ID is required.'], 400);
     }
+    if (!in_array($paymentMethod, ['cod', 'stripe'], true)) {
+        return $this->json(['success' => false, 'error' => 'bad_request', 'message' => 'Invalid payment method.'], 400);
+    }
+    if ($paymentMethod === 'stripe' && !$paymentIntentId) {
+        return $this->json(['success' => false, 'error' => 'bad_request', 'message' => 'Payment intent ID is required.'], 400);
+    }
+
+    $order = $orderRepository->find($orderId);
+    if (!$order) {
+        return $this->json(['success' => false, 'error' => 'not_found', 'message' => 'Order not found.'], 404);
+    }
+    if (strtolower($order->getStatus()) === 'paid') {
+        return $this->json(['success' => false, 'error' => 'conflict', 'message' => 'Already paid.'], 409);
+    }
+
+    try {
+        $order = $paymentService->processPayment($order, null, $paymentMethod, $paymentIntentId);
+
+        // Mercure
+        try {
+            if ($paymentMethod === 'stripe') {
+                $mercure->publishOrderPaid([
+                    'id'          => $order->getId(),
+                    'orderNumber' => $order->getOrderNumber(),
+                    'customer'    => $order->getCustomerName(),
+                    'total'       => $order->getTotalAmount(),
+                    'paid_at'     => (new \DateTime())->format('Y-m-d H:i:s'),
+                ]);
+                $mercure->publishNotification('Order ' . $order->getOrderNumber() . ' has been paid!', 'success');
+            } else {
+                $mercure->publishNotification('Order ' . $order->getOrderNumber() . ' placed! Payment on delivery.', 'success');
+            }
+        } catch (\Throwable $e) {}
+
+        // 🔔 Notify customer
+        $customerToken = $order->getCreatedBy()?->getFcmToken();
+        if ($customerToken) {
+            $firebase->sendToToken(
+                $customerToken,
+                '✅ Order Confirmed!',
+                'Your order ' . $order->getOrderNumber() . ' has been placed successfully!',
+                ['orderId' => (string) $order->getId(), 'screen' => 'Orders']
+            );
+        }
+
+        // 🔔 Notify staff
+        $staffUsers = array_filter(
+            $userRepository->findAll(),
+            fn($u) => in_array('ROLE_STAFF', $u->getRoles(), true)
+                   || in_array('ROLE_ADMIN', $u->getRoles(), true)
+        );
+        $tokens = array_values(array_filter(
+            array_map(fn($u) => $u->getFcmToken(), $staffUsers)
+        ));
+        $firebase->sendToTokens(
+            $tokens,
+            $paymentMethod === 'stripe' ? '💰 Order Paid!' : '🧁 New COD Order!',
+            'Order ' . $order->getOrderNumber() . ($paymentMethod === 'cod' ? ' — Cash on Delivery' : ' — Paid via Stripe'),
+            ['orderId' => (string) $order->getId(), 'screen' => 'Orders']
+        );
+
+        // ← return is HERE, after all notifications
+        return $this->json(['success' => true, 'status' => $order->getStatus()]);
+
+    } catch (\Exception $e) {
+        return $this->json(['success' => false, 'error' => 'server_error', 'message' => $e->getMessage()], 500);
+    }
+}
 }

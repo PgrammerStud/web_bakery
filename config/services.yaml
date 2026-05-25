@@ -44,3 +44,7 @@ services:
         arguments:
             - '%env(DATABASE_URL)%'
             - { db_table: 'sessions' }
+
+    App\Service\FirebaseMessagingService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
