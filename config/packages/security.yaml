@@ -89,6 +89,7 @@ security:
 
         - { path: ^/api/payment, roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api/order/create, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/orders, roles: IS_AUTHENTICATED_FULLY }   # ← ADD THIS
             
     
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }  # ← this stays
