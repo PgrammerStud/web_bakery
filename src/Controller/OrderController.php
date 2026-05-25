@@ -16,10 +16,16 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Attribute\Security;
 use App\Service\ActivityLoggerService;
+use App\Service\MercurePublisher;  // ← ADD THIS
 
 #[Route('/order')]
 final class OrderController extends AbstractController
 {
+    // ── Inject MercurePublisher ──────────────────────────────
+    public function __construct(
+        private MercurePublisher $mercurePublisher
+    ) {}
+
     #[Route('/', name: 'app_order_index', methods: ['GET'])]
     public function index(OrderRepository $orderRepository): Response
     {
@@ -50,6 +56,21 @@ final class OrderController extends AbstractController
 
             $activityLogger->log($this->getUser(), 'CREATE', "Order: #{$order->getId()}");
 
+            // ── Publish to Mercure ───────────────────────────
+            $user = $this->getUser();
+            $this->mercurePublisher->publishNewOrder([
+                'id'          => $order->getId(),
+                'orderNumber' => $order->getOrderNumber() ?? $order->getId(),
+                'customer'    => $user?->getUserIdentifier() ?? 'Unknown',
+                'total'       => $order->getTotalAmount(),
+                'created_at'  => (new \DateTime())->format('Y-m-d H:i:s'),
+            ]);
+            $this->mercurePublisher->publishNotification(
+                "New order #{$order->getId()} received!",
+                'new_order'
+            );
+            // ────────────────────────────────────────────────
+
             $this->addFlash('success', 'Order created successfully! Now add items.');
             return $this->redirectToRoute('app_order_add_items', ['id' => $order->getId()]);
         }
@@ -58,7 +79,6 @@ final class OrderController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
 
     #[Route('/{id}', name: 'app_order_show', methods: ['GET'])]
     public function show(Order $order): Response
@@ -89,6 +109,18 @@ final class OrderController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            // ── Publish paid event if status changed to paid ─
+            if ($order->getStatus() === 'paid') {
+                $this->mercurePublisher->publishOrderPaid([
+                    'id'          => $order->getId(),
+                    'orderNumber' => $order->getOrderNumber() ?? $order->getId(),
+                    'customer'    => $order->getCreatedBy()?->getUserIdentifier() ?? 'Unknown',
+                    'total'       => $order->getTotalAmount(),
+                    'paid_at'     => (new \DateTime())->format('Y-m-d H:i:s'),
+                ]);
+            }
+            // ────────────────────────────────────────────────
+
             $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true) || $order->getCreatedBy() === $user;
             if ($shouldLog) {
                 $activityLogger->log($user, 'UPDATE', "Order: #{$order->getId()}");
@@ -102,6 +134,7 @@ final class OrderController extends AbstractController
             'form' => $form,
         ]);
     }
+
     #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF')")]
     #[Route('/{id}/items', name: 'app_order_add_items', methods: ['GET', 'POST'])]
     public function addItems(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
@@ -129,7 +162,6 @@ final class OrderController extends AbstractController
 
             $entityManager->persist($orderItem);
 
-            // Update order total
             $total = $order->getTotalAmount() + $subtotal;
             $order->setTotalAmount($total);
 
@@ -138,7 +170,6 @@ final class OrderController extends AbstractController
             $activityLogger->log($this->getUser(), 'CREATE', "Order Item: {$product->getName()} for Order #{$order->getId()}");
 
             $this->addFlash('success', 'Item added successfully! Add another or view the order.');
-            // Stay on the same page
             return $this->redirectToRoute('app_order_add_items', ['id' => $order->getId()]);
         }
 
@@ -147,6 +178,7 @@ final class OrderController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
     #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
     public function delete(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
     {
