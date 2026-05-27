@@ -21,23 +21,26 @@ class DeliveryTrackingController extends AbstractController
         $this->database = $firebaseDb->getDatabase();
     }
 
-    #[Route('/rider/active', name: 'rider_active_delivery', methods: ['GET'])]
+   #[Route('/rider/active', name: 'rider_active_delivery', methods: ['GET'])]
 #[IsGranted('ROLE_STAFF')]
 public function getRiderActiveDelivery(DeliveryRepository $repo): JsonResponse
 {
     $user = $this->getUser();
 
-    $allDeliveries = $repo->findBy(['rider' => $user]);
+    $delivery = $repo->findOneBy(['rider' => $user, 'status' => DeliveryStatus::IN_TRANSIT])
+               ?? $repo->findOneBy(['rider' => $user, 'status' => DeliveryStatus::PENDING]);
+
+    if (!$delivery) {
+        return $this->json(['deliveryId' => null, 'message' => 'No active delivery']);
+    }
 
     return $this->json([
-        'logged_in_user_id'          => $user->getId(),
-        'logged_in_username'         => $user->getUserIdentifier(),
-        'deliveries_assigned_to_me'  => count($allDeliveries),
-        'statuses'                   => array_map(fn($d) => $d->getStatus()->value, $allDeliveries),
+        'deliveryId'  => $delivery->getId(),
+        'status'      => $delivery->getStatus()->value,
+        'orderId'     => $delivery->getOrders()?->getId(),
+        'orderNumber' => $delivery->getOrders()?->getOrderNumber(),
     ]);
 }
-
-
 
     #[Route('/{id}/status', name: 'delivery_status', methods: ['GET'])]
     public function getStatus(int $id, DeliveryRepository $repo): JsonResponse
