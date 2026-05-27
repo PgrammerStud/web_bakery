@@ -35,8 +35,6 @@ class DeliveryType extends AbstractType
                 'choice_label' => 'orderNumber',
                 'placeholder' => 'Select Order',
             ])
-            ->add('delivery_address')
-            ->add('delivery_contact')
             ->add('delivery_date', DateTimeType::class, [
                 'widget' => 'single_text',
             ])

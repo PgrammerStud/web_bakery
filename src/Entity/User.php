@@ -93,6 +93,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 512, nullable: true)]
     private ?string $fcmToken = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $address = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $contactNumber = null;
+    
     /**
      * @var Collection<int, Bakeitforward>
      */
@@ -348,6 +354,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     $this->fcmToken = $fcmToken;
     return $this;
      }
+
+
+     public function getAddress(): ?string
+{
+    return $this->address;
+}
+
+public function setAddress(?string $address): static
+{
+    $this->address = $address;
+    return $this;
+}
+
+public function getContactNumber(): ?string
+{
+    return $this->contactNumber;
+}
+
+public function setContactNumber(?string $contactNumber): static
+{
+    $this->contactNumber = $contactNumber;
+    return $this;
+}
 
     /**
      * @return Collection<int, Bakeitforward>
