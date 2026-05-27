@@ -21,7 +21,10 @@ class DeliveryType extends AbstractType
         $builder
             ->add('rider', EntityType::class, [
     'class'        => User::class,
-    'choice_label' => 'email',
+    'choice_label' => function (User $user) {
+        $name = trim(($user->getFirstname() ?? '') . ' ' . ($user->getLastname() ?? ''));
+        return $name ?: $user->getEmail() ?: $user->getUsername();
+    },
     'placeholder'  => 'Assign a rider (optional)',
     'required'     => false,
     'query_builder' => function (\App\Repository\UserRepository $repo) {
