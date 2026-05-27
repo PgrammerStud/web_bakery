@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\User;
 use App\Enum\DeliveryStatus;
 use App\Repository\DeliveryRepository;
 use Doctrine\ORM\Mapping as ORM;
@@ -37,6 +38,21 @@ class Delivery
 
     #[ORM\Column]
     private ?\DateTime $updated_at = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $rider = null;
+
+    public function getRider(): ?User
+    {
+    return $this->rider;
+    }
+
+    public function setRider(?User $rider): static
+    {
+    $this->rider = $rider;
+    return $this;
+    }
 
     public function getId(): ?int
     {

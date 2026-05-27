@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Enum\DeliveryStatus; 
 use App\Repository\DeliveryRepository;
 use App\Service\FirebaseDatabaseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,6 +20,29 @@ class DeliveryTrackingController extends AbstractController
     {
         $this->database = $firebaseDb->getDatabase();
     }
+
+    #[Route('/rider/active', name: 'rider_active_delivery', methods: ['GET'])]
+#[IsGranted('ROLE_STAFF')]
+public function getRiderActiveDelivery(DeliveryRepository $repo): JsonResponse
+{
+    $user = $this->getUser();
+
+    $delivery = $repo->findOneBy(['rider' => $user, 'status' => DeliveryStatus::IN_TRANSIT])
+               ?? $repo->findOneBy(['rider' => $user, 'status' => DeliveryStatus::PENDING]);
+
+    if (!$delivery) {
+        return $this->json(['deliveryId' => null, 'message' => 'No active delivery']);
+    }
+
+    return $this->json([
+        'deliveryId'  => $delivery->getId(),
+        'status'      => $delivery->getStatus()->value,
+        'orderId'     => $delivery->getOrders()?->getId(),
+        'orderNumber' => $delivery->getOrders()?->getOrderNumber(),
+    ]);
+}
+
+
 
     #[Route('/{id}/status', name: 'delivery_status', methods: ['GET'])]
     public function getStatus(int $id, DeliveryRepository $repo): JsonResponse
@@ -38,7 +62,7 @@ class DeliveryTrackingController extends AbstractController
     }
 
     #[Route('/{id}/location', name: 'delivery_location_update', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
+   #[IsGranted('ROLE_STAFF')]
     public function updateLocation(int $id, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -62,7 +86,7 @@ class DeliveryTrackingController extends AbstractController
     }
 
     #[Route('/{id}/message', name: 'delivery_send_message', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
+   #[IsGranted('ROLE_STAFF')]
     public function sendMessage(int $id, Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -86,7 +110,7 @@ class DeliveryTrackingController extends AbstractController
     }
 
     #[Route('/{id}/update-status', name: 'delivery_update_status', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
+   #[IsGranted('ROLE_STAFF')]
     public function updateStatus(
         int $id,
         Request $request,
