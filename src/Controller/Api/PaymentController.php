@@ -6,6 +6,8 @@ use App\Service\FirebaseMessagingService;
 use App\Repository\UserRepository;
 use App\Entity\Order;
 use App\Entity\OrderItems;
+use App\Entity\Delivery;
+use App\Enum\DeliveryStatus;
 use App\Exception\InsufficientStockException;
 use App\Repository\CartRepository;
 use App\Repository\OrderRepository;
@@ -201,10 +203,15 @@ public function confirmPayment(
         $order = $paymentService->processPayment($order, null, $paymentMethod, $paymentIntentId);
  
         // ── Create Delivery record in MySQL ───────────────────────────────────
-        $delivery = new \App\Entity\Delivery();
+        $delivery = new Delivery();
         $delivery->setOrders($order);
+        // Set required delivery fields with defaults (customer will update via checkout)
+        $delivery->setDeliveryAddress($order->getCustomerName() ? 'To be confirmed' : '');
+        $delivery->setDeliveryContact($order->getCustomerContact() ?? '');
+        $delivery->setDeliveryDate(new \DateTime('+2 days')); // Default: 2 days from now
+        $delivery->setStatus(DeliveryStatus::PENDING);
+        $delivery->setDeliveryFee(0.0); // Will be calculated based on address
         $delivery->setCreatedAt(new \DateTime());
-        $delivery->setUpdatedAt(new \DateTime());
         $delivery->setUpdatedAt(new \DateTime());
         $em->persist($delivery);
         $em->flush(); // flush now so we have the delivery ID
@@ -215,7 +222,7 @@ public function confirmPayment(
         $firebaseDb->getDatabase()
             ->getReference('deliveries/' . $deliveryId)
             ->set([
-                'status'    => \App\Enum\DeliveryStatus::PENDING->value,
+                'status'    => DeliveryStatus::PENDING->value,
                 'orderId'   => $order->getId(),
                 'messages'  => [],
                 'createdAt' => date('c'),
