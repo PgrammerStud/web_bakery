@@ -28,8 +28,6 @@
             <thead>
                 <tr>
                     <th>Order #</th>
-                    <th>Address</th>
-                    <th>Contact</th>
                     <th>Delivery Date</th>
                     <th>Status</th>
                     <th>Fee</th>
@@ -40,8 +38,6 @@
                 {% for delivery in deliveries %}
                 <tr>
                     <td>{{ delivery.orders ? delivery.orders.orderNumber : 'N/A' }}</td>
-                    <td>{{ delivery.deliveryAddress }}</td>
-                    <td>{{ delivery.deliveryContact }}</td>
                     <td>{{ delivery.deliveryDate|date('Y-m-d H:i') }}</td>
                     <td>
                         <span class="badge {{ delivery.status.getColorClass() }}">{{ delivery.status.getLabel() }}</span>
