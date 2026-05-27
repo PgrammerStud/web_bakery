@@ -27,18 +27,13 @@ public function getRiderActiveDelivery(DeliveryRepository $repo): JsonResponse
 {
     $user = $this->getUser();
 
-    $delivery = $repo->findOneBy(['rider' => $user, 'status' => DeliveryStatus::IN_TRANSIT])
-               ?? $repo->findOneBy(['rider' => $user, 'status' => DeliveryStatus::PENDING]);
-
-    if (!$delivery) {
-        return $this->json(['deliveryId' => null, 'message' => 'No active delivery']);
-    }
+    $allDeliveries = $repo->findBy(['rider' => $user]);
 
     return $this->json([
-        'deliveryId'  => $delivery->getId(),
-        'status'      => $delivery->getStatus()->value,
-        'orderId'     => $delivery->getOrders()?->getId(),
-        'orderNumber' => $delivery->getOrders()?->getOrderNumber(),
+        'logged_in_user_id'          => $user->getId(),
+        'logged_in_username'         => $user->getUserIdentifier(),
+        'deliveries_assigned_to_me'  => count($allDeliveries),
+        'statuses'                   => array_map(fn($d) => $d->getStatus()->value, $allDeliveries),
     ]);
 }
 
