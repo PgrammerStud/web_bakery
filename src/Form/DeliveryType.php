@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Entity\User; 
 use App\Entity\Delivery;
 use App\Enum\DeliveryStatus;
 use Symfony\Component\Form\AbstractType;
@@ -18,6 +19,17 @@ class DeliveryType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('rider', EntityType::class, [
+    'class'        => User::class,
+    'choice_label' => 'email',
+    'placeholder'  => 'Assign a rider (optional)',
+    'required'     => false,
+    'query_builder' => function (\App\Repository\UserRepository $repo) {
+        return $repo->createQueryBuilder('u')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_STAFF%');
+    },
+])
             ->add('orders', EntityType::class, [
                 'class' => Order::class,
                 'choice_label' => 'orderNumber',
