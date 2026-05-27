@@ -11,14 +11,27 @@ class FirebaseDatabaseService
 
     public function __construct()
     {
-        $credentialsPath = dirname(__DIR__, 2) . '/config/firebase/serviceAccountKey.json';
         $databaseUrl = $_SERVER['FIREBASE_DATABASE_URL'] 
             ?? getenv('FIREBASE_DATABASE_URL');
 
-        $factory = (new Factory)
-            ->withServiceAccount($credentialsPath)
-            ->withDatabaseUri($databaseUrl);
-        
+        // Try env variable first (Railway), fall back to file (local)
+        $credentialsJson = $_SERVER['FIREBASE_CREDENTIALS_JSON'] 
+            ?? getenv('FIREBASE_CREDENTIALS_JSON');
+
+        if ($credentialsJson) {
+            // Railway — read from environment variable
+            $credentials = json_decode($credentialsJson, true);
+            $factory = (new Factory)
+                ->withServiceAccount($credentials)
+                ->withDatabaseUri($databaseUrl);
+        } else {
+            // Local — read from file
+            $credentialsPath = dirname(__DIR__, 2) . '/config/firebase/serviceAccountKey.json';
+            $factory = (new Factory)
+                ->withServiceAccount($credentialsPath)
+                ->withDatabaseUri($databaseUrl);
+        }
+
         $this->database = $factory->createDatabase();
     }
 
