@@ -203,8 +203,8 @@ public function confirmPayment(
         // ── Create Delivery record in MySQL ───────────────────────────────────
         $delivery = new \App\Entity\Delivery();
         $delivery->setOrders($order);
-        $delivery->setStatus(\App\Enum\DeliveryStatus::PENDING);
-        $delivery->setCreatedAt(new \DateTimeImmutable());
+        $delivery->setCreatedAt(new \DateTime());
+        $delivery->setUpdatedAt(new \DateTime());
         $delivery->setUpdatedAt(new \DateTime());
         $em->persist($delivery);
         $em->flush(); // flush now so we have the delivery ID
