@@ -48,3 +48,7 @@ services:
     App\Service\FirebaseMessagingService:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Service\FirebaseDatabaseService: ~
+
+    
