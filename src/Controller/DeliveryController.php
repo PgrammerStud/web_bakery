@@ -55,12 +55,21 @@ final class DeliveryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $order = $delivery->getOrders();
+            $customer = $order?->getCreatedBy();
+
+            if ($customer) {
+                $delivery->setDeliveryAddress($customer->getAddress() ?? 'No address set');
+                $delivery->setDeliveryContact($customer->getContactNumber() ?? $order->getCustomerContact());
+            }
+
             $entityManager->persist($delivery);
             $entityManager->flush();
 
             return $this->redirectToRoute('app_delivery_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        // ✅ Missing before — renders the form on GET request
         return $this->render('delivery/new.html.twig', [
             'delivery' => $delivery,
             'form' => $form,
@@ -74,12 +83,21 @@ final class DeliveryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $order = $delivery->getOrders();
+            $customer = $order?->getCreatedBy();
+
+            if ($customer) {
+                $delivery->setDeliveryAddress($customer->getAddress() ?? 'No address set');
+                $delivery->setDeliveryContact($customer->getContactNumber() ?? $order->getCustomerContact());
+            }
+
             $delivery->setUpdatedAt(new \DateTime());
             $entityManager->flush();
 
             return $this->redirectToRoute('app_delivery_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        // ✅ Missing before — renders the form on GET request
         return $this->render('delivery/edit.html.twig', [
             'delivery' => $delivery,
             'form' => $form,
