@@ -161,14 +161,16 @@ public function confirmPayment(
     PaymentService $paymentService,
     OrderRepository $orderRepository,
     MercurePublisher $mercure,
-    FirebaseMessagingService $firebase,   // ← ADD
-    UserRepository $userRepository,       // ← ADD
+    FirebaseMessagingService $firebase,
+    UserRepository $userRepository,
+    EntityManagerInterface $em,          // ← already injected via createOrder, add here too
+    FirebaseDatabaseService $firebaseDb, // ← ADD: to write initial Firebase node
 ): JsonResponse {
     $data            = json_decode($request->getContent(), true);
     $orderId         = $data['orderId'] ?? null;
     $paymentMethod   = $data['paymentMethod'] ?? 'cod';
     $paymentIntentId = $data['paymentIntentId'] ?? null;
-
+ 
     if (!$orderId) {
         return $this->json(['success' => false, 'error' => 'bad_request', 'message' => 'Order ID is required.'], 400);
     }
@@ -178,7 +180,7 @@ public function confirmPayment(
     if ($paymentMethod === 'stripe' && !$paymentIntentId) {
         return $this->json(['success' => false, 'error' => 'bad_request', 'message' => 'Payment intent ID is required.'], 400);
     }
-
+ 
     $order = $orderRepository->find($orderId);
     if (!$order) {
         return $this->json(['success' => false, 'error' => 'not_found', 'message' => 'Order not found.'], 404);
@@ -186,11 +188,32 @@ public function confirmPayment(
     if (strtolower($order->getStatus()) === 'paid') {
         return $this->json(['success' => false, 'error' => 'conflict', 'message' => 'Already paid.'], 409);
     }
-
+ 
     try {
         $order = $paymentService->processPayment($order, null, $paymentMethod, $paymentIntentId);
-
-        // Mercure
+ 
+        // ── Create Delivery record in MySQL ───────────────────────────────────
+        $delivery = new \App\Entity\Delivery();
+        $delivery->setOrders($order);
+        $delivery->setStatus(\App\Enum\DeliveryStatus::PENDING);
+        $delivery->setCreatedAt(new \DateTimeImmutable());
+        $delivery->setUpdatedAt(new \DateTime());
+        $em->persist($delivery);
+        $em->flush(); // flush now so we have the delivery ID
+ 
+        $deliveryId = $delivery->getId();
+ 
+        // ── Seed Firebase node so customer listener has something to read ─────
+        $firebaseDb->getDatabase()
+            ->getReference('deliveries/' . $deliveryId)
+            ->set([
+                'status'    => \App\Enum\DeliveryStatus::PENDING->value,
+                'orderId'   => $order->getId(),
+                'messages'  => [],
+                'createdAt' => date('c'),
+            ]);
+ 
+        // ── Mercure ───────────────────────────────────────────────────────────
         try {
             if ($paymentMethod === 'stripe') {
                 $mercure->publishOrderPaid([
@@ -205,8 +228,8 @@ public function confirmPayment(
                 $mercure->publishNotification('Order ' . $order->getOrderNumber() . ' placed! Payment on delivery.', 'success');
             }
         } catch (\Throwable $e) {}
-
-        // 🔔 Notify customer
+ 
+        // ── Notify customer ───────────────────────────────────────────────────
         $customerToken = $order->getCreatedBy()?->getFcmToken();
         if ($customerToken) {
             $firebase->sendToToken(
@@ -216,8 +239,8 @@ public function confirmPayment(
                 ['orderId' => (string) $order->getId(), 'screen' => 'Orders']
             );
         }
-
-        // 🔔 Notify staff
+ 
+        // ── Notify staff ──────────────────────────────────────────────────────
         $staffUsers = array_filter(
             $userRepository->findAll(),
             fn($u) => in_array('ROLE_STAFF', $u->getRoles(), true)
@@ -232,10 +255,14 @@ public function confirmPayment(
             'Order ' . $order->getOrderNumber() . ($paymentMethod === 'cod' ? ' — Cash on Delivery' : ' — Paid via Stripe'),
             ['orderId' => (string) $order->getId(), 'screen' => 'Orders']
         );
-
-        // ← return is HERE, after all notifications
-        return $this->json(['success' => true, 'status' => $order->getStatus()]);
-
+ 
+        // ── Return deliveryId so the app can navigate to tracking screen ──────
+        return $this->json([
+            'success'    => true,
+            'status'     => $order->getStatus(),
+            'deliveryId' => $deliveryId,  // ← THIS is what CartScreen needs
+        ]);
+ 
     } catch (\Exception $e) {
         return $this->json(['success' => false, 'error' => 'server_error', 'message' => $e->getMessage()], 500);
     }
