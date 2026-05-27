@@ -22,9 +22,16 @@ use App\Service\FirebaseDatabaseService;
 
 class PaymentController extends AbstractController
 {
+    private $firebaseDb;
+
+    public function __construct(FirebaseDatabaseService $firebaseDb)
+    {
+        $this->firebaseDb = $firebaseDb;
+    }
+
     #[Route('/api/order/create', name: 'api_order_create', methods: ['POST'])]
-#[IsGranted('ROLE_USER')]
-public function createOrder(
+    #[IsGranted('ROLE_USER')]
+    public function createOrder(
     Request $request,
     EntityManagerInterface $em,
     CartRepository $cartRepository,
