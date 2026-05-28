@@ -51,12 +51,17 @@ class DeliveryTrackingController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function getStatus(int $id, DeliveryRepository $repo): JsonResponse
     {
+        error_log('🔍 Fetching delivery status for ID: ' . $id);
+        
         $delivery = $repo->find($id);
 
         if (!$delivery) {
-            return $this->json(['error' => 'Delivery not found'], 404);
+            error_log('❌ Delivery not found for ID: ' . $id);
+            return $this->json(['error' => 'Delivery not found', 'debugId' => $id], 404);
         }
 
+        error_log('✅ Delivery found: ' . $delivery->getId());
+        
         $order = $delivery->getOrders();
         $rider = $delivery->getRider();
 
@@ -126,15 +131,30 @@ class DeliveryTrackingController extends AbstractController
             ? 'rider'
             : 'customer';
 
-        $this->database
-            ->getReference('deliveries/' . $id . '/messages')
-            ->push([
-                'sender'    => $actualSender,
-                'text'      => $text,
-                'timestamp' => round(microtime(true) * 1000), // JS-compatible ms timestamp
+        try {
+            $firebasePath = 'deliveries/' . $id . '/messages';
+            error_log('📤 Writing message to Firebase: ' . $firebasePath);
+            
+            $this->database
+                ->getReference($firebasePath)
+                ->push([
+                    'sender'    => $actualSender,
+                    'text'      => $text,
+                    'timestamp' => round(microtime(true) * 1000), // JS-compatible ms timestamp
+                ]);
+            
+            error_log('✅ Message written to Firebase successfully at: ' . $firebasePath);
+            
+            return $this->json([
+                'success' => true,
+                'firebasePath' => $firebasePath,
+                'sender' => $actualSender,
+                'timestamp' => round(microtime(true) * 1000),
             ]);
-
-        return $this->json(['success' => true]);
+        } catch (\Exception $e) {
+            error_log('❌ Firebase write error: ' . $e->getMessage());
+            return $this->json(['error' => 'Failed to save message to Firebase', 'details' => $e->getMessage()], 500);
+        }
     }
 
     // ── Rider: mark as delivered ──────────────────────────────────────────────
