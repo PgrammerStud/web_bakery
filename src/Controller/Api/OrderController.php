@@ -16,7 +16,21 @@ class OrderController extends AbstractController
 public function myOrders(OrderRepository $orderRepository): JsonResponse
 {
     $user = $this->getUser();
-    $orders = $orderRepository->findBy(['createdBy' => $user], ['id' => 'DESC']);
+    
+    // Check if user is a rider or customer
+    if (in_array('ROLE_RIDER', $user->getRoles())) {
+        // Rider: fetch orders assigned to them through deliveries
+        $orders = $orderRepository->createQueryBuilder('o')
+            ->innerJoin('o.deliveries', 'd')
+            ->where('d.rider = :rider')
+            ->setParameter('rider', $user)
+            ->orderBy('o.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    } else {
+        // Customer: fetch orders created by them
+        $orders = $orderRepository->findBy(['createdBy' => $user], ['id' => 'DESC']);
+    }
 
     $data = array_map(function (Order $order) {
         $customer = $order->getCreatedBy();
@@ -49,4 +63,5 @@ public function myOrders(OrderRepository $orderRepository): JsonResponse
 
     return $this->json($data);
 }
+
 }
