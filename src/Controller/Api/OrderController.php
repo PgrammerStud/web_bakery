@@ -54,13 +54,13 @@ public function myOrders(OrderRepository $orderRepository): JsonResponse
             'paymentMethod'    => $order->getPaymentMethod(),
             'createdAt'        => $order->getUpdatedAt()?->format('Y-m-d H:i:s'),
             // Always include direct fields from Order entity:
-            'customerName'     => $order->getCustomerName() ?? $customer?->getName() ?? 'Unknown',
-            'customerContact'  => $order->getCustomerContact() ?? $customer?->getPhone() ?? 'N/A',
-            'customerAddress'  => $order->getDeliveryAddress() ?? $customer?->getAddress() ?? 'No address',
+            'customerName'     => $order->getCustomerName() ?? $customer?->getDisplayName() ?? $customer?->getFirstname() ?? 'Unknown',
+            'customerContact'  => $order->getCustomerContact() ?? $customer?->getContactNumber() ?? 'N/A',
+            'customerAddress'  => $customer?->getAddress() ?? 'No address',
             'createdBy'        => [
                 'id'    => $customer?->getId(),
-                'name'  => $customer?->getName(),
-                'phone' => $customer?->getPhone(),
+                'name'  => $customer?->getDisplayName() ?? $customer?->getFirstname() ?? 'Unknown',
+                'phone' => $customer?->getContactNumber(),
                 'address' => $customer?->getAddress(),
             ],
             'items'            => array_map(fn($item) => [
@@ -100,7 +100,7 @@ public function debugRiderDeliveries(DeliveryRepository $deliveryRepository, Ord
     $debug = [
         'currentUser' => [
             'id' => $user->getId(),
-            'name' => $user->getName(),
+            'name' => $user->getDisplayName() ?? $user->getFirstname() ?? $user->getEmail(),
             'email' => $user->getEmail(),
             'roles' => $roles,
         ],
