@@ -42,6 +42,14 @@ class PaymentController extends AbstractController
 ): JsonResponse {
     try {
         $user = $this->getUser();
+
+        if (!$user->getAddress() || !$user->getContactNumber()) {
+        return $this->json([
+        'success' => false,
+        'error'   => 'profile_incomplete',
+        'message' => 'Please add your delivery address and contact number in your profile before checking out.',
+    ], 400);
+}
         $cart = $cartRepository->findOneBy(['customer' => $user]);
 
         if (!$cart || $cart->getCartItems()->isEmpty()) {
