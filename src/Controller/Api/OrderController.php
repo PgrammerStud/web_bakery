@@ -24,12 +24,12 @@ public function myOrders(OrderRepository $orderRepository): JsonResponse
             'id'               => $order->getId(),
             'orderNumber'      => $order->getOrderNumber(),
             'status'           => $order->getStatus(),
-            'totalAmount'      => $order->getTotalAmount(),
+            'totalAmount'      => $order->getTotalAmount() ?? 'N/A',
             'paymentMethod'    => $order->getPaymentMethod(),
             'createdAt'        => $order->getUpdatedAt()?->format('Y-m-d H:i:s'),
-            // ↓ ADD THESE:
-            'customerName'     => $customer?->getName() ?? 'Unknown',
-            'customerPhone'    => $customer?->getPhone() ?? 'N/A',
+            // Always include direct fields from Order entity:
+            'customerName'     => $order->getCustomerName() ?? $customer?->getName() ?? 'Unknown',
+            'customerContact'  => $order->getCustomerContact() ?? $customer?->getPhone() ?? 'N/A',
             'customerAddress'  => $order->getDeliveryAddress() ?? $customer?->getAddress() ?? 'No address',
             'createdBy'        => [
                 'id'    => $customer?->getId(),
