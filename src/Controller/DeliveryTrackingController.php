@@ -186,4 +186,46 @@ class DeliveryTrackingController extends AbstractController
 
         return $this->json(['success' => true]);
     }
+
+    
+#[Route('/my-deliveries', name: 'my_deliveries', methods: ['GET'])]
+#[IsGranted('ROLE_USER')]
+public function getMyDeliveries(DeliveryRepository $deliveryRepo): JsonResponse
+{
+    $user = $this->getUser();
+    $roles = $user->getRoles() ?? [];
+    $isRider = in_array('ROLE_STAFF', $roles) || in_array('ROLE_ADMIN', $roles);
+
+    if ($isRider) {
+        // Rider: all deliveries assigned to them
+        $deliveries = $deliveryRepo->findBy(['rider' => $user], ['id' => 'DESC']);
+    } else {
+        // Customer: deliveries from their orders
+        $deliveries = $deliveryRepo->createQueryBuilder('d')
+            ->innerJoin('d.orders', 'o')
+            ->where('o.createdBy = :user')
+            ->setParameter('user', $user)
+            ->orderBy('d.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    $data = array_map(function(Delivery $d) {
+        return [
+            'deliveryId' => $d->getId(),
+            'orderNumber' => $d->getOrders()?->getOrderNumber() ?? 'N/A',
+            'riderName' => $d->getRider()
+                ? trim(($d->getRider()->getFirstname() ?? '') . ' ' . ($d->getRider()->getLastname() ?? ''))
+                  ?: $d->getRider()->getDisplayName() ?? 'Your Rider'
+                : null,
+            'riderPhone' => $d->getRider()?->getContactNumber(),
+            'status' => $d->getStatus() instanceof \BackedEnum
+                ? $d->getStatus()->value
+                : $d->getStatus(),
+            'createdAt' => $d->getCreatedAt()?->format('c'),
+        ];
+    }, $deliveries);
+
+    return $this->json($data);
+}
 }
