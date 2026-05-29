@@ -198,13 +198,12 @@ public function getMyDeliveries(DeliveryRepository $deliveryRepo): JsonResponse
     $isRider = in_array('ROLE_STAFF', $roles) || in_array('ROLE_ADMIN', $roles);
 
     if ($isRider) {
-        // Rider: all deliveries assigned to them
         $deliveries = $deliveryRepo->findBy(['rider' => $user], ['id' => 'DESC']);
     } else {
-        // Customer: deliveries from their orders
         $deliveries = $deliveryRepo->createQueryBuilder('d')
             ->innerJoin('d.orders', 'o')
             ->where('o.createdBy = :user')
+            ->andWhere('d.rider IS NOT NULL')  // ← just add this line
             ->setParameter('user', $user)
             ->orderBy('d.id', 'DESC')
             ->getQuery()
