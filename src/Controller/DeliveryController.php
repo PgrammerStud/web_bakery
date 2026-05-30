@@ -21,35 +21,42 @@ final class DeliveryController extends AbstractController
         private MercurePublisher $mercure,
     ) {}
     
-    #[Route('/', name: 'app_delivery_index', methods: ['GET'])]
-public function index(DeliveryRepository $deliveryRepository, Request $request): Response
-{
-        $status = $request->query->get('status');
-        $orderNumber = $request->query->get('order');
+   use Symfony\Component\Mercure\Authorization;
 
-        $qb = $deliveryRepository->createQueryBuilder('d')
-            ->leftJoin('d.orders', 'o')
-            ->addSelect('o');
+#[Route('/', name: 'app_delivery_index', methods: ['GET'])]
+public function index(
+    DeliveryRepository $deliveryRepository,
+    Request $request,
+    Authorization $authorization,
+): Response {
+    $status = $request->query->get('status');
+    $orderNumber = $request->query->get('order');
 
-        if ($status) {
-            $qb->andWhere('d.status = :status')
-               ->setParameter('status', $status);
-        }
+    $qb = $deliveryRepository->createQueryBuilder('d')
+        ->leftJoin('d.orders', 'o')
+        ->addSelect('o');
 
-        if ($orderNumber) {
-            $qb->andWhere('o.orderNumber = :orderId')
-               ->setParameter('orderId', $orderNumber);
-        }
+    if ($status) {
+        $qb->andWhere('d.status = :status')->setParameter('status', $status);
+    }
+    if ($orderNumber) {
+        $qb->andWhere('o.orderNumber = :orderId')->setParameter('orderId', $orderNumber);
+    }
 
-        $deliveries = $qb->getQuery()->getResult();
+    $deliveries = $qb->getQuery()->getResult();
 
-       return $this->render('delivery/index.html.twig', [
+    // Generate subscriber JWT cookie so the browser can connect to Mercure
+    $response = $this->render('delivery/index.html.twig', [
         'deliveries'    => $deliveries,
         'status_filter' => $status,
         'order_filter'  => $orderNumber,
         'mercure_url'   => $_ENV['MERCURE_PUBLIC_URL'] ?? 'https://mercure-production-b6cc.up.railway.app/.well-known/mercure',
     ]);
-    }
+
+    $authorization->setCookie($request, $response, ['/delivery/update']);
+
+    return $response;
+}
 
    #[Route('/new', name: 'app_delivery_new', methods: ['GET', 'POST'])]
 public function new(
