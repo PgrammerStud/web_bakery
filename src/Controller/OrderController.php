@@ -65,13 +65,20 @@ final class OrderController extends AbstractController
             $activityLogger->log($this->getUser(), 'CREATE', "Order: #{$order->getId()}");
 
             // ── Get updated metrics for dashboard ──────────────
+            error_log('[OrderController] Getting dashboard metrics for order: ' . $order->getId());
             $totalRecords = $productRepository->count([]);
             $totalOrders = $orderRepository->count([]);
             $wallet = $walletRepository->findOneBy([]);
             $totalDonations = $wallet ? $wallet->getTotalBalance() : 0;
+            error_log('[OrderController] Dashboard metrics: ' . json_encode([
+                'totalRecords' => $totalRecords,
+                'totalOrders' => $totalOrders,
+                'totalDonations' => $totalDonations,
+            ]));
 
             // ── Publish to Mercure ───────────────────────────
             $user = $this->getUser();
+            error_log('[OrderController] Publishing new order event');
             $this->mercurePublisher->publishNewOrder([
                 'id'          => $order->getId(),
                 'orderNumber' => $order->getOrderNumber() ?? $order->getId(),
@@ -79,17 +86,20 @@ final class OrderController extends AbstractController
                 'total'       => $order->getTotalAmount(),
                 'created_at'  => (new \DateTime())->format('Y-m-d H:i:s'),
             ]);
+            error_log('[OrderController] Publishing notification');
             $this->mercurePublisher->publishNotification(
                 "New order #{$order->getId()} received!",
                 'new_order'
             );
             
             // ── Publish dashboard update ───────────────────────
+            error_log('[OrderController] Publishing dashboard update');
             $this->mercurePublisher->publishDashboardUpdate([
                 'totalRecords'   => $totalRecords,
                 'totalOrders'    => $totalOrders,
                 'totalDonations' => $totalDonations,
             ]);
+            error_log('[OrderController] Dashboard update published');
             // ────────────────────────────────────────────────
 
             $this->addFlash('success', 'Order created successfully! Now add items.');
