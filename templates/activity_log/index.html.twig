@@ -2,6 +2,19 @@
 
 {% block title %}Activity Log{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .new-row-flash {
+        animation: flashRow 2s ease;
+    }
+    @keyframes flashRow {
+        0%   { background-color: #dbeafe; }
+        100% { background-color: transparent; }
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="activity-log-container">
     <h1>Activity Log</h1>
@@ -76,4 +89,33 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    window.onNewActivityLog = function(data) {
+        // Don't add row if filters are active — it would be misleading
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('user') || params.get('action') || params.get('date_from') || params.get('date_to')) {
+            return;
+        }
+
+        const tbody = document.querySelector('.activity-log-table tbody');
+        if (!tbody) return;
+
+        // Remove "No logs found" row if present
+        const emptyRow = tbody.querySelector('td[colspan]');
+        if (emptyRow) emptyRow.closest('tr').remove();
+
+        const row = document.createElement('tr');
+        row.className = 'new-row-flash';
+        row.innerHTML = `
+            <td>${data.id}</td>
+            <td>${data.username}</td>
+            <td>${data.role}</td>
+            <td>${data.action}</td>
+            <td>${data.targetData}</td>
+            <td>${data.createdAt}</td>
+        `;
+        tbody.insertBefore(row, tbody.firstChild);
+    };
+</script>
 {% endblock %}

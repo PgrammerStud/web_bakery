@@ -312,6 +312,11 @@
             if (typeof onNewDonation === 'function') onNewDonation(data);
         });
 
+        connectMercure('/activity-log/new', function(data) {
+    console.log('📋 Activity log received:', data);
+    if (typeof onNewActivityLog === 'function') onNewActivityLog(data);
+});
+
         connectMercure('/dashboard/update', function(data) {
     console.log('📊 Dashboard update received:', data);
     if (typeof onDashboardUpdate === 'function') {
