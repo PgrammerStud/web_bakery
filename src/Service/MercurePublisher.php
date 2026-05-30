@@ -179,4 +179,22 @@ public function publishDeliveryUpdate(array $metrics): void
         $this->log('Error publishing delivery update: ' . $e->getMessage());
     }
 }
+
+public function publishOrderStatusUpdate(array $order): void
+{
+    try {
+        $this->hub->publish(new Update(
+            '/orders/status-update',
+            json_encode([
+                'type'        => 'order_status_update',
+                'id'          => $order['id'],
+                'orderNumber' => $order['orderNumber'],
+                'status'      => $order['status'],
+                'updatedAt'   => (new \DateTime())->format('Y-m-d H:i:s'),
+            ])
+        ));
+    } catch (\Exception $e) {
+        $this->log('Error publishing order status update: ' . $e->getMessage());
+    }
+}
 }
