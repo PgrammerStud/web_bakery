@@ -28,15 +28,16 @@ class MercurePublisher
 
     // ── Call this from every publish method ─────────────────
     private function publishLiveDashboard(): void
-    {
-        $wallet = $this->walletRepository->findOneBy([]);
+{
+    $wallet = $this->walletRepository->findOneBy([]);
 
-        $this->publishDashboardUpdate([
-            'totalRecords'   => $this->productRepository->count([]),
-            'totalOrders'    => $this->orderRepository->count([]),
-            'totalDonations' => $wallet ? $wallet->getTotalBalance() : 0,
-        ]);
-    }
+    $this->publishDashboardUpdate([
+        'totalRecords'   => $this->productRepository->count([]),
+        'totalOrders'    => $this->orderRepository->count([]),
+        'totalDonations' => $wallet ? $wallet->getTotalBalance() : 0,
+        'goalAmount'     => $wallet ? $wallet->getGoalAmount() : 0,  
+    ]);
+}
 
     public function publishNewOrder(array $order): void
     {
@@ -116,21 +117,22 @@ class MercurePublisher
         }
     }
 
-    public function publishDashboardUpdate(array $metrics): void
-    {
-        try {
-            $this->hub->publish(new Update(
-                '/dashboard/update',
-                json_encode([
-                    'type'           => 'dashboard_update',
-                    'totalRecords'   => $metrics['totalRecords'] ?? 0,
-                    'totalOrders'    => $metrics['totalOrders'] ?? 0,
-                    'totalDonations' => $metrics['totalDonations'] ?? 0,
-                    'timestamp'      => (new \DateTime())->format('Y-m-d H:i:s'),
-                ])
-            ));
-        } catch (\Exception $e) {
-            $this->log('Error publishing dashboard update: ' . $e->getMessage());
-        }
+   public function publishDashboardUpdate(array $metrics): void
+{
+    try {
+        $this->hub->publish(new Update(
+            '/dashboard/update',
+            json_encode([
+                'type'           => 'dashboard_update',
+                'totalRecords'   => $metrics['totalRecords'] ?? 0,
+                'totalOrders'    => $metrics['totalOrders'] ?? 0,
+                'totalDonations' => $metrics['totalDonations'] ?? 0,
+                'goalAmount'     => $metrics['goalAmount'] ?? 0,  // ✅ ADD THIS
+                'timestamp'      => (new \DateTime())->format('Y-m-d H:i:s'),
+            ])
+        ));
+    } catch (\Exception $e) {
+        $this->log('Error publishing dashboard update: ' . $e->getMessage());
     }
+}
 }
