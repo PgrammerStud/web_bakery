@@ -17,11 +17,12 @@ class DeliveryTrackingController extends AbstractController
 {
     private $database;
 
-    public function __construct(FirebaseDatabaseService $firebaseDb, private MercurePublisher $mercure)
-    {
-        $this->database = $firebaseDb->getDatabase();
-        
-    }
+    public function __construct(
+    FirebaseDatabaseService $firebaseDb,
+    private MercurePublisher $mercure,  
+) {
+    $this->database = $firebaseDb->getDatabase();
+}
 
     // ── Rider: get active delivery ────────────────────────────────────────────
 
