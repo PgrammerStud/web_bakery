@@ -116,8 +116,9 @@
     }
 
     // ── Subscribe to Mercure ──────────────────────────────────
-    const mercureUrl = new URL('{{ mercure_hub_url|default("/.well-known/mercure") }}', window.location.href);
-    mercureUrl.searchParams.append('topic', '/delivery/update');
+   const mercureUrl = new URL('https://mercure-production-b6cc.up.railway.app/.well-known/mercure');
+mercureUrl.searchParams.append('topic', '/delivery/update');
+const es = new EventSource(mercureUrl.toString(), { withCredentials: true });
 
     const es = new EventSource(mercureUrl.toString(), { withCredentials: true });
 
