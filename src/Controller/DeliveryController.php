@@ -18,8 +18,8 @@ use App\Service\MercurePublisher;
 final class DeliveryController extends AbstractController
 {
     #[Route('/', name: 'app_delivery_index', methods: ['GET'])]
-    public function index(DeliveryRepository $deliveryRepository, Request $request): Response
-    {
+public function index(DeliveryRepository $deliveryRepository, Request $request): Response
+{
         $status = $request->query->get('status');
         $orderNumber = $request->query->get('order');
 
@@ -40,11 +40,11 @@ final class DeliveryController extends AbstractController
         $deliveries = $qb->getQuery()->getResult();
 
        return $this->render('delivery/index.html.twig', [
-    'deliveries'    => $deliveries,
-    'status_filter' => $status,
-    'order_filter'  => $orderNumber,
-    'mercure_url'   => $this->getParameter('mercure.hub.public_url'), // or hardcode for now
-]);
+        'deliveries'    => $deliveries,
+        'status_filter' => $status,
+        'order_filter'  => $orderNumber,
+        'mercure_url'   => $_ENV['MERCURE_PUBLIC_URL'] ?? 'https://mercure-production-b6cc.up.railway.app/.well-known/mercure',
+    ]);
     }
 
     #[Route('/new', name: 'app_delivery_new', methods: ['GET', 'POST'])]
