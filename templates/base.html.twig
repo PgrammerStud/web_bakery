@@ -313,14 +313,14 @@
         });
 
         connectMercure('/dashboard/update', function(data) {
-            console.log('📊 Dashboard update received:', data);
-            if (typeof onDashboardUpdate === 'function') {
-                console.log('✅ Calling onDashboardUpdate');
-                onDashboardUpdate(data);
-            } else {
-                console.warn('❌ onDashboardUpdate function not found');
-            }
-        });
+    console.log('📊 Dashboard update received:', data);
+    if (typeof onDashboardUpdate === 'function') {
+        console.log('✅ Calling onDashboardUpdate');
+        onDashboardUpdate(data);
+    } else {
+        console.warn('❌ onDashboardUpdate function not found');
+    }
+});
 
     });
 </script>
