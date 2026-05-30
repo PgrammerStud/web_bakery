@@ -102,11 +102,6 @@ public function new(
             'delivery'       => ['id' => $savedDelivery->getId(), 'status' => $status],
         ]);
 
-        // ← ADD THIS
-     $this->database
-    ->getReference('deliveries/' . $savedDelivery->getId() . '/status')
-    ->set($status);
-
         return $this->redirectToRoute('app_delivery_index', [], Response::HTTP_SEE_OTHER);
     }
 
@@ -152,10 +147,7 @@ public function new(
                 ],
             ]);
 
-            $this->database
-    ->getReference('deliveries/' . $delivery->getId() . '/status')
-    ->set($status);
-
+        
             return $this->redirectToRoute('app_delivery_index', [], Response::HTTP_SEE_OTHER);
         }
 
