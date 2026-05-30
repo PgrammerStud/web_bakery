@@ -70,8 +70,15 @@ final class OrderController extends AbstractController
             $wallet = $walletRepository->findOneBy([]);
             $totalDonations = $wallet ? $wallet->getTotalBalance() : 0;
 
+            error_log('[OrderController] Metrics calculated: ' . json_encode([
+                'totalRecords' => $totalRecords,
+                'totalOrders' => $totalOrders,
+                'totalDonations' => $totalDonations,
+            ]));
+
             // ── Publish to Mercure ───────────────────────────
             $user = $this->getUser();
+            error_log('[OrderController] About to publish new order');
             $this->mercurePublisher->publishNewOrder([
                 'id'          => $order->getId(),
                 'orderNumber' => $order->getOrderNumber() ?? $order->getId(),
@@ -79,17 +86,27 @@ final class OrderController extends AbstractController
                 'total'       => $order->getTotalAmount(),
                 'created_at'  => (new \DateTime())->format('Y-m-d H:i:s'),
             ]);
+            error_log('[OrderController] New order published');
+            
             $this->mercurePublisher->publishNotification(
                 "New order #{$order->getId()} received!",
                 'new_order'
             );
             
             // ── Publish dashboard update ───────────────────────
+            error_log('[OrderController] About to publish dashboard update with metrics: ' . json_encode([
+                'totalRecords'   => $totalRecords,
+                'totalOrders'    => $totalOrders,
+                'totalDonations' => $totalDonations,
+            ]));
+            
             $this->mercurePublisher->publishDashboardUpdate([
                 'totalRecords'   => $totalRecords,
                 'totalOrders'    => $totalOrders,
                 'totalDonations' => $totalDonations,
             ]);
+            
+            error_log('[OrderController] Dashboard update published');
             // ────────────────────────────────────────────────
 
             $this->addFlash('success', 'Order created successfully! Now add items.');
@@ -145,6 +162,7 @@ final class OrderController extends AbstractController
 
             // ── Publish paid event if status changed to paid ─
             if ($order->getStatus() === 'paid') {
+                error_log('[OrderController] Publishing order paid event');
                 $this->mercurePublisher->publishOrderPaid([
                     'id'          => $order->getId(),
                     'orderNumber' => $order->getOrderNumber() ?? $order->getId(),
@@ -155,6 +173,7 @@ final class OrderController extends AbstractController
             }
             
             // ── Publish dashboard update ───────────────────────
+            error_log('[OrderController] Publishing dashboard update from edit() method');
             $this->mercurePublisher->publishDashboardUpdate([
                 'totalRecords'   => $totalRecords,
                 'totalOrders'    => $totalOrders,
@@ -247,6 +266,7 @@ final class OrderController extends AbstractController
             $totalDonations = $wallet ? $wallet->getTotalBalance() : 0;
             
             // ── Publish dashboard update ───────────────────────
+            error_log('[OrderController] Publishing dashboard update from delete() method');
             $this->mercurePublisher->publishDashboardUpdate([
                 'totalRecords'   => $totalRecords,
                 'totalOrders'    => $totalOrders,

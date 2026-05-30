@@ -109,31 +109,23 @@ class MercurePublisher
     public function publishDashboardUpdate(array $metrics): void
     {
         try {
-            $this->log('Publishing dashboard update to Mercure', ['metrics' => $metrics]);
-            error_log('[MercurePublisher] Dashboard Update Data: ' . json_encode($metrics));
-            
-            $updateData = [
-                'type'          => 'dashboard_update',
-                'totalRecords'  => $metrics['totalRecords'] ?? null,
-                'totalOrders'   => $metrics['totalOrders'] ?? null,
-                'totalDonations'=> $metrics['totalDonations'] ?? null,
-                'timestamp'     => (new \DateTime())->format('Y-m-d H:i:s'),
-            ];
-            
-            error_log('[MercurePublisher] Publishing to topic: /dashboard/update');
-            error_log('[MercurePublisher] Payload: ' . json_encode($updateData));
+            error_log('[MercurePublisher] Publishing dashboard update: ' . json_encode($metrics));
             
             $this->hub->publish(new Update(
                 '/dashboard/update',
-                json_encode($updateData)
+                json_encode([
+                    'type'          => 'dashboard_update',
+                    'totalRecords'  => $metrics['totalRecords'] ?? 0,
+                    'totalOrders'   => $metrics['totalOrders'] ?? 0,
+                    'totalDonations'=> $metrics['totalDonations'] ?? 0,
+                    'timestamp'     => (new \DateTime())->format('Y-m-d H:i:s'),
+                ])
             ));
             
-            $this->log('✅ Dashboard update published successfully');
-            error_log('[MercurePublisher] Dashboard update published successfully');
+            error_log('[MercurePublisher] ✅ Dashboard update published successfully');
         } catch (\Exception $e) {
-            $this->log('❌ Error publishing dashboard update: ' . $e->getMessage());
-            error_log('[MercurePublisher Error] ' . $e->getMessage());
-            error_log('[MercurePublisher Error Stack] ' . $e->getTraceAsString());
+            error_log('[MercurePublisher] ❌ Error publishing dashboard update: ' . $e->getMessage());
+            error_log('[MercurePublisher] Stack: ' . $e->getTraceAsString());
         }
     }
 }

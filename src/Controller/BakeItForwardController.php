@@ -73,6 +73,7 @@ final class BakeItForwardController extends AbstractController
         );
         
         // ── Publish dashboard update ───────────────────────
+        error_log('[BakeItForwardController] Publishing dashboard update from markDonated() method');
         $mercure->publishDashboardUpdate([
             'totalRecords'   => $totalRecords,
             'totalOrders'    => $totalOrders,
