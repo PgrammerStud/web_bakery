@@ -27,7 +27,7 @@
         <div class="progress-bar">
             <div class="progress-fill" style="width: {{ progress }}%"></div>
         </div>
-        <p>Current Balance: ${{ balance|number_format(2) }} / Goal: ${{ goal|number_format(2) }}</p>
+       <p>Current Balance: ₱{{ balance|number_format(2) }} / Goal: ₱{{ goal|number_format(2) }}</p>
     </div>
 
     <div class="card">
@@ -48,7 +48,7 @@
                 <tr>
                     <td>{{ contribution.user ? contribution.user.email : 'N/A' }}</td>
                     <td>{{ contribution.orders ? contribution.orders.id : 'N/A' }}</td>
-                    <td>${{ contribution.amount|number_format(2) }}</td>
+                    <td>₱{{ contribution.amount|number_format(2) }}</td>
                     <td>{{ contribution.createdAt|date('Y-m-d H:i') }}</td>
                     <td>
                         {% if contribution.donated %}
@@ -73,22 +73,42 @@
 </div>
 
 <script>
-    // Called from base.html.twig when donation arrives
+    // Called from base.html.twig when a donation is marked
     window.onNewDonation = function(data) {
-        var tbody = document.getElementById('donations-tbody');
+        const tbody = document.getElementById('donations-tbody');
+        if (!tbody) return;
 
-        var row = document.createElement('tr');
+        const row = document.createElement('tr');
         row.className = 'new-row-flash';
         row.innerHTML = `
             <td>${data.donor}</td>
             <td>N/A</td>
-            <td>$${parseFloat(data.amount).toFixed(2)}</td>
+            <td>₱${parseFloat(data.amount).toFixed(2)}</td>
             <td>${data.created_at}</td>
             <td><span class="badge badge-warning">Pending</span></td>
             <td></td>
         `;
-
         tbody.insertBefore(row, tbody.firstChild);
     };
+
+    // Called from base.html.twig when dashboard update arrives
+    window.onDashboardUpdate = function(data) {
+        if (data.totalDonations === undefined || data.goalAmount === undefined || data.goalAmount <= 0) return;
+
+        const pct = Math.min(Math.round((data.totalDonations / data.goalAmount) * 100), 100);
+
+        // Matches: <div class="progress-fill" ...>
+        const progressFill = document.querySelector('.progress-fill');
+        if (progressFill) progressFill.style.width = pct + '%';
+
+        // Matches: <p>Current Balance: ...</p>
+        const balanceText = document.querySelector('.card p');
+        if (balanceText) {
+            balanceText.textContent = 
+                'Current Balance: ₱' + parseFloat(data.totalDonations).toLocaleString('en-PH', { minimumFractionDigits: 2 }) +
+                ' / Goal: ₱' + parseFloat(data.goalAmount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+        }
+    };
 </script>
+
 {% endblock %}
