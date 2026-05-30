@@ -271,40 +271,55 @@
     function connectMercure(topic, handler) {                
         const url = new URL(MERCURE_PUBLIC_URL);
         url.searchParams.append('topic', topic);
+        console.log('🔗 Connecting to Mercure topic:', topic);
         const es = new EventSource(url.toString());
-        es.onmessage = (e) => handler(JSON.parse(e.data));
-        es.onerror   = () => console.warn('Mercure reconnecting: ' + topic);
+        es.onmessage = (e) => {
+            console.log('📨 Message received on topic', topic, ':', e.data);
+            handler(JSON.parse(e.data));
+        };
+        es.onerror   = () => console.warn('⚠️ Mercure reconnecting: ' + topic);
     }
 
     // ── Listeners (wrapped in DOMContentLoaded) ────────────
     document.addEventListener('DOMContentLoaded', function () {
+        console.log('✅ DOMContentLoaded - Setting up Mercure listeners');
 
         connectMercure('/orders/new', function(data) {
+            console.log('📦 New order received:', data);
             showToast('🧁 New Order!', 'Order ' + data.orderNumber + ' placed by ' + data.customer, 'success');
             addNotification('New Order', 'Order ' + data.orderNumber + ' placed by ' + data.customer);
             if (typeof onNewOrder === 'function') onNewOrder(data);
         });
 
         connectMercure('/orders/paid', function(data) {
+            console.log('💳 Order paid received:', data);
             showToast('💰 Order Paid', 'Order ' + data.orderNumber + ' has been paid!', 'success');
             addNotification('Order Paid', 'Order ' + data.orderNumber + ' — ' + data.customer + ' paid successfully');
             if (typeof onOrderPaid === 'function') onOrderPaid(data);
         });
 
         connectMercure('/notifications/new', function(data) {
+            console.log('🔔 Notification received:', data);
             if (data.type !== 'new_order' && data.type !== 'order_paid') {
                 showToast('Notification', data.message, data.type);
             }
         });
 
         connectMercure('/donations/new', function(data) {
+            console.log('🎁 Donation received:', data);
             showToast('🍰 Bake It Forward', 'New donation of ₱' + data.amount + ' from ' + data.donor, 'info');
             addNotification('New Donation', data.donor + ' donated ₱' + data.amount);
             if (typeof onNewDonation === 'function') onNewDonation(data);
         });
 
         connectMercure('/dashboard/update', function(data) {
-            if (typeof onDashboardUpdate === 'function') onDashboardUpdate(data);
+            console.log('📊 Dashboard update received:', data);
+            if (typeof onDashboardUpdate === 'function') {
+                console.log('✅ Calling onDashboardUpdate');
+                onDashboardUpdate(data);
+            } else {
+                console.warn('❌ onDashboardUpdate function not found');
+            }
         });
 
     });
