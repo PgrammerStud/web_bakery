@@ -12,16 +12,22 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\MercurePublisher;
+use App\Service\FirebaseDatabaseService;
 
 #[Route('/delivery')]
 #[IsGranted('ROLE_ADMIN')]
 final class DeliveryController extends AbstractController
+
 {
+      private $database;
     public function __construct(
         private MercurePublisher $mercure,
-    ) {}
+         FirebaseDatabaseService $firebaseDb,
+    ) {
+         $this->database = $firebaseDb->getDatabase(); 
+    }
 
-    #[Route('/', name: 'app_delivery_index', methods: ['GET'])]
+#[Route('/', name: 'app_delivery_index', methods: ['GET'])]
 public function index(
     DeliveryRepository $deliveryRepository,
     Request $request,
@@ -96,6 +102,11 @@ public function new(
             'delivery'       => ['id' => $savedDelivery->getId(), 'status' => $status],
         ]);
 
+        // ← ADD THIS
+     $this->database
+    ->getReference('deliveries/' . $savedDelivery->getId() . '/status')
+    ->set($status);
+
         return $this->redirectToRoute('app_delivery_index', [], Response::HTTP_SEE_OTHER);
     }
 
@@ -140,6 +151,10 @@ public function new(
                     'status' => $status,
                 ],
             ]);
+
+            $this->database
+    ->getReference('deliveries/' . $delivery->getId() . '/status')
+    ->set($status);
 
             return $this->redirectToRoute('app_delivery_index', [], Response::HTTP_SEE_OTHER);
         }
