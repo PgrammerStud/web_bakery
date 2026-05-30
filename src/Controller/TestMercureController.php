@@ -15,8 +15,6 @@ final class TestMercureController extends AbstractController
     #[Route('/publish-dashboard', name: 'app_test_mercure_publish_dashboard', methods: ['GET'])]
     public function publishDashboard(MercurePublisher $mercurePublisher): Response
     {
-        error_log('[TestMercure] Starting test');
-        
         // Test data
         $testMetrics = [
             'totalRecords' => 42,
@@ -24,39 +22,28 @@ final class TestMercureController extends AbstractController
             'totalDonations' => 5000.50,
         ];
 
-        error_log('[TestMercure] About to publish dashboard update with data: ' . json_encode($testMetrics));
-        
         // Publish the test update
-        try {
-            $mercurePublisher->publishDashboardUpdate($testMetrics);
-            error_log('[TestMercure] Successfully called publishDashboardUpdate');
-        } catch (\Exception $e) {
-            error_log('[TestMercure] ERROR calling publishDashboardUpdate: ' . $e->getMessage());
-            error_log('[TestMercure] Stack trace: ' . $e->getTraceAsString());
-        }
+        $mercurePublisher->publishDashboardUpdate($testMetrics);
 
         return $this->json([
             'success' => true,
-            'message' => 'Dashboard update published! Check console and var/log/dashboard-debug.log',
+            'message' => 'Dashboard update published!',
             'data' => $testMetrics,
         ]);
     }
 
-    #[Route('/check-logs', name: 'app_test_mercure_check_logs', methods: ['GET'])]
-    public function checkLogs(): Response
+    #[Route('/test-logs', name: 'app_test_mercure_logs', methods: ['GET'])]
+    public function testLogs(): Response
     {
-        $logContent = '';
-        $debugLogPath = 'var/log/dashboard-debug.log';
-        
-        if (file_exists($debugLogPath)) {
-            $logContent = file_get_contents($debugLogPath);
-        }
-        
         return $this->json([
-            'message' => 'Dashboard debug logs',
-            'log_file' => $debugLogPath,
-            'exists' => file_exists($debugLogPath),
-            'content' => $logContent ? explode("\n", $logContent) : [],
+            'message' => 'Check your logs directory for Mercure publishing logs',
+            'log_location' => 'var/log/dev.log',
+            'instructions' => [
+                '1. Open browser console (F12)',
+                '2. Visit /test-mercure/publish-dashboard',
+                '3. Watch console and check logs',
+                '4. You should see dashboard update logs',
+            ]
         ]);
     }
 }
