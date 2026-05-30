@@ -303,6 +303,10 @@
             if (typeof onNewDonation === 'function') onNewDonation(data);
         });
 
+        connectMercure('/dashboard/update', function(data) {
+            if (typeof onDashboardUpdate === 'function') onDashboardUpdate(data);
+        });
+
     });
 </script>
 {% endif %}

@@ -126,4 +126,45 @@
         </div>
     </div>
 </div>
+
+<script>
+    // ── Dashboard Real-Time Updates via Mercure ────────────
+    function onDashboardUpdate(data) {
+        // Update Total Records
+        if (data.totalRecords !== null && data.totalRecords !== undefined) {
+            const recordsElement = document.querySelector('.metrics-grid .card-orange:nth-child(3) .metric-value');
+            if (recordsElement) {
+                recordsElement.textContent = data.totalRecords;
+                animateUpdate(recordsElement);
+            }
+        }
+
+        // Update Total Orders
+        if (data.totalOrders !== null && data.totalOrders !== undefined) {
+            const ordersElement = document.querySelector('.metrics-grid .card-blue:nth-child(4) .metric-value');
+            if (ordersElement) {
+                ordersElement.textContent = data.totalOrders;
+                animateUpdate(ordersElement);
+            }
+        }
+
+        // Update Total Donations
+        if (data.totalDonations !== null && data.totalDonations !== undefined) {
+            const donationsElement = document.querySelector('.metrics-grid .card-red .metric-value');
+            if (donationsElement) {
+                donationsElement.textContent = '$' + parseFloat(data.totalDonations).toFixed(2);
+                animateUpdate(donationsElement);
+            }
+        }
+    }
+
+    // ── Animation helper for metric updates ─────────────────
+    function animateUpdate(element) {
+        element.style.transition = 'color 0.5s ease';
+        element.style.color = '#22c55e';  // Green flash
+        setTimeout(() => {
+            element.style.color = '';  // Reset to original
+        }, 500);
+    }
+</script>
 {% endblock %}
