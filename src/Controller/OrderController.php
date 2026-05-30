@@ -16,17 +16,21 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Attribute\Security;
 use App\Service\ActivityLoggerService;
-use App\Service\MercurePublisher;  // ← ADD THIS
+use App\Service\MercurePublisher;  
 use App\Repository\ProductRepository;
 use App\Repository\BakeitforwardwalletRepository;
+use App\Service\FirebaseDatabaseService;
 
 #[Route('/order')]
 final class OrderController extends AbstractController
 {
     // ── Inject MercurePublisher ──────────────────────────────
     public function __construct(
-        private MercurePublisher $mercurePublisher
-    ) {}
+        private MercurePublisher $mercurePublisher,
+        FirebaseDatabaseService $firebaseDb,
+    ) {
+         $this->database = $firebaseDb->getDatabase();
+    }
 
     #[Route('/', name: 'app_order_index', methods: ['GET'])]
     public function index(OrderRepository $orderRepository): Response
@@ -153,6 +157,22 @@ final class OrderController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
+
+         $status = $order->getStatus() instanceof \BackedEnum
+        ? $order->getStatus()->value
+        : $order->getStatus();
+
+         $this->mercurePublisher->publishOrderStatusUpdate([
+        'id'          => $order->getId(),
+        'orderNumber' => $order->getOrderNumber() ?? $order->getId(),
+        'status'      => $status,
+    ]);
+         
+          $this->database
+        ->getReference('orders/' . $order->getId() . '/status')
+        ->set($status);
+
+        
 
             // ── Get updated metrics for dashboard ──────────────
             $totalRecords = $productRepository->count([]);
