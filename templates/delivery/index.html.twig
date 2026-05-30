@@ -66,15 +66,13 @@
     </div>
 </div>
 
-<script>
+<script data-turbo-eval="false">
 (function () {
-    // ── Status label + CSS class maps (mirror your PHP Enum) ──
     const STATUS_LABELS = {
         pending:     'Pending',
         in_transit:  'In Transit',
         delivered:   'Delivered',
         returned:    'Returned',
-        // add others your DeliveryStatus enum has
     };
 
     const STATUS_CLASSES = {
@@ -84,38 +82,26 @@
         returned:   'badge-danger',
     };
 
-    function labelFor(status)  { return STATUS_LABELS[status]  ?? status; }
-    function classFor(status)  { return STATUS_CLASSES[status] ?? 'badge-secondary'; }
+    function labelFor(status) { return STATUS_LABELS[status] ?? status; }
+    function classFor(status) { return STATUS_CLASSES[status] ?? 'badge-secondary'; }
 
-    // ── Flash a row briefly so the user sees it changed ───────
     function flashRow(row) {
         row.style.transition = 'background 0.3s';
         row.style.background = '#fffbe6';
         setTimeout(() => { row.style.background = ''; }, 1500);
     }
 
-    // ── Handle a delivery_update event ────────────────────────
     function applyDeliveryUpdate(data) {
-        // The backend sends { type, totalDelivered, totalPending, delivery? }
-        // When a specific delivery changed, `delivery` carries { id, status }
         if (!data.delivery) return;
-
         const { id, status } = data.delivery;
         const row = document.querySelector(`tr[data-delivery-id="${id}"]`);
-        if (!row) {
-            // New delivery not in the table yet — reload so it appears
-            window.location.reload();
-            return;
-        }
-
+        if (!row) { window.location.reload(); return; }
         const cell = row.querySelector('.status-cell');
         if (!cell) return;
-
         cell.innerHTML = `<span class="badge ${classFor(status)}">${labelFor(status)}</span>`;
         flashRow(row);
     }
 
-    // ── Subscribe to Mercure ──────────────────────────────────
     const mercureUrl = new URL('{{ mercure_url }}');
     mercureUrl.searchParams.append('topic', '/delivery/update');
 
@@ -124,9 +110,7 @@
     es.addEventListener('message', (event) => {
         try {
             const data = JSON.parse(event.data);
-            if (data.type === 'delivery_update') {
-                applyDeliveryUpdate(data);
-            }
+            if (data.type === 'delivery_update') applyDeliveryUpdate(data);
         } catch (e) {
             console.warn('Mercure parse error:', e);
         }
