@@ -6,6 +6,8 @@ use App\Entity\Bakeitforward;
 use App\Entity\Bakeitforwardwallet;
 use App\Repository\BakeitforwardRepository;
 use App\Repository\BakeitforwardwalletRepository;
+use App\Repository\OrderRepository;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,12 +43,21 @@ final class BakeItForwardController extends AbstractController
     public function markDonated(
         Bakeitforward $bakeitforward, 
         EntityManagerInterface $entityManager,
-        MercurePublisher $mercure 
+        MercurePublisher $mercure,
+        BakeitforwardwalletRepository $walletRepository,
+        OrderRepository $orderRepository,
+        ProductRepository $productRepository
         
         ): Response
     {
         $bakeitforward->setDonated(true);
         $entityManager->flush();
+
+        // ── Get updated metrics for dashboard ──────────────
+        $wallet = $walletRepository->findOneBy([]);
+        $totalDonations = $wallet ? $wallet->getTotalBalance() : 0;
+        $totalOrders = $orderRepository->count([]);
+        $totalRecords = $productRepository->count([]);
 
         // 👇 Publish to Mercure
         $mercure->publishNewDonation([
@@ -60,6 +71,14 @@ final class BakeItForwardController extends AbstractController
             'A new Bake It Forward donation has been marked!',
             'info'
         );
+        
+        // ── Publish dashboard update ───────────────────────
+        $mercure->publishDashboardUpdate([
+            'totalRecords'   => $totalRecords,
+            'totalOrders'    => $totalOrders,
+            'totalDonations' => $totalDonations,
+        ]);
+        // ────────────────────────────────────────────────
 
         $this->addFlash('success', 'Contribution marked as donated.');
 

@@ -65,4 +65,18 @@ class MercurePublisher
             ])
         ));
     }
+
+    public function publishDashboardUpdate(array $metrics): void
+    {
+        $this->hub->publish(new Update(
+            '/dashboard/update',
+            json_encode([
+                'type'          => 'dashboard_update',
+                'totalRecords'  => $metrics['totalRecords'] ?? null,
+                'totalOrders'   => $metrics['totalOrders'] ?? null,
+                'totalDonations'=> $metrics['totalDonations'] ?? null,
+                'timestamp'     => (new \DateTime())->format('Y-m-d H:i:s'),
+            ])
+        ));
+    }
 }

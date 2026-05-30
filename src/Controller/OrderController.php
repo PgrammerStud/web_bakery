@@ -17,6 +17,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Attribute\Security;
 use App\Service\ActivityLoggerService;
 use App\Service\MercurePublisher;  // ← ADD THIS
+use App\Repository\ProductRepository;
+use App\Repository\BakeitforwardwalletRepository;
 
 #[Route('/order')]
 final class OrderController extends AbstractController
@@ -38,8 +40,14 @@ final class OrderController extends AbstractController
 
     #[Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF')")]
     #[Route('/new', name: 'app_order_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
-    {
+    public function new(
+        Request $request, 
+        EntityManagerInterface $entityManager, 
+        ActivityLoggerService $activityLogger,
+        OrderRepository $orderRepository,
+        ProductRepository $productRepository,
+        BakeitforwardwalletRepository $walletRepository
+    ): Response {
         $order = new Order();
         $order->setCreatedBy($this->getUser());
         $order->setTotalAmount(0.0);
@@ -56,6 +64,12 @@ final class OrderController extends AbstractController
 
             $activityLogger->log($this->getUser(), 'CREATE', "Order: #{$order->getId()}");
 
+            // ── Get updated metrics for dashboard ──────────────
+            $totalRecords = $productRepository->count([]);
+            $totalOrders = $orderRepository->count([]);
+            $wallet = $walletRepository->findOneBy([]);
+            $totalDonations = $wallet ? $wallet->getTotalBalance() : 0;
+
             // ── Publish to Mercure ───────────────────────────
             $user = $this->getUser();
             $this->mercurePublisher->publishNewOrder([
@@ -69,6 +83,13 @@ final class OrderController extends AbstractController
                 "New order #{$order->getId()} received!",
                 'new_order'
             );
+            
+            // ── Publish dashboard update ───────────────────────
+            $this->mercurePublisher->publishDashboardUpdate([
+                'totalRecords'   => $totalRecords,
+                'totalOrders'    => $totalOrders,
+                'totalDonations' => $totalDonations,
+            ]);
             // ────────────────────────────────────────────────
 
             $this->addFlash('success', 'Order created successfully! Now add items.');
@@ -95,8 +116,15 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_order_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
-    {
+    public function edit(
+        Request $request, 
+        Order $order, 
+        EntityManagerInterface $entityManager, 
+        ActivityLoggerService $activityLogger,
+        OrderRepository $orderRepository,
+        ProductRepository $productRepository,
+        BakeitforwardwalletRepository $walletRepository
+    ): Response {
         $user = $this->getUser();
         if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
             $this->addFlash('error', 'You can only edit your own orders.');
@@ -109,6 +137,12 @@ final class OrderController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            // ── Get updated metrics for dashboard ──────────────
+            $totalRecords = $productRepository->count([]);
+            $totalOrders = $orderRepository->count([]);
+            $wallet = $walletRepository->findOneBy([]);
+            $totalDonations = $wallet ? $wallet->getTotalBalance() : 0;
+
             // ── Publish paid event if status changed to paid ─
             if ($order->getStatus() === 'paid') {
                 $this->mercurePublisher->publishOrderPaid([
@@ -119,6 +153,13 @@ final class OrderController extends AbstractController
                     'paid_at'     => (new \DateTime())->format('Y-m-d H:i:s'),
                 ]);
             }
+            
+            // ── Publish dashboard update ───────────────────────
+            $this->mercurePublisher->publishDashboardUpdate([
+                'totalRecords'   => $totalRecords,
+                'totalOrders'    => $totalOrders,
+                'totalDonations' => $totalDonations,
+            ]);
             // ────────────────────────────────────────────────
 
             $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true) || $order->getCreatedBy() === $user;
@@ -180,8 +221,15 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_order_delete', methods: ['POST'])]
-    public function delete(Request $request, Order $order, EntityManagerInterface $entityManager, ActivityLoggerService $activityLogger): Response
-    {
+    public function delete(
+        Request $request, 
+        Order $order, 
+        EntityManagerInterface $entityManager, 
+        ActivityLoggerService $activityLogger,
+        OrderRepository $orderRepository,
+        ProductRepository $productRepository,
+        BakeitforwardwalletRepository $walletRepository
+    ): Response {
         $user = $this->getUser();
         if (!in_array('ROLE_ADMIN', $user->getRoles(), true) && !in_array('ROLE_STAFF', $user->getRoles(), true) && $order->getCreatedBy() !== $user) {
             $this->addFlash('error', 'You can only delete your own orders.');
@@ -191,6 +239,21 @@ final class OrderController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($order);
             $entityManager->flush();
+            
+            // ── Get updated metrics for dashboard ──────────────
+            $totalRecords = $productRepository->count([]);
+            $totalOrders = $orderRepository->count([]);
+            $wallet = $walletRepository->findOneBy([]);
+            $totalDonations = $wallet ? $wallet->getTotalBalance() : 0;
+            
+            // ── Publish dashboard update ───────────────────────
+            $this->mercurePublisher->publishDashboardUpdate([
+                'totalRecords'   => $totalRecords,
+                'totalOrders'    => $totalOrders,
+                'totalDonations' => $totalDonations,
+            ]);
+            // ────────────────────────────────────────────────
+
             $shouldLog = in_array('ROLE_ADMIN', $user->getRoles(), true) || in_array('ROLE_STAFF', $user->getRoles(), true) || $order->getCreatedBy() === $user;
             if ($shouldLog) {
                 $activityLogger->log($user, 'DELETE', "Order: #{$order->getId()}");
