@@ -197,5 +197,29 @@ if (data.totalDonations !== null && data.totalDonations !== undefined) {
         console.log('Orders element:', document.getElementById('metric-value-orders'));
         console.log('Donations element:', document.getElementById('metric-value-donations'));
     });
+
+    // ── Real-time activity log updates for dashboard ────────
+window.onNewActivityLog = function(data) {
+    const tbody = document.querySelector('.activities-table tbody');
+    if (!tbody) return;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${data.username}</td>
+        <td><span class="action-badge badge-neutral">${data.action}</span></td>
+        <td>${data.targetData}</td>
+        <td>${data.createdAt}</td>
+    `;
+    row.style.transition = 'background 0.5s ease';
+    row.style.background = '#f0fdf4';
+    setTimeout(() => row.style.background = '', 2000);
+
+    // Prepend new row and remove the oldest if over 10
+    tbody.insertBefore(row, tbody.firstChild);
+    if (tbody.rows.length > 10) {
+        tbody.removeChild(tbody.lastChild);
+    }
+};
+
 </script>
 {% endblock %}
