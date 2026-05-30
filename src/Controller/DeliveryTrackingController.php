@@ -17,9 +17,10 @@ class DeliveryTrackingController extends AbstractController
 {
     private $database;
 
-    public function __construct(FirebaseDatabaseService $firebaseDb)
+    public function __construct(FirebaseDatabaseService $firebaseDb, private MercurePublisher $mercure)
     {
         $this->database = $firebaseDb->getDatabase();
+        
     }
 
     // ── Rider: get active delivery ────────────────────────────────────────────
@@ -162,31 +163,41 @@ class DeliveryTrackingController extends AbstractController
 
     #[Route('/{id}/update-status', name: 'delivery_update_status', methods: ['POST'])]
     #[IsGranted('ROLE_STAFF')]
-    public function updateStatus(
-        int $id,
-        Request $request,
-        DeliveryRepository $repo,
-        \Doctrine\ORM\EntityManagerInterface $em
-    ): JsonResponse {
-        $data   = json_decode($request->getContent(), true);
-        $status = $data['status'] ?? null;
+public function updateStatus(
+    int $id,
+    Request $request,
+    DeliveryRepository $repo,
+    \Doctrine\ORM\EntityManagerInterface $em
+): JsonResponse {
+    $data   = json_decode($request->getContent(), true);
+    $status = $data['status'] ?? null;
 
-        $delivery = $repo->find($id);
-        if (!$delivery) {
-            return $this->json(['error' => 'Not found'], 404);
-        }
-
-        $delivery->setStatus(\App\Enum\DeliveryStatus::from($status));
-        $delivery->setUpdatedAt(new \DateTime());
-        $em->flush();
-
-        // Push status update to Firebase so customer screen reacts in real-time
-        $this->database
-            ->getReference('deliveries/' . $id . '/status')
-            ->set($status);
-
-        return $this->json(['success' => true]);
+    $delivery = $repo->find($id);
+    if (!$delivery) {
+        return $this->json(['error' => 'Not found'], 404);
     }
+
+    $delivery->setStatus(\App\Enum\DeliveryStatus::from($status));
+    $delivery->setUpdatedAt(new \DateTime());
+    $em->flush();
+
+    // Push to Firebase (for the mobile app)
+    $this->database
+        ->getReference('deliveries/' . $id . '/status')
+        ->set($status);
+
+    // Push to Mercure (for the admin web table)  ← add this block
+    $this->mercure->publishDeliveryUpdate([
+        'totalDelivered' => $repo->countByStatus('delivered'),
+        'totalPending'   => $repo->countByStatus('pending'),
+        'delivery'       => [        // ← this is the key the JS watches for
+            'id'     => $id,
+            'status' => $status,
+        ],
+    ]);
+
+    return $this->json(['success' => true]);
+}
 
     
 #[Route('/my-deliveries', name: 'my_deliveries', methods: ['GET'])]
