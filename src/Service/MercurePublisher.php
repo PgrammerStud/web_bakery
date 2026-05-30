@@ -1,8 +1,10 @@
 <?php
-// src/Service/MercurePublisher.php
 
 namespace App\Service;
 
+use App\Repository\OrderRepository;
+use App\Repository\ProductRepository;
+use App\Repository\BakeitforwardwalletRepository;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Psr\Log\LoggerInterface;
@@ -11,6 +13,9 @@ class MercurePublisher
 {
     public function __construct(
         private HubInterface $hub,
+        private OrderRepository $orderRepository,
+        private ProductRepository $productRepository,
+        private BakeitforwardwalletRepository $walletRepository,
         private ?LoggerInterface $logger = null
     ) {}
 
@@ -19,35 +24,44 @@ class MercurePublisher
         if ($this->logger) {
             $this->logger->info($message, $context);
         }
-        error_log('[MercurePublisher] ' . $message . ' ' . json_encode($context));
+    }
+
+    // ── Call this from every publish method ─────────────────
+    private function publishLiveDashboard(): void
+    {
+        $wallet = $this->walletRepository->findOneBy([]);
+
+        $this->publishDashboardUpdate([
+            'totalRecords'   => $this->productRepository->count([]),
+            'totalOrders'    => $this->orderRepository->count([]),
+            'totalDonations' => $wallet ? $wallet->getTotalBalance() : 0,
+        ]);
     }
 
     public function publishNewOrder(array $order): void
     {
         try {
-            $this->log('Publishing new order to Mercure', ['order' => $order]);
             $this->hub->publish(new Update(
                 '/orders/new',
                 json_encode([
-                    'type'       => 'new_order',
-                    'id'         => $order['id'],
-                    'orderNumber'=> $order['orderNumber'],
-                    'customer'   => $order['customer'],
-                    'total'      => $order['total'],
-                    'created_at' => $order['created_at'],
+                    'type'        => 'new_order',
+                    'id'          => $order['id'],
+                    'orderNumber' => $order['orderNumber'],
+                    'customer'    => $order['customer'],
+                    'total'       => $order['total'],
+                    'created_at'  => $order['created_at'],
                 ])
             ));
-            $this->log('✅ New order published successfully');
+            // ✅ Push fresh dashboard counts after every new order
+            $this->publishLiveDashboard();
         } catch (\Exception $e) {
-            $this->log('❌ Error publishing new order: ' . $e->getMessage());
-            error_log('[MercurePublisher Error] ' . $e->getMessage());
+            $this->log('Error publishing new order: ' . $e->getMessage());
         }
     }
 
     public function publishOrderPaid(array $order): void
     {
         try {
-            $this->log('Publishing order paid to Mercure', ['order' => $order]);
             $this->hub->publish(new Update(
                 '/orders/paid',
                 json_encode([
@@ -59,17 +73,16 @@ class MercurePublisher
                     'paid_at'     => $order['paid_at'],
                 ])
             ));
-            $this->log('✅ Order paid published successfully');
+            // ✅ Orders status changed — refresh dashboard too
+            $this->publishLiveDashboard();
         } catch (\Exception $e) {
-            $this->log('❌ Error publishing order paid: ' . $e->getMessage());
-            error_log('[MercurePublisher Error] ' . $e->getMessage());
+            $this->log('Error publishing order paid: ' . $e->getMessage());
         }
     }
 
     public function publishNotification(string $message, string $type = 'info'): void
     {
         try {
-            $this->log('Publishing notification to Mercure', ['message' => $message, 'type' => $type]);
             $this->hub->publish(new Update(
                 '/notifications/new',
                 json_encode([
@@ -78,17 +91,14 @@ class MercurePublisher
                     'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 ])
             ));
-            $this->log('✅ Notification published successfully');
         } catch (\Exception $e) {
-            $this->log('❌ Error publishing notification: ' . $e->getMessage());
-            error_log('[MercurePublisher Error] ' . $e->getMessage());
+            $this->log('Error publishing notification: ' . $e->getMessage());
         }
     }
 
     public function publishNewDonation(array $donation): void
     {
         try {
-            $this->log('Publishing new donation to Mercure', ['donation' => $donation]);
             $this->hub->publish(new Update(
                 '/donations/new',
                 json_encode([
@@ -99,30 +109,28 @@ class MercurePublisher
                     'created_at' => $donation['created_at'],
                 ])
             ));
-            $this->log('✅ New donation published successfully');
+            // ✅ Donation balance changed — refresh dashboard
+            $this->publishLiveDashboard();
         } catch (\Exception $e) {
-            $this->log('❌ Error publishing new donation: ' . $e->getMessage());
-            error_log('[MercurePublisher Error] ' . $e->getMessage());
+            $this->log('Error publishing new donation: ' . $e->getMessage());
         }
     }
 
     public function publishDashboardUpdate(array $metrics): void
     {
         try {
-            $this->log('Publishing dashboard update', ['metrics' => $metrics]);
-            
-            $updateData = [
-                'type'          => 'dashboard_update',
-                'totalRecords'  => $metrics['totalRecords'] ?? 0,
-                'totalOrders'   => $metrics['totalOrders'] ?? 0,
-                'totalDonations'=> $metrics['totalDonations'] ?? 0,
-                'timestamp'     => (new \DateTime())->format('Y-m-d H:i:s'),
-            ];
-            
-            $this->hub->publish(new Update('/dashboard/update', json_encode($updateData)));
-            $this->log('✅ Dashboard update published successfully', $updateData);
+            $this->hub->publish(new Update(
+                '/dashboard/update',
+                json_encode([
+                    'type'           => 'dashboard_update',
+                    'totalRecords'   => $metrics['totalRecords'] ?? 0,
+                    'totalOrders'    => $metrics['totalOrders'] ?? 0,
+                    'totalDonations' => $metrics['totalDonations'] ?? 0,
+                    'timestamp'      => (new \DateTime())->format('Y-m-d H:i:s'),
+                ])
+            ));
         } catch (\Exception $e) {
-            $this->log('❌ Error publishing dashboard update: ' . $e->getMessage(), ['exception' => $e->getTraceAsString()]);
+            $this->log('Error publishing dashboard update: ' . $e->getMessage());
         }
     }
 }
