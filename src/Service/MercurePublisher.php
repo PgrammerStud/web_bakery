@@ -8,6 +8,7 @@ use App\Repository\BakeitforwardwalletRepository;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 use Psr\Log\LoggerInterface;
+use App\Repository\DeliveryRepository;
 
 class MercurePublisher
 {
@@ -16,6 +17,7 @@ class MercurePublisher
         private OrderRepository $orderRepository,
         private ProductRepository $productRepository,
         private BakeitforwardwalletRepository $walletRepository,
+        private DeliveryRepository $deliveryRepository, 
         private ?LoggerInterface $logger = null
     ) {}
 
@@ -36,6 +38,11 @@ class MercurePublisher
         'totalOrders'    => $this->orderRepository->count([]),
         'totalDonations' => $wallet ? $wallet->getTotalBalance() : 0,
         'goalAmount'     => $wallet ? $wallet->getGoalAmount() : 0,  
+    ]);
+
+     $this->publishDeliveryUpdate([
+        'totalDelivered' => $this->deliveryRepository->countByStatus('delivered'),
+        'totalPending'   => $this->deliveryRepository->countByStatus('pending'),
     ]);
 }
 
@@ -153,6 +160,23 @@ public function publishActivityLog(array $log): void
         ));
     } catch (\Exception $e) {
         $this->log('Error publishing activity log: ' . $e->getMessage());
+    }
+}
+
+public function publishDeliveryUpdate(array $metrics): void
+{
+    try {
+        $this->hub->publish(new Update(
+            '/delivery/update',
+            json_encode([
+                'type'           => 'delivery_update',
+                'totalDelivered' => $metrics['totalDelivered'] ?? 0,
+                'totalPending'   => $metrics['totalPending'] ?? 0,
+                'delivery'       => $metrics['delivery'] ?? null, // for delivery management page
+            ])
+        ));
+    } catch (\Exception $e) {
+        $this->log('Error publishing delivery update: ' . $e->getMessage());
     }
 }
 }

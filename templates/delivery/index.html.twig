@@ -36,9 +36,9 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="delivery-table-body">
                 {% for delivery in deliveries %}
-                <tr>
+                <tr data-delivery-id="{{ delivery.id }}">
                     <td>{{ delivery.id }}</td>
                     <td>{{ delivery.orders ? delivery.orders.orderNumber : 'N/A' }}</td>
                     <td>
@@ -52,7 +52,7 @@
                         {% endif %}
                     </td>
                     <td>{{ delivery.deliveryDate|date('Y-m-d H:i') }}</td>
-                    <td>
+                    <td class="status-cell">
                         <span class="badge {{ delivery.status.getColorClass() }}">{{ delivery.status.getLabel() }}</span>
                     </td>
                     <td>${{ delivery.deliveryFee|number_format(2) }}</td>
@@ -65,4 +65,76 @@
         </table>
     </div>
 </div>
+
+<script>
+(function () {
+    // ── Status label + CSS class maps (mirror your PHP Enum) ──
+    const STATUS_LABELS = {
+        pending:     'Pending',
+        in_transit:  'In Transit',
+        delivered:   'Delivered',
+        returned:    'Returned',
+        // add others your DeliveryStatus enum has
+    };
+
+    const STATUS_CLASSES = {
+        pending:    'badge-warning',
+        in_transit: 'badge-info',
+        delivered:  'badge-success',
+        returned:   'badge-danger',
+    };
+
+    function labelFor(status)  { return STATUS_LABELS[status]  ?? status; }
+    function classFor(status)  { return STATUS_CLASSES[status] ?? 'badge-secondary'; }
+
+    // ── Flash a row briefly so the user sees it changed ───────
+    function flashRow(row) {
+        row.style.transition = 'background 0.3s';
+        row.style.background = '#fffbe6';
+        setTimeout(() => { row.style.background = ''; }, 1500);
+    }
+
+    // ── Handle a delivery_update event ────────────────────────
+    function applyDeliveryUpdate(data) {
+        // The backend sends { type, totalDelivered, totalPending, delivery? }
+        // When a specific delivery changed, `delivery` carries { id, status }
+        if (!data.delivery) return;
+
+        const { id, status } = data.delivery;
+        const row = document.querySelector(`tr[data-delivery-id="${id}"]`);
+        if (!row) {
+            // New delivery not in the table yet — reload so it appears
+            window.location.reload();
+            return;
+        }
+
+        const cell = row.querySelector('.status-cell');
+        if (!cell) return;
+
+        cell.innerHTML = `<span class="badge ${classFor(status)}">${labelFor(status)}</span>`;
+        flashRow(row);
+    }
+
+    // ── Subscribe to Mercure ──────────────────────────────────
+    const mercureUrl = new URL('{{ mercure_hub_url|default("/.well-known/mercure") }}', window.location.href);
+    mercureUrl.searchParams.append('topic', '/delivery/update');
+
+    const es = new EventSource(mercureUrl.toString(), { withCredentials: true });
+
+    es.addEventListener('message', (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'delivery_update') {
+                applyDeliveryUpdate(data);
+            }
+        } catch (e) {
+            console.warn('Mercure parse error:', e);
+        }
+    });
+
+    es.addEventListener('error', () => {
+        console.warn('Mercure connection lost — will auto-reconnect.');
+    });
+})();
+</script>
 {% endblock %}
