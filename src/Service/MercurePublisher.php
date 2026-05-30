@@ -135,4 +135,24 @@ class MercurePublisher
         $this->log('Error publishing dashboard update: ' . $e->getMessage());
     }
 }
+
+public function publishActivityLog(array $log): void
+{
+    try {
+        $this->hub->publish(new Update(
+            '/activity-log/new',
+            json_encode([
+                'type'       => 'activity_log',
+                'id'         => $log['id'],
+                'username'   => $log['username'],
+                'role'       => $log['role'],
+                'action'     => $log['action'],
+                'targetData' => $log['targetData'],
+                'createdAt'  => $log['createdAt'],
+            ])
+        ));
+    } catch (\Exception $e) {
+        $this->log('Error publishing activity log: ' . $e->getMessage());
+    }
+}
 }

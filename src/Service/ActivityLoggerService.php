@@ -10,6 +10,7 @@ class ActivityLoggerService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private MercurePublisher $mercurePublisher,  
     ) {}
 
     public function log(User $user, string $action, string $targetData): void
@@ -19,10 +20,10 @@ class ActivityLoggerService
         $log->setUsername($user->getUsername());
         $roles = $user->getRoles();
         $role = in_array('ROLE_ADMIN', $roles, true) 
-    ? 'Admin' 
-    : (in_array('ROLE_STAFF', $roles, true) 
-        ? 'Staff' 
-        : 'User');  // ✅ ROLE_USER now correctly saves as 'User'
+            ? 'Admin' 
+            : (in_array('ROLE_STAFF', $roles, true) 
+                ? 'Staff' 
+                : 'User');
         $log->setRole($role);
         $log->setAction($action);
         $log->setTargetData($targetData);
@@ -30,5 +31,15 @@ class ActivityLoggerService
 
         $this->entityManager->persist($log);
         $this->entityManager->flush();
+
+        // ✅ Publish to Mercure after flush so $log->getId() is available
+        $this->mercurePublisher->publishActivityLog([
+            'id'         => $log->getId(),
+            'username'   => $log->getUsername(),
+            'role'       => $log->getRole(),
+            'action'     => $log->getAction(),
+            'targetData' => $log->getTargetData(),
+            'createdAt'  => $log->getCreatedAt()->format('Y-m-d H:i:s'),
+        ]);
     }
 }

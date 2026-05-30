@@ -43,37 +43,40 @@ class ActivityLogDoctrineListener implements EventSubscriberInterface
     }
 
     private function logActivity(object $entity, string $action): void
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
+{
+    // ✅ Prevent infinite loop — don't log the ActivityLog entity itself
+    if ($entity instanceof \App\Entity\ActivityLog) {
+        return;
+    }
+
+    $user = $this->security->getUser();
+    if (!$user instanceof User) {
+        return;
+    }
+
+    $userRoles = $user->getRoles();
+
+    if ($entity instanceof User) {
+        if (!in_array('ROLE_ADMIN', $userRoles, true)) {
             return;
         }
-
-        $userRoles = $user->getRoles();
-
-        if ($entity instanceof User) {
-            // Only admins can manage users
-            if (!in_array('ROLE_ADMIN', $userRoles, true)) {
-                return;
-            }
-            $targetData = 'User: ' . $entity->getUsername() . ' (ID: ' . $entity->getId() . ')';
-        } else {
-            // For other entities, log if admin or staff
-            if (!in_array('ROLE_ADMIN', $userRoles, true) && !in_array('ROLE_STAFF', $userRoles, true)) {
-                return;
-            }
-            $entityName = (new \ReflectionClass($entity))->getShortName();
-            $name = 'Unknown';
-            if (method_exists($entity, 'getName')) {
-                $name = $entity->getName();
-            } elseif (method_exists($entity, 'getOrderNumber')) {
-                $name = $entity->getOrderNumber();
-            } elseif (method_exists($entity, 'getUsername')) {
-                $name = $entity->getUsername();
-            }
-            $targetData = $entityName . ': ' . $name . ' (ID: ' . $entity->getId() . ')';
+        $targetData = 'User: ' . $entity->getUsername() . ' (ID: ' . $entity->getId() . ')';
+    } else {
+        if (!in_array('ROLE_ADMIN', $userRoles, true) && !in_array('ROLE_STAFF', $userRoles, true)) {
+            return;
         }
-
-        $this->activityLogger->log($user, $action, $targetData);
+        $entityName = (new \ReflectionClass($entity))->getShortName();
+        $name = 'Unknown';
+        if (method_exists($entity, 'getName')) {
+            $name = $entity->getName();
+        } elseif (method_exists($entity, 'getOrderNumber')) {
+            $name = $entity->getOrderNumber();
+        } elseif (method_exists($entity, 'getUsername')) {
+            $name = $entity->getUsername();
+        }
+        $targetData = $entityName . ': ' . $name . ' (ID: ' . $entity->getId() . ')';
     }
+
+    $this->activityLogger->log($user, $action, $targetData);
+}
 }
