@@ -108,6 +108,13 @@ class MercurePublisher
 
     public function publishDashboardUpdate(array $metrics): void
     {
+        // Force log at the very start
+        file_put_contents('var/log/dashboard-debug.log', 
+            "[" . date('Y-m-d H:i:s') . "] Publishing dashboard update\n" . 
+            json_encode($metrics) . "\n\n", 
+            FILE_APPEND
+        );
+        
         try {
             $this->log('Publishing dashboard update to Mercure', ['metrics' => $metrics]);
             error_log('[MercurePublisher] Dashboard Update Data: ' . json_encode($metrics));
@@ -128,9 +135,20 @@ class MercurePublisher
                 json_encode($updateData)
             ));
             
+            file_put_contents('var/log/dashboard-debug.log', 
+                "[" . date('Y-m-d H:i:s') . "] ✅ Dashboard update published successfully\n\n", 
+                FILE_APPEND
+            );
+            
             $this->log('✅ Dashboard update published successfully');
             error_log('[MercurePublisher] Dashboard update published successfully');
         } catch (\Exception $e) {
+            file_put_contents('var/log/dashboard-debug.log', 
+                "[" . date('Y-m-d H:i:s') . "] ❌ ERROR: " . $e->getMessage() . "\n" .
+                $e->getTraceAsString() . "\n\n", 
+                FILE_APPEND
+            );
+            
             $this->log('❌ Error publishing dashboard update: ' . $e->getMessage());
             error_log('[MercurePublisher Error] ' . $e->getMessage());
             error_log('[MercurePublisher Error Stack] ' . $e->getTraceAsString());
