@@ -39,11 +39,12 @@ final class DeliveryController extends AbstractController
 
         $deliveries = $qb->getQuery()->getResult();
 
-        return $this->render('delivery/index.html.twig', [
-            'deliveries' => $deliveries,
-            'status_filter' => $status,
-            'order_filter' => $orderNumber,
-        ]);
+       return $this->render('delivery/index.html.twig', [
+    'deliveries'    => $deliveries,
+    'status_filter' => $status,
+    'order_filter'  => $orderNumber,
+    'mercure_url'   => $this->getParameter('mercure.hub.public_url'), // or hardcode for now
+]);
     }
 
     #[Route('/new', name: 'app_delivery_new', methods: ['GET', 'POST'])]
