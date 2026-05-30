@@ -109,23 +109,20 @@ class MercurePublisher
     public function publishDashboardUpdate(array $metrics): void
     {
         try {
-            error_log('[MercurePublisher] Publishing dashboard update: ' . json_encode($metrics));
+            $this->log('Publishing dashboard update', ['metrics' => $metrics]);
             
-            $this->hub->publish(new Update(
-                '/dashboard/update',
-                json_encode([
-                    'type'          => 'dashboard_update',
-                    'totalRecords'  => $metrics['totalRecords'] ?? 0,
-                    'totalOrders'   => $metrics['totalOrders'] ?? 0,
-                    'totalDonations'=> $metrics['totalDonations'] ?? 0,
-                    'timestamp'     => (new \DateTime())->format('Y-m-d H:i:s'),
-                ])
-            ));
+            $updateData = [
+                'type'          => 'dashboard_update',
+                'totalRecords'  => $metrics['totalRecords'] ?? 0,
+                'totalOrders'   => $metrics['totalOrders'] ?? 0,
+                'totalDonations'=> $metrics['totalDonations'] ?? 0,
+                'timestamp'     => (new \DateTime())->format('Y-m-d H:i:s'),
+            ];
             
-            error_log('[MercurePublisher] ✅ Dashboard update published successfully');
+            $this->hub->publish(new Update('/dashboard/update', json_encode($updateData)));
+            $this->log('✅ Dashboard update published successfully', $updateData);
         } catch (\Exception $e) {
-            error_log('[MercurePublisher] ❌ Error publishing dashboard update: ' . $e->getMessage());
-            error_log('[MercurePublisher] Stack: ' . $e->getTraceAsString());
+            $this->log('❌ Error publishing dashboard update: ' . $e->getMessage(), ['exception' => $e->getTraceAsString()]);
         }
     }
 }
